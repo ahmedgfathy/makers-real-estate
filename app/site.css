@@ -461,7 +461,7 @@ html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; fo
 .tbl .c-code { color: var(--ink); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
 .tbl .c-num { font-variant-numeric: tabular-nums; }
 .tbl .c-price { color: var(--inksoft, rgba(244, 240, 233, 0.9)); font-variant-numeric: tabular-nums; }
-.tbl .c-month { color: var(--sand); font-variant-numeric: tabular-nums; opacity: 0.85; }
+.tbl .c-month { color: var(--gold-bright); text-shadow: 0 0 12px var(--gold-glow); font-variant-numeric: tabular-nums; opacity: 0.9; }
 .tbl .num { text-align: end; padding-inline-end: 0; }
 
 .tbl-note {
@@ -488,7 +488,7 @@ html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; fo
 .price-label { font-size: 0.9rem; color: var(--ink); }
 .price-area { font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.04em; }
 .price-value { font-size: 0.94rem; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
-.price-month { font-size: 0.7rem; color: var(--sand); font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.9; }
+.price-month { font-size: 0.7rem; color: var(--gold-bright); text-shadow: 0 0 12px var(--gold-glow); font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.95; }
 
 /* note */
 

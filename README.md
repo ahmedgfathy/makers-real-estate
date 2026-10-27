@@ -83,7 +83,7 @@ app/
   page.tsx          async server component: loads content from PostgreSQL → <Landing />
   globals.css       design tokens, header, hero, footer, bidi helpers
   site.css          tile grid, detail panel, tables, gallery
-  icon.svg          favicon (M monogram)
+  icon.png          favicon (gold M monogram, cropped from the brand logo)
 components/
   Landing.tsx       state: language, open panel, hash deep-links (#tile-lakes …)
   Header.tsx        wordmark, nav, EN/ع switch, WhatsApp CTA
@@ -105,8 +105,9 @@ scripts/
   db-migrate.ts     apply the schema
   db-seed.ts        seed the database from data/content.ts
 public/
-  video/hero.mp4    seamless 41s boomerang loop, 1280×720, 3.8 MB, no audio
+  video/hero.mp4    seamless 24s boomerang loop, 1920×1080, 4.3 MB, no audio
   img/*.jpg         hero poster + 6 stills used by tiles, panels and gallery
+  img/makers-*.png  gold monogram mark + full logo lockup (header uses the mark)
 ```
 
 ## Editing content
@@ -132,10 +133,11 @@ stores the isolated text as-is, so the rendered output is byte-identical to the 
 
 | Asset | Source |
 |---|---|
-| `public/video/hero.mp4` | trimmed from the 27s *The Lakes* render film (title card cut), forward + reversed for a seamless loop, re-encoded H.264 CRF 28 |
-| `public/img/*.jpg` | frames from the same film, contrast/saturation nudged, 1280 wide |
+| `public/video/hero.mp4` | Pexels stock clip *Aerial View of Luxurious Waterfront Homes* (video ID [36870461](https://www.pexels.com/video/36870461/), David Pickup — Pexels License, free for commercial use, no attribution required): 4K source → 1080p30, 12s forward + reversed for a seamless 24s boomerang, two-pass H.264 ≈1.5 Mbps, no audio |
+| `public/img/hero-poster.jpg` | poster frame from the same clip |
+| `public/img/{lakes,creek,mall,boulevard,sodic,phase08m}.jpg` | frames from the original *The Lakes* render film, contrast/saturation nudged, 1280 wide |
 | Copy & figures | `The Lakes – SODIC East – Factsheet.pdf`, `SODIC_EAST_Inventory_Breakdown_Brief.pdf` and the Phase 08M unit list |
-| Brand | built from the Makers logo concept sheet (wordmark + المونوجرام) as type/SVG, not a raster crop |
+| Brand | gold “M” monogram + wordmark from the brand logo PNG (`public/img/makers-mark.png` / `makers-logo.png`, favicon `app/icon.png` are crops/rescales of it); the header wordmark is set as type beside the monogram, and gold text uses a metallic gradient + slow sheen (`--gold-*` tokens in `globals.css`) |
 
 To swap the background film: drop an `.mp4` at `public/video/hero.mp4` and a matching
 `public/img/hero-poster.jpg`. Keep it under ~5 MB and mute the audio track.

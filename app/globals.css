@@ -13,6 +13,13 @@
   --line-strong: rgba(244, 240, 233, 0.24);
   --sand: #c9a97c;
   --sand-dim: rgba(201, 169, 124, 0.16);
+
+  /* polished-gold palette (metallic text + glow) */
+  --gold-deep: #8f6f33;
+  --gold: #c9a97c;
+  --gold-bright: #e8c87b;
+  --gold-light: #fff8e0;
+  --gold-glow: rgba(233, 200, 124, 0.3);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --pad: clamp(1.25rem, 4.4vw, 4.5rem);
   --maxw: 1560px;
@@ -145,9 +152,25 @@ html[lang="ar"] .section-lede { line-height: 1.95; }
 
 .brand {
   display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.6rem, 1vw, 0.95rem);
+  line-height: 1;
+}
+
+/* Polished-gold M monogram (from the brand logo PNG).
+   screen blend dissolves its dark background over the hero video. */
+.brand-mark {
+  display: block;
+  width: clamp(34px, 3vw, 46px);
+  height: auto;
+  mix-blend-mode: screen;
+}
+
+.brand-inner {
+  display: inline-flex;
   flex-direction: column;
   gap: 0.34rem;
-  line-height: 1;
 }
 
 .brand-name {
@@ -159,7 +182,11 @@ html[lang="ar"] .section-lede { line-height: 1.95; }
   color: var(--ink);
 }
 
-.brand-rule { height: 1px; width: 100%; background: var(--line-strong); }
+.brand-rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(201, 169, 124, 0.9), rgba(201, 169, 124, 0.12));
+}
 
 .brand-sub {
   font-size: 0.5rem;
@@ -616,4 +643,60 @@ html[lang="ar"] .footer-bottom { letter-spacing: 0.02em; text-transform: none; f
 @media (max-width: 640px) {
   .site-header .btn { display: none; }
   .header-right { gap: 0.7rem; }
+}
+
+/* ---------- polished gold ----------
+   Real-gold multi-stop gradient clipped to the glyphs, with a slow
+   specular sweep and a warm glow — the "brand voice" text: eyebrows,
+   tile/panel kickers and the wordmark. Applied only where supported,
+   otherwise the flat --sand / --ink colours above remain. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .gold-shine,
+  .eyebrow,
+  .tile-kicker,
+  .panel-kicker,
+  .brand-name {
+    background-image: linear-gradient(
+      105deg,
+      var(--gold-deep) 0%,
+      var(--gold) 12%,
+      #efd9a0 24%,
+      var(--gold-light) 34%,
+      #f3dd9c 42%,
+      var(--gold) 56%,
+      var(--gold-deep) 70%,
+      #cdb171 82%,
+      #f0dba4 92%,
+      var(--gold) 100%
+    );
+    background-size: 230% 100%;
+    background-position: 14% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 10px var(--gold-glow);
+    animation: gold-sheen 8s ease-in-out infinite;
+  }
+}
+
+/* Specular band travels across the glyphs and returns — living gold. */
+@keyframes gold-sheen {
+  0%,
+  100% {
+    background-position: 10% 50%;
+  }
+  50% {
+    background-position: 90% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold-shine,
+  .eyebrow,
+  .tile-kicker,
+  .panel-kicker,
+  .brand-name {
+    animation: none;
+    background-position: 34% 50%;
+  }
 }
