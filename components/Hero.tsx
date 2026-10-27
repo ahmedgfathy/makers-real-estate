@@ -66,7 +66,6 @@ export default function Hero({
 
         <Reveal delay={460} className="hero-foot">
           <div>
-            <p className="hero-lede">{c.hero.lede}</p>
             <div className="hero-actions">
               <a className="btn btn--solid" href="#collection">
                 <span>{c.hero.primary}</span>

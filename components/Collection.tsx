@@ -28,11 +28,10 @@ export default function Collection({
       <div className="collection-inner">
         <div className="collection-head">
           <Reveal>
-            <span className="eyebrow">{c.grid.label}</span>
-            <h2 className="collection-title">{c.grid.title}</h2>
+            <h2 className="collection-lede">{c.hero.lede}</h2>
           </Reveal>
-          <Reveal delay={120} className="collection-head-r">
-            <p className="section-lede">{c.grid.lede}</p>
+          <Reveal delay={100} className="collection-meta">
+            <span className="eyebrow">{c.grid.label}</span>
             <span className="collection-count">
               {c.tiles.length} {t.collections} — SODIC East
             </span>

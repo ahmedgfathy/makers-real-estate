@@ -423,7 +423,7 @@ html[lang="ar"] .hero-place {
   max-width: 44ch;
 }
 
-.hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.6rem; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
 
 .hero-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(0.75rem, 1.6vw, 1.6rem); }
 
