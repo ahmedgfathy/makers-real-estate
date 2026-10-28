@@ -46,6 +46,15 @@ export default function Header({
           </a>
         </nav>
 
+        <a className="header-login" href="/login" aria-label={ui[lang].login}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M8 10V7.2a4 4 0 018 0V10" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="12" cy="15" r="1.2" fill="currentColor" />
+          </svg>
+          <span>{ui[lang].login}</span>
+        </a>
+
         <div className="lang-switch" role="group" aria-label="Language / اللغة">
           <button
             type="button"

@@ -42,7 +42,7 @@ reads on every request.
 
 | Piece | Purpose |
 |---|---|
-| `db/schema.sql` | DDL — `locales`, `site_content`, `tiles`, `panels`, `panel_sections`, `settings` |
+| `db/schema.sql` | DDL — content tables (`locales`, `site_content`, `tiles`, `panels`, `panel_sections`, `settings`) plus `leads` and `properties` |
 | `scripts/db-migrate.ts` | applies the schema (idempotent) — `npm run db:migrate` |
 | `scripts/db-seed.ts` | seeds both locales from `data/content.ts` — `npm run db:seed` |
 | `lib/db.ts` | `pg` connection pool + query/transaction helpers |
@@ -75,6 +75,62 @@ npm run db:seed      # re-import content from data/content.ts
 npm run db:setup     # migrate + seed
 ```
 
+## Admin dashboard
+
+The public header has a **Login** button. Sign in at `http://localhost:3000/login`:
+
+| | |
+|---|---|
+| Username | `admin` |
+| Password | `zerocall` |
+
+Override both with `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env` (and set a long
+`ADMIN_SESSION_SECRET`). The session is an HTTP-only, signed cookie valid for eight hours.
+
+Four modules:
+
+| Module | Route | What it does |
+|---|---|---|
+| Overview | `/dashboard` | Lead, source, availability and portfolio-value cards; latest leads; featured inventory |
+| Leads | `/dashboard/leads` | Pipeline across Facebook, Instagram, website, WhatsApp and manual entry; filters, detail view, status updates, manual intake |
+| Primary data | `/dashboard/primary` | The SODIC East fact sheet and all six collection panels, read live from PostgreSQL with EN / AR switch |
+| Inventory | `/dashboard/inventory` | Standard property records — code, type, specs, areas, finishing, price, payment plan, delivery, images and video |
+
+### Lead intake API
+
+Facebook / Instagram lead ads and website forms can post to `POST /api/leads`. A Facebook
+`field_data` payload is normalised automatically (source `facebook`, external leadgen ID kept):
+
+```bash
+curl -X POST http://localhost:3000/api/leads \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "leadgen_id": "123456789",
+    "form_name": "The Lakes — Request a call",
+    "campaign_name": "The Lakes · 0% down · Cairo",
+    "field_data": [
+      { "name": "full_name", "values": ["Omar Hassan"] },
+      { "name": "phone_number", "values": ["01002148831"] },
+      { "name": "project", "values": ["The Lakes"] },
+      { "name": "bedrooms", "values": ["2"] }
+    ]
+  }'
+```
+
+Plain JSON (`full_name`, `phone`, `email`, `project`, `budget_min`…) also works. If
+`LEADS_API_KEY` is set, send it as `x-api-key` (or `?key=`).
+
+### Seed data
+
+`npm run db:seed` inserts **23 properties** derived from the Phase 08M unit list and the
+Collection / Payment panels, plus **12 demo leads** across every source. Property images come
+from `public/img`, and featured units carry the project film at `/video/hero.mp4`. Existing
+leads are preserved on re-seed; properties are inserted by unique code.
+
+> **Security:** the dashboard is a single-admin tool for this landing page. Change the
+> credentials and session secret before deploying, and put the dashboard behind your normal
+> infrastructure controls if it will be public.
+
 ## Structure
 
 ```
@@ -84,15 +140,20 @@ app/
   globals.css       design tokens, header, hero, footer, bidi helpers
   site.css          tile grid, detail panel, tables, gallery
   icon.png          favicon (gold M monogram, cropped from the brand logo)
+  login/            admin sign-in screen
+  dashboard/        overview, leads, primary data, inventory (layout + dashboard.css)
+  api/auth/         login / logout routes
+  api/leads/        public lead intake (website + Facebook lead ads)
 components/
   Landing.tsx       state: language, open panel, hash deep-links (#tile-lakes …)
-  Header.tsx        wordmark, nav, EN/ع switch, WhatsApp CTA
+  Header.tsx        wordmark, nav, Login button, EN/ع switch, WhatsApp CTA
   Hero.tsx          video background (poster fallback / reduced-motion fallback), headline, stats
   Collection.tsx    the 6 large square tiles
   Panel.tsx         full-screen detail sheet (scroll lock, Esc, focus return, exit animation)
   Sections.tsx      renders the data sections (stats / tables / unit tables / prices / lists / gallery)
   Footer.tsx        advisor card, links, disclaimer
   Brand.tsx, Reveal.tsx
+  dashboard/        DashboardNav, PropertyCard, status/source badges
 data/
   content.ts        seed data + type definitions (EN + AR). Source for db:seed and the fallback.
 db/
@@ -100,6 +161,9 @@ db/
 lib/
   db.ts             pg pool, query(), withTransaction(), pingDb()
   content-db.ts     getSite(): content + contact from PostgreSQL (cached, with fallback)
+  admin.ts          leads + property inventory queries
+  auth.ts           signed admin session, credentials, requireAdmin()
+  format.ts         EGP/area/date/budget formatting helpers
   labels.ts         small UI labels (Ground, per-month, back-to-top…)
 scripts/
   db-migrate.ts     apply the schema
@@ -153,9 +217,10 @@ To swap the background film: drop an `.mp4` at `public/video/hero.mp4` and a mat
 
 ## Not built yet (the full site)
 
-This is intentionally a landing page. Natural next steps: per-project routes, unit-level pages
-with layouts per code, a lead form writing to a CRM, real photography of the built product,
-and an admin UI on top of the PostgreSQL content tables.
+This is intentionally a landing page with a single-admin operations layer. Natural next steps:
+per-project routes, unit-level public pages, a public lead form writing into the same `leads`
+table, CRM sync for Facebook lead ads, real photography of the built product, and multi-user
+roles / audit history for the dashboard.
 
 ---
 

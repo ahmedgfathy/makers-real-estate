@@ -49,7 +49,9 @@ export default function Hero({
 
       <div className="hero-inner">
         <Reveal delay={80}>
-          <span className="eyebrow">{c.hero.eyebrow}</span>
+          <span className="hero-eyebrow">
+            <span className="eyebrow">{c.hero.eyebrow}</span>
+          </span>
         </Reveal>
 
         <h1 className="hero-title">

@@ -5,6 +5,7 @@ _src
 *.log
 .DS_Store
 next-env.d.ts
+*.tsbuildinfo
 
 # env (keep the example)
 .env

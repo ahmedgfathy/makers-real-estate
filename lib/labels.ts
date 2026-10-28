@@ -15,6 +15,7 @@ export const ui = {
     siteBy: "Makers Real Estate",
     openTile: "Open",
     top: "Back to top",
+    login: "Login",
   },
   ar: {
     ground: "أرضي",
@@ -30,5 +31,6 @@ export const ui = {
     siteBy: "ميكرز للعقارات",
     openTile: "افتح",
     top: "أعلى الصفحة",
+    login: "دخول",
   },
 } satisfies Record<Lang, Record<string, string>>;
