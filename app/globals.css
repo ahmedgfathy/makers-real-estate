@@ -9,6 +9,10 @@
   --ink: #f4f0e9;
   --ink-dim: rgba(244, 240, 233, 0.62);
   --ink-faint: rgba(244, 240, 233, 0.38);
+
+  /* Headline ink: pure white for maximum contrast over the hero video.
+     Body copy and labels keep the warmer --ink ramp so hierarchy survives. */
+  --title: #ffffff;
   --line: rgba(244, 240, 233, 0.12);
   --line-strong: rgba(244, 240, 233, 0.24);
   --sand: #c9a97c;

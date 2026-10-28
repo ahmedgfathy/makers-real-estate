@@ -53,12 +53,16 @@ export default function Hero({
         </Reveal>
 
         <h1 className="hero-title">
-          <Reveal delay={160}>
-            <span className="hero-title-line">{c.hero.titleLine1}</span>
-          </Reveal>
-          <Reveal delay={260}>
-            <span className="hero-title-line hero-title-line--italic">{c.hero.titleLine2}</span>
-          </Reveal>
+          {c.hero.titleLine1 ? (
+            <Reveal delay={160}>
+              <span className="hero-title-line">{c.hero.titleLine1}</span>
+            </Reveal>
+          ) : null}
+          {c.hero.titleLine2 ? (
+            <Reveal delay={260}>
+              <span className="hero-title-line hero-title-line--italic">{c.hero.titleLine2}</span>
+            </Reveal>
+          ) : null}
           <Reveal delay={380}>
             <span className="hero-place">{c.hero.place}</span>
           </Reveal>
