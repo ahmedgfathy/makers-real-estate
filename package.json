@@ -8,8 +8,8 @@
     "start": "next start",
     "preview": "next build && next start",
     "lint": "next lint",
-    "db:migrate": "tsx scripts/db-migrate.ts",
-    "db:seed": "tsx scripts/db-seed.ts",
+    "db:migrate": "tsx --env-file=.env scripts/db-migrate.ts",
+    "db:seed": "tsx --env-file=.env scripts/db-seed.ts",
     "db:setup": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {

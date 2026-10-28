@@ -20,6 +20,14 @@ const config: PoolConfig =
     ? { connectionString: process.env.DATABASE_URL }
     : { host: DEFAULT_HOST, database: DEFAULT_DB };
 
+/**
+ * Serverless platforms spin up many short-lived instances, and each instance
+ * holds its own pool. Keep the per-instance pool tiny when deployed (traffic is
+ * funnelled through the provider's pooler anyway) and allow a real pool locally.
+ */
+const IS_SERVERLESS = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const POOL_MAX = Number(process.env.PG_POOL_MAX ?? (IS_SERVERLESS ? 1 : 5));
+
 // Survive Next.js dev-server hot reloads: keep one pool per process.
 const globalForDb = globalThis as unknown as { __makersPool?: Pool };
 
@@ -27,9 +35,11 @@ export function getPool(): Pool {
   if (!globalForDb.__makersPool) {
     const pool = new Pool({
       ...config,
-      max: 5,
+      max: POOL_MAX,
       idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 5_000,
+      connectionTimeoutMillis: 10_000,
+      // Neon/other managed Postgres suspend idle compute; keep TCP alive briefly.
+      keepAlive: true,
     });
     // Avoid crashing the process on idle-client errors (e.g. server restart).
     pool.on("error", (err) => {
