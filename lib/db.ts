@@ -33,6 +33,12 @@ const globalForDb = globalThis as unknown as { __makersPool?: Pool };
 
 export function getPool(): Pool {
   if (!globalForDb.__makersPool) {
+    if (IS_SERVERLESS && !process.env.DATABASE_URL) {
+      // Fail loudly instead of silently dialling a unix socket that cannot exist.
+      throw new Error(
+        "[db] DATABASE_URL is not set for this deployment. Add it in Vercel → Settings → Environment Variables (use the -pooler host, ?sslmode=verify-full)."
+      );
+    }
     const pool = new Pool({
       ...config,
       max: POOL_MAX,
