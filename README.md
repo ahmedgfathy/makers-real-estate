@@ -124,7 +124,7 @@ Plain JSON (`full_name`, `phone`, `email`, `project`, `budget_min`…) also work
 
 `npm run db:seed` inserts **23 properties** derived from the Phase 08M unit list and the
 Collection / Payment panels, plus **12 demo leads** across every source. Property images come
-from `public/img`, and featured units carry the project film at `/video/hero.mp4`. Existing
+from `public/img`, and featured units carry the site film at `/video/hero.mp4`. Existing
 leads are preserved on re-seed; properties are inserted by unique code.
 
 > **Security:** the dashboard is a single-admin tool for this landing page. Change the
@@ -169,7 +169,7 @@ scripts/
   db-migrate.ts     apply the schema
   db-seed.ts        seed the database from data/content.ts
 public/
-  video/hero.mp4    seamless 24s boomerang loop, 1920×1080, 4.3 MB, no audio
+  video/hero.mp4    seamless 24s boomerang loop, 1920×1080, 7.2 MB, no audio
   img/*.jpg         hero poster + 6 stills used by tiles, panels and gallery
   img/makers-*.png  gold monogram mark + full logo lockup (header uses the mark)
 ```
@@ -197,7 +197,7 @@ stores the isolated text as-is, so the rendered output is byte-identical to the 
 
 | Asset | Source |
 |---|---|
-| `public/video/hero.mp4` | Pexels stock clip *Aerial View of Luxurious Waterfront Homes* (video ID [36870461](https://www.pexels.com/video/36870461/), David Pickup — Pexels License, free for commercial use, no attribution required): 4K source → 1080p30, 12s forward + reversed for a seamless 24s boomerang, two-pass H.264 ≈1.5 Mbps, no audio |
+| `public/video/hero.mp4` | Pexels stock clip *Aerial View of Luxurious Waterfront Homes* (video ID [36870461](https://www.pexels.com/video/36870461/), David Pickup — Pexels License, free for commercial use, no attribution required): 1080p30 master (the full-resolution cut kept in this repo's history), 12s forward + reversed for a seamless 24s boomerang, H.264 High CRF 22 capped at 3 Mbps (≈2.4 Mbps, 7.2 MB), no audio, `+faststart`. Poster is a 1920 px frame from the same file. |
 | `public/img/hero-poster.jpg` | poster frame from the same clip |
 | `public/img/{lakes,creek,mall,boulevard,sodic,phase08m}.jpg` | frames from the original *The Lakes* render film, contrast/saturation nudged, 1280 wide |
 | Copy & figures | `The Lakes – SODIC East – Factsheet.pdf`, `SODIC_EAST_Inventory_Breakdown_Brief.pdf` and the Phase 08M unit list |
