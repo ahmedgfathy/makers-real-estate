@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { forgetUser } from "@/lib/analytics";
 
 type NavItem = { href: string; label: string; icon: ReactNode };
 
@@ -147,7 +148,7 @@ export default function DashboardNav({ username }: { username: string }) {
           </div>
 
           <form action="/api/auth/logout" method="post">
-            <button type="submit" className="dash-logout">
+            <button type="submit" className="dash-logout" onClick={() => forgetUser()}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

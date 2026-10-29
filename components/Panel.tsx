@@ -89,7 +89,14 @@ export default function Panel({
           <span className="panel-foot-meta">
             {contact.name[lang]} · <span className="phone">{contact.phoneLabel}</span>
           </span>
-          <a className="btn btn--solid btn--sm" href={whatsapp} target="_blank" rel="noopener noreferrer">
+          <a
+            className="btn btn--solid btn--sm"
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-cta="whatsapp"
+            data-cta-surface={"panel-" + id}
+          >
             <span>{panel.cta}</span>
           </a>
         </div>

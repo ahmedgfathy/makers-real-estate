@@ -940,3 +940,51 @@ html[lang="ar"] .footer-bottom { letter-spacing: 0.02em; text-transform: none; f
     background-position: 34% 50%;
   }
 }
+
+/* ---------- analytics consent ----------
+   Sits above the header (60) and below the brief panel (100). Nothing is
+   sent to PostHog until one of these two buttons is pressed. */
+.consent {
+  position: fixed;
+  inset-inline-start: clamp(1rem, 4vw, 2rem);
+  inset-block-end: clamp(1rem, 4vw, 2rem);
+  z-index: 70;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.4rem;
+  max-width: min(31rem, calc(100vw - 2rem));
+  padding: 1.05rem 1.2rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: rgba(8, 8, 10, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  animation: consent-in 0.5s var(--ease) both;
+}
+
+.consent-text {
+  flex: 1 1 15rem;
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.7;
+  color: var(--ink-dim);
+}
+
+.consent-actions { display: flex; gap: 0.5rem; }
+
+html[lang="ar"] .consent-text { font-size: 0.82rem; }
+
+@keyframes consent-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consent { animation: none; }
+}
+
+@media (max-width: 560px) {
+  .consent-actions { width: 100%; }
+  .consent-actions .btn { flex: 1 1 auto; justify-content: center; }
+}

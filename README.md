@@ -75,6 +75,36 @@ npm run db:seed      # re-import content from data/content.ts
 npm run db:setup     # migrate + seed
 ```
 
+## Product analytics (PostHog)
+
+The site reports to **PostHog** through `posthog-js`, behind an opt-in consent bar.
+
+| Piece | Purpose |
+|---|---|
+| `lib/analytics.ts` | SDK init (opted out by default, `respect_dnt`), `capture` / `identify` helpers, consent storage |
+| `components/Analytics.tsx` | One `$pageview` per route, the consent prompt, and delegated `data-cta` click tracking; the footer's **Cookie preferences** reopens the prompt |
+| `components/dashboard/Identify.tsx` | `identify("admin:<username>")` for a signed-in dashboard session |
+
+Events: `$pageview`, `collection_opened` (`tile`, `position`, `language`), `language_switched`,
+`contact_clicked` (`channel`: `whatsapp` / `phone` / `explore`, plus `surface`), and PostHog's own
+`$opt_in` / `$pageleave`.
+
+The visitor funnel is `$pageview` → `collection_opened` → `contact_clicked`; splitting
+`collection_opened` by `tile` shows which brief drives enquiries.
+
+To switch it on, create a PostHog project and put its **project API key** (public, starts `phc_`)
+and host in `.env` — see `.env.example`:
+
+```bash
+NEXT_PUBLIC_POSTHOG_KEY=phc_...
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com   # or https://eu.i.posthog.com
+```
+
+Without the key every helper is a no-op, so builds and previews stay quiet. Nothing is sent until
+the visitor presses **Allow**; the choice is stored in `localStorage` under
+`makers.analytics-consent`, and Do Not Track is honoured. Give any new contact link
+`data-cta="whatsapp" data-cta-surface="…"` to have its clicks captured.
+
 ## Admin dashboard
 
 The public header has a **Login** button. Sign in at `http://localhost:3000/login`:

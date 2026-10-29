@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth";
 import DashboardNav from "@/components/dashboard/DashboardNav";
+import Identify from "@/components/dashboard/Identify";
 import "./dashboard.css";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <div className="dash-shell">
+      <Identify username={session.username} />
       <DashboardNav username={session.username} />
       <div className="dash-main">{children}</div>
     </div>

@@ -38,7 +38,7 @@ export default function Header({
           <a className="header-link" href="#collection">
             {c.nav.collection}
           </a>
-          <a className="header-link phone" href={phoneHref}>
+          <a className="header-link phone" href={phoneHref} data-cta="phone" data-cta-surface="header">
             {c.footer.call}
           </a>
           <a className="header-link" href="#contact">
@@ -76,7 +76,14 @@ export default function Header({
           </button>
         </div>
 
-        <a className="btn btn--solid btn--sm" href={whatsapp} target="_blank" rel="noopener noreferrer">
+        <a
+          className="btn btn--solid btn--sm"
+          href={whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-cta="whatsapp"
+          data-cta-surface="header"
+        >
           <span>{ui[lang].book}</span>
         </a>
       </div>

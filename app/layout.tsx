@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Cairo, Cormorant_Garamond, Inter } from "next/font/google";
+import Analytics from "@/components/Analytics";
 import { getSite } from "@/lib/content-db";
 import "./globals.css";
 import "./site.css";
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body>
         {children}
+        <Analytics />
         <noscript>
           <style>{`.reveal{opacity:1;transform:none}`}</style>
         </noscript>

@@ -16,6 +16,11 @@ export const ui = {
     openTile: "Open",
     top: "Back to top",
     login: "Login",
+    cookies: "Cookie preferences",
+    consentText:
+      "We measure how this site is used (PostHog) to improve the listings. Nothing is tracked unless you allow it.",
+    consentAccept: "Allow",
+    consentDecline: "Decline",
   },
   ar: {
     ground: "أرضي",
@@ -32,5 +37,10 @@ export const ui = {
     openTile: "افتح",
     top: "أعلى الصفحة",
     login: "دخول",
+    cookies: "تفضيلات الكوكيز",
+    consentText:
+      "نقيس كيفية استخدام الموقع (PostHog) لتحسين المعروض. لا يتم تتبع أي شيء بدون موافقتك.",
+    consentAccept: "موافق",
+    consentDecline: "رفض",
   },
 } satisfies Record<Lang, Record<string, string>>;

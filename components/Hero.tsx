@@ -72,16 +72,34 @@ export default function Hero({
           )}
 
           <div className="hero-actions">
-            <a className="btn btn--solid hero-btn-primary" href="#collection">
+            <a
+              className="btn btn--solid hero-btn-primary"
+              href="#collection"
+              data-cta="explore"
+              data-cta-surface="hero"
+            >
               <span>{c.hero.primary}</span>
               <svg className="hero-btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
-            <a className="btn btn--glass" href={whatsapp} target="_blank" rel="noopener noreferrer">
+            <a
+              className="btn btn--glass"
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cta="whatsapp"
+              data-cta-surface="hero"
+            >
               <span>{c.hero.secondary}</span>
             </a>
-            <a className="btn btn--ghost hero-phone phone" href={phoneHref} aria-label={c.footer.call}>
+            <a
+              className="btn btn--ghost hero-phone phone"
+              href={phoneHref}
+              aria-label={c.footer.call}
+              data-cta="phone"
+              data-cta-surface="hero"
+            >
               <span>{c.footer.call}</span>
             </a>
           </div>

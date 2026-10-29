@@ -8,6 +8,7 @@ import {
   type Lang,
   type TileId,
 } from "@/data/content";
+import { capture } from "@/lib/analytics";
 import Header from "./Header";
 import Hero from "./Hero";
 import Collection from "./Collection";
@@ -52,12 +53,25 @@ export default function Landing({
     }
   }, [lang]);
 
-  const open = useCallback((id: TileId, el?: HTMLButtonElement) => {
-    if (el) lastFocus.current = el;
-    setActive(id);
-    // Push (not replace) so the browser's Back button closes the brief.
-    window.history.pushState({ tile: id }, "", "#tile-" + id);
-    pushed.current = true;
+  const open = useCallback(
+    (id: TileId, el?: HTMLButtonElement) => {
+      if (el) lastFocus.current = el;
+      capture("collection_opened", {
+        tile: id,
+        position: TILE_IDS.indexOf(id) + 1,
+        language: lang,
+      });
+      setActive(id);
+      // Push (not replace) so the browser's Back button closes the brief.
+      window.history.pushState({ tile: id }, "", "#tile-" + id);
+      pushed.current = true;
+    },
+    [lang]
+  );
+
+  const changeLang = useCallback((next: Lang) => {
+    setLang(next);
+    capture("language_switched", { language: next });
   }, []);
 
   const close = useCallback(() => {
@@ -102,7 +116,7 @@ export default function Landing({
   return (
     <>
       <div className="grain" aria-hidden="true" />
-      <Header c={c} lang={lang} onLang={setLang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
+      <Header c={c} lang={lang} onLang={changeLang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
 
       <main>
         <Hero c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Contact, Content, Lang, TileId } from "@/data/content";
+import { requestConsent } from "@/lib/analytics";
 import { ui } from "@/lib/labels";
 
 export default function Footer({
@@ -36,10 +37,17 @@ export default function Footer({
                 href={whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-cta="whatsapp"
+                data-cta-surface="footer"
               >
                 <span>{c.footer.whatsapp}</span>
               </a>
-              <a className="btn btn--ghost btn--sm phone" href={phoneHref}>
+              <a
+                className="btn btn--ghost btn--sm phone"
+                href={phoneHref}
+                data-cta="phone"
+                data-cta-surface="footer"
+              >
                 <span>{c.footer.call}</span>
               </a>
             </div>
@@ -70,7 +78,14 @@ export default function Footer({
             <a className="footer-link" href="#top">
               {ui[lang].top}
             </a>
-            <a className="footer-link" href={whatsapp} target="_blank" rel="noopener noreferrer">
+            <a
+              className="footer-link"
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cta="whatsapp"
+              data-cta-surface="footer-links"
+            >
               {c.footer.whatsapp}
             </a>
           </div>
@@ -81,6 +96,9 @@ export default function Footer({
             © {new Date().getFullYear()} {c.footer.rights}
           </span>
           <span>{c.footer.builtWith}</span>
+          <button type="button" className="footer-link" onClick={() => requestConsent()}>
+            {ui[lang].cookies}
+          </button>
         </div>
       </div>
     </footer>
