@@ -2,7 +2,9 @@ import type { Content, Lang, Section } from "@/data/content";
 import { formatEGP } from "@/data/content";
 import { ui } from "@/lib/labels";
 
-const isNumeric = (v?: string) => !!v && /^[\d,]+$/.test(v);
+// Arabic values carry LRI/PDI isolates around digits, so strip them before testing.
+const isNumeric = (v?: string) =>
+  !!v && /^[\d,]+$/.test(v.replace(/[\u2066-\u2069]/g, ""));
 
 function SecHead({ title }: { title?: string }) {
   if (!title) return null;

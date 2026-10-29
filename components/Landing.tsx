@@ -27,6 +27,8 @@ export default function Landing({
   const [lang, setLang] = useState<Lang>("en");
   const [active, setActive] = useState<TileId | null>(null);
   const lastFocus = useRef<HTMLButtonElement | null>(null);
+  const pushed = useRef(false);
+  const wasOpen = useRef(false);
 
   const c = content[lang];
   const whatsapp = whatsappLink(contact, lang);
@@ -53,29 +55,49 @@ export default function Landing({
   const open = useCallback((id: TileId, el?: HTMLButtonElement) => {
     if (el) lastFocus.current = el;
     setActive(id);
-    window.history.replaceState(null, "", "#tile-" + id);
+    // Push (not replace) so the browser's Back button closes the brief.
+    window.history.pushState({ tile: id }, "", "#tile-" + id);
+    pushed.current = true;
   }, []);
 
   const close = useCallback(() => {
+    // Unwind the entry pushed by open() so closing does not leave a dead hash behind.
+    if (pushed.current) {
+      pushed.current = false;
+      window.history.back();
+      return;
+    }
     setActive(null);
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    lastFocus.current?.focus({ preventScroll: true });
   }, []);
 
   useEffect(() => {
     const sync = () => {
       const hash = window.location.hash.replace("#", "");
-      if (hash.startsWith("tile-")) {
-        const id = hash.slice(5);
-        if (isTileId(id)) setActive(id);
+      const id = hash.startsWith("tile-") ? hash.slice(5) : "";
+      if (isTileId(id)) {
+        setActive(id);
         return;
       }
+      pushed.current = false;
       setActive(null);
     };
     sync();
     window.addEventListener("popstate", sync);
     return () => window.removeEventListener("popstate", sync);
   }, []);
+
+  // Return focus to the tile that opened the brief once it closes (Back or Esc).
+  useEffect(() => {
+    if (active) {
+      wasOpen.current = true;
+      return;
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+      lastFocus.current?.focus({ preventScroll: true });
+    }
+  }, [active]);
 
   return (
     <>
