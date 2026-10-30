@@ -17,3 +17,7 @@ next-env.d.ts
 data/*
 !data/content.ts
 !data/projects.ts
+_work/
+_repo/
+_backup-local/
+.freebuff/
