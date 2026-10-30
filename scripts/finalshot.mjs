@@ -1,0 +1,18 @@
+import { chromium } from "playwright";
+const base = "http://127.0.0.1:3001";
+const out = "/home/xinreal/makers/_src/shots/";
+const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto(base, { waitUntil: "networkidle" });
+await page.waitForTimeout(3200);
+await page.screenshot({ path: out + "final-hero.png" });
+await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await page.waitForTimeout(1500);
+await page.evaluate(() => window.scrollTo(0, 0));
+await page.waitForTimeout(800);
+await page.screenshot({ path: out + "final-full.png", fullPage: true });
+await page.locator("button.tile").nth(0).click();
+await page.waitForTimeout(1600);
+await page.screenshot({ path: out + "final-panel.png" });
+console.log("shots ok");
+await browser.close();

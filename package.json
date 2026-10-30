@@ -1,0 +1,32 @@
+{
+  "name": "makers-real-estate",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "preview": "next build && next start",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx --env-file=.env scripts/db-migrate.ts",
+    "db:seed": "tsx --env-file=.env scripts/db-seed.ts",
+    "db:seed:projects": "tsx --env-file=.env scripts/db-seed-projects.ts",
+    "db:setup": "npm run db:migrate && npm run db:seed"
+  },
+  "dependencies": {
+    "next": "^16.4.3",
+    "pg": "^8.23.0",
+    "posthog-js": "^1.443.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "playwright": "^1.64.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

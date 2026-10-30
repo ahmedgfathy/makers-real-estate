@@ -1,0 +1,1 @@
+cd /home/xinreal/makers; python3 scripts/patch4.py; grep -c isolateDeep data/content.ts
