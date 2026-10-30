@@ -45,6 +45,7 @@ reads on every request.
 | `db/schema.sql` | DDL — content tables (`locales`, `site_content`, `tiles`, `panels`, `panel_sections`, `settings`) plus `leads`, `properties` and `projects` |
 | `scripts/db-migrate.ts` | applies the schema (idempotent) — `npm run db:migrate` |
 | `scripts/db-seed.ts` | seeds both locales from `data/content.ts` and the project catalogue from `data/projects.ts` — `npm run db:seed` |
+| `scripts/db-seed-projects.ts` | refreshes only the project catalogue — `npm run db:seed:projects` (safe on production: leaves content, properties and leads untouched) |
 | `lib/db.ts` | `pg` connection pool + query/transaction helpers |
 | `lib/content-db.ts` | loads content from PostgreSQL and assembles the app's `Content` shape |
 | `lib/projects.ts` | reads the SODIC project catalogue from PostgreSQL (static fallback) |
@@ -68,9 +69,11 @@ stats/table/units/list/prices/gallery/note). `settings.contact` holds the adviso
 `projects` holds one row per SODIC development — region, category, status, starting price,
 payment plan, finishing, unit mix, amenities and distances as jsonb, with bilingual columns.
 
-**Editing the catalogue:** change `data/projects.ts`, then run `npm run db:seed`. The seed
-rebuilds `projects` wholesale (it is generated data), so any manual edits in the table are
-replaced. The catalogue is compiled from the fact sheets and briefs in `data/sodic-projects/`;
+**Editing the catalogue:** change `data/projects.ts`, then run `npm run db:seed:projects`
+(or the full `npm run db:seed`). The seed rebuilds `projects` wholesale (it is generated data),
+so any manual edits in the table are replaced. To update a deployed database, point
+`DATABASE_URL` at it (use the direct/unpooled endpoint for migrations) and run
+`npm run db:migrate && npm run db:seed:projects`. The catalogue is compiled from the fact sheets and briefs in `data/sodic-projects/`;
 `data/` is gitignored, so those PDFs stay local.
 
 **Editing content:** change the data in `data/content.ts`, then re-run `npm run db:seed`
@@ -78,8 +81,9 @@ replaced. The catalogue is compiled from the fact sheets and briefs in `data/sod
 PostgreSQL directly — changes appear within `CONTENT_CACHE_TTL_MS`.
 
 ```bash
-npm run db:migrate   # apply db/schema.sql
-npm run db:seed      # re-import content from data/content.ts
+npm run db:migrate        # apply db/schema.sql
+npm run db:seed           # re-import content + projects from data/
+npm run db:seed:projects  # refresh only the SODIC project catalogue
 npm run db:setup     # migrate + seed
 ```
 

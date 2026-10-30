@@ -1,6 +1,6 @@
 import { contact, content, type Lang, type Section, type TileId } from "../data/content";
-import { projects } from "../data/projects";
 import { getPool, withTransaction, type TxClient } from "../lib/db";
+import { seedProjects } from "../lib/seed-projects";
 
 /**
  * Seeds PostgreSQL from data/content.ts — the original single source of truth.
@@ -348,53 +348,11 @@ async function seedProperties(client: TxClient) {
 /* SODIC project catalogue                                             */
 /* ------------------------------------------------------------------ */
 
-const PROJECT_COLUMNS = [
-  "slug", "name", "name_ar", "region", "location", "category", "status",
-  "tagline", "tagline_ar", "description", "description_ar", "price_from",
-  "payment_plan", "payment_plan_ar", "finishing", "unit_types", "amenities",
-  "location_notes", "hero_image", "brochure", "masterplan", "position",
-] as const;
-
-async function seedProjects(client: TxClient) {
-  // The catalogue in data/projects.ts is authoritative: rebuild it wholesale so
-  // removed projects do not linger in the CRM.
-  await client.query("DELETE FROM projects");
-
-  for (const project of projects) {
-    const values = [
-      project.slug,
-      project.name,
-      project.nameAr || null,
-      project.region,
-      project.location,
-      project.category,
-      project.status,
-      project.tagline || null,
-      project.taglineAr || null,
-      project.description,
-      project.descriptionAr || null,
-      project.priceFrom,
-      project.paymentPlan,
-      project.paymentPlanAr,
-      project.finishing,
-      json(project.unitTypes),
-      json(project.amenities),
-      json(project.locationNotes),
-      project.heroImage,
-      project.brochure,
-      project.masterplan,
-      project.position,
-    ];
-    const placeholders = values.map((_, i) => `$${i + 1}`).join(", ");
-
-    await client.query(
-      `INSERT INTO projects (${PROJECT_COLUMNS.join(", ")})
-       VALUES (${placeholders})`,
-      values
-    );
-  }
-
-  console.log(`[seed] projects: ${projects.length} SODIC developments`);
+// The catalogue in data/projects.ts is authoritative: rebuild it wholesale so
+// removed projects do not linger in the CRM.
+async function seedProjectCatalogue(client: TxClient) {
+  const count = await seedProjects(client);
+  console.log(`[seed] projects: ${count} SODIC developments`);
 }
 
 /* ------------------------------------------------------------------ */
@@ -571,7 +529,7 @@ async function main() {
     );
 
     await seedProperties(client);
-    await seedProjects(client);
+    await seedProjectCatalogue(client);
     await seedLeads(client);
   });
 
