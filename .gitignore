@@ -13,6 +13,7 @@ next-env.d.ts
 .env.*.local
 
 # raw source media in data/ stays local (videos, zips, PDFs, images)
-# only data/content.ts — the actual source code — is tracked
+# only data/content.ts and data/projects.ts — the actual source code — are tracked
 data/*
 !data/content.ts
+!data/projects.ts

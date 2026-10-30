@@ -50,6 +50,16 @@ const NAV: NavItem[] = [
     ),
   },
   {
+    href: "/dashboard/projects",
+    label: "Projects",
+    icon: (
+      <Icon>
+        <path d="M4 20V6.5L12 3l8 3.5V20" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M4 20h16M8 20v-5h3v5M14 20v-9h3v9" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      </Icon>
+    ),
+  },
+  {
     href: "/dashboard/inventory",
     label: "Inventory",
     icon: (

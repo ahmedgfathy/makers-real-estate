@@ -134,8 +134,43 @@ CREATE TABLE IF NOT EXISTS properties (
   updated_at          timestamptz NOT NULL DEFAULT now()
 );
 
+-- SODIC project catalogue: one row per development (or phase) with its unit
+-- mix, amenities, payment plan and source documents. Bilingual text lives in
+-- paired columns so the CRM can switch language without a join.
+CREATE TABLE IF NOT EXISTS projects (
+  slug             text PRIMARY KEY,
+  name             text NOT NULL,
+  name_ar          text,
+  region           text NOT NULL
+                   CHECK (region IN ('east-cairo', 'new-cairo', 'west-cairo', 'north-coast')),
+  location         text NOT NULL,
+  category         text NOT NULL
+                   CHECK (category IN ('residential', 'mixed-use', 'commercial', 'branded', 'serviced')),
+  status           text NOT NULL DEFAULT 'selling'
+                   CHECK (status IN ('launching', 'selling', 'delivering', 'sold-out', 'completed')),
+  tagline          text,
+  tagline_ar       text,
+  description      text NOT NULL,
+  description_ar   text,
+  price_from       bigint,
+  payment_plan     text,
+  payment_plan_ar  text,
+  finishing        text,
+  unit_types       jsonb NOT NULL DEFAULT '[]'::jsonb,
+  amenities        jsonb NOT NULL DEFAULT '[]'::jsonb,
+  location_notes   jsonb NOT NULL DEFAULT '[]'::jsonb,
+  hero_image       text,
+  brochure         text,
+  masterplan       text,
+  position         integer NOT NULL DEFAULT 0,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS idx_tiles_lang_pos ON tiles (lang, position);
 CREATE INDEX IF NOT EXISTS idx_sections_lookup ON panel_sections (lang, tile_id, position);
+CREATE INDEX IF NOT EXISTS idx_projects_region ON projects (region, position);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status, position);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_leads_external ON leads (external_id)
   WHERE external_id IS NOT NULL;

@@ -42,11 +42,12 @@ reads on every request.
 
 | Piece | Purpose |
 |---|---|
-| `db/schema.sql` | DDL — content tables (`locales`, `site_content`, `tiles`, `panels`, `panel_sections`, `settings`) plus `leads` and `properties` |
+| `db/schema.sql` | DDL — content tables (`locales`, `site_content`, `tiles`, `panels`, `panel_sections`, `settings`) plus `leads`, `properties` and `projects` |
 | `scripts/db-migrate.ts` | applies the schema (idempotent) — `npm run db:migrate` |
-| `scripts/db-seed.ts` | seeds both locales from `data/content.ts` — `npm run db:seed` |
+| `scripts/db-seed.ts` | seeds both locales from `data/content.ts` and the project catalogue from `data/projects.ts` — `npm run db:seed` |
 | `lib/db.ts` | `pg` connection pool + query/transaction helpers |
 | `lib/content-db.ts` | loads content from PostgreSQL and assembles the app's `Content` shape |
+| `lib/projects.ts` | reads the SODIC project catalogue from PostgreSQL (static fallback) |
 
 How the app uses it:
 
@@ -64,6 +65,13 @@ local unix socket with peer auth (`postgresql:///makers?host=/var/run/postgresql
 Schema shape: one row per locale in `site_content` (page chrome as jsonb), ordered `tiles` and
 `panels`, and polymorphic `panel_sections` (`kind` + jsonb `payload` for
 stats/table/units/list/prices/gallery/note). `settings.contact` holds the advisor block.
+`projects` holds one row per SODIC development — region, category, status, starting price,
+payment plan, finishing, unit mix, amenities and distances as jsonb, with bilingual columns.
+
+**Editing the catalogue:** change `data/projects.ts`, then run `npm run db:seed`. The seed
+rebuilds `projects` wholesale (it is generated data), so any manual edits in the table are
+replaced. The catalogue is compiled from the fact sheets and briefs in `data/sodic-projects/`;
+`data/` is gitignored, so those PDFs stay local.
 
 **Editing content:** change the data in `data/content.ts`, then re-run `npm run db:seed`
 (the seed is transactional and replaces tiles/panels/sections wholesale). Or edit rows in
@@ -117,13 +125,14 @@ The public header has a **Login** button. Sign in at `http://localhost:3000/logi
 Override both with `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env` (and set a long
 `ADMIN_SESSION_SECRET`). The session is an HTTP-only, signed cookie valid for eight hours.
 
-Four modules:
+Five modules:
 
 | Module | Route | What it does |
 |---|---|---|
 | Overview | `/dashboard` | Lead, source, availability and portfolio-value cards; latest leads; featured inventory |
 | Leads | `/dashboard/leads` | Pipeline across Facebook, Instagram, website, WhatsApp and manual entry; filters, detail view, status updates, manual intake |
-| Primary data | `/dashboard/primary` | The SODIC East fact sheet and all six collection panels, read live from PostgreSQL with EN / AR switch |
+| Primary data | `/dashboard/primary` | The SODIC East fact sheet and all six collection panels, read live from PostgreSQL with EN / AR switch; links to every SODIC project |
+| Projects | `/dashboard/projects` | The full SODIC catalogue — 22 developments with region, category, status, starting price, unit mix, payment plan, amenities, distances and source brochures |
 | Inventory | `/dashboard/inventory` | Standard property records — code, type, specs, areas, finishing, price, payment plan, delivery, images and video |
 
 ### Lead intake API
@@ -153,7 +162,8 @@ Plain JSON (`full_name`, `phone`, `email`, `project`, `budget_min`…) also work
 ### Seed data
 
 `npm run db:seed` inserts **23 properties** derived from the Phase 08M unit list and the
-Collection / Payment panels, plus **12 demo leads** across every source. Property images come
+Collection / Payment panels, **22 SODIC projects** from `data/projects.ts`, plus **12 demo
+leads** across every source. Property images come
 from `public/img`, and featured units carry the site film at `/video/hero.mp4`. Existing
 leads are preserved on re-seed; properties are inserted by unique code.
 
@@ -171,7 +181,7 @@ app/
   site.css          tile grid, detail panel, tables, gallery
   icon.png          favicon (gold M monogram, cropped from the brand logo)
   login/            admin sign-in screen
-  dashboard/        overview, leads, primary data, inventory (layout + dashboard.css)
+  dashboard/        overview, leads, primary data, projects, inventory (layout + dashboard.css)
   api/auth/         login / logout routes
   api/leads/        public lead intake (website + Facebook lead ads)
 components/
@@ -186,11 +196,15 @@ components/
   dashboard/        DashboardNav, PropertyCard, status/source badges
 data/
   content.ts        seed data + type definitions (EN + AR). Source for db:seed and the fallback.
+  projects.ts       SODIC project catalogue (22 developments, EN + AR) compiled from the
+                    sales material in data/sodic-projects/ — seeded into the `projects` table.
+  sodic-projects/   raw SODIC brochures, fact sheets and masterplans (local only, gitignored)
 db/
   schema.sql        PostgreSQL schema
 lib/
   db.ts             pg pool, query(), withTransaction(), pingDb()
   content-db.ts     getSite(): content + contact from PostgreSQL (cached, with fallback)
+  projects.ts       listProjects() / getProject() / getProjectStats() for the catalogue
   admin.ts          leads + property inventory queries
   auth.ts           signed admin session, credentials, requireAdmin()
   format.ts         EGP/area/date/budget formatting helpers
@@ -201,6 +215,7 @@ scripts/
 public/
   video/hero.mp4    seamless 24s boomerang loop, 1920×1080, 7.2 MB, no audio
   img/*.jpg         hero poster + 6 stills used by tiles, panels and gallery
+  projects/*.jpg    hero stills for V Residence and Ogami (other projects use a monogram tile)
   img/makers-*.png  gold monogram mark + full logo lockup (header uses the mark)
 ```
 

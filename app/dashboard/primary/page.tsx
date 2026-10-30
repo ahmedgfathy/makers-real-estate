@@ -1,6 +1,7 @@
 import type { Content, Lang, Section, TileId } from "@/data/content";
 import { getSite } from "@/lib/content-db";
 import { egp } from "@/lib/format";
+import { REGIONS, STATUSES, listProjects } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default async function PrimaryPage({
 
   const { content, contact } = await getSite();
   const c = content[lang];
+  const projects = await listProjects();
 
   const overview = listItems(c, "sodic-east", 0);
   const community = listItems(c, "sodic-east", 1);
@@ -43,6 +45,8 @@ export default async function PrimaryPage({
           payment: "خطة السداد",
           advisor: "مستشار المبيعات",
           tiles: "بيانات المجموعة",
+          projects: "مشروعات سوديك",
+          allProjects: "كل المشروعات",
           source: "المصدر: PostgreSQL · بذور من data/content.ts",
         }
       : {
@@ -55,6 +59,8 @@ export default async function PrimaryPage({
           payment: "Payment plan",
           advisor: "Sales advisor",
           tiles: "Collection data",
+          projects: "SODIC projects",
+          allProjects: "All projects",
           source: "Source: PostgreSQL · seeded from data/content.ts",
         };
 
@@ -233,6 +239,34 @@ export default async function PrimaryPage({
                 <span className="primary-tile-index">{tile.index}</span>
                 <span className="primary-tile-title">{tile.title}</span>
                 <span className="primary-tile-meta">{tile.meta}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="dash-card" style={{ marginTop: "0.9rem" }}>
+        <div className="dash-card-head">
+          <h2 className="dash-card-title">
+            {labels.projects} · {projects.length}
+          </h2>
+          <a className="dash-link" href={`/dashboard/projects?lang=${lang}`}>
+            {labels.allProjects} →
+          </a>
+        </div>
+        <div className="dash-card-body">
+          <div className="project-index">
+            {projects.map((project) => (
+              <a
+                className="project-index-row"
+                key={project.slug}
+                href={`/dashboard/projects/${project.slug}?lang=${lang}`}
+              >
+                <strong>{lang === "ar" ? project.nameAr : project.name}</strong>
+                <em>
+                  {REGIONS[project.region][lang]} · {STATUSES[project.status][lang]}
+                </em>
+                <span>{project.priceFrom ? egp(project.priceFrom, true) : "—"}</span>
               </a>
             ))}
           </div>
