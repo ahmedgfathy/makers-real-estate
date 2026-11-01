@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { canPublish, requireAdmin } from "@/lib/auth";
 import { setPropertyPublished } from "@/lib/admin";
 import { setProjectPublished } from "@/lib/projects";
+import { setDeveloperPublished } from "@/lib/developers";
 
 /**
  * Publish switches for the public website.
@@ -15,6 +16,22 @@ import { setProjectPublished } from "@/lib/projects";
 export type PublishResult = { ok: boolean; error?: string };
 
 const DENIED = "Only an admin can publish to the website.";
+
+export async function publishDeveloperAction(
+  slug: string,
+  published: boolean
+): Promise<PublishResult> {
+  const session = await requireAdmin(`/dashboard/developers/${slug}`);
+  if (!canPublish(session)) return { ok: false, error: DENIED };
+
+  await setDeveloperPublished(slug, published);
+  revalidatePath("/dashboard/primary");
+  revalidatePath(`/dashboard/developers/${slug}`);
+  revalidatePath("/developers");
+  revalidatePath("/projects");
+  revalidatePath("/properties");
+  return { ok: true };
+}
 
 export async function publishProjectAction(
   slug: string,

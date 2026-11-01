@@ -3,6 +3,11 @@ import { canPublish, getSession } from "@/lib/auth";
 import PublishToggle from "@/components/dashboard/PublishToggle";
 import { area, egp } from "@/lib/format";
 import { CATEGORIES, REGIONS, STATUSES, getProject } from "@/lib/projects";
+import { listDevelopers } from "@/lib/developers";
+import { listProperties } from "@/lib/admin";
+import PropertyCard from "@/components/dashboard/PropertyCard";
+import ProjectForm from "@/components/dashboard/ProjectForm";
+import { updateProjectAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +16,17 @@ export default async function ProjectPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; error?: string; ok?: string }>;
 }) {
   const { slug } = await params;
   const query = await searchParams;
   const lang = query.lang === "ar" ? "ar" : "en";
 
-  const project = await getProject(slug);
+  const [project, developers, inventory] = await Promise.all([
+    getProject(slug),
+    listDevelopers(),
+    listProperties({ projectSlug: slug, limit: 500 }),
+  ]);
   if (!project) notFound();
   const mayPublish = canPublish(await getSession());
 
@@ -95,6 +104,7 @@ export default async function ProjectPage({
           <p>{tagline}</p>
         </div>
         <div className="dash-actions">
+          <a className="dash-btn" href={`/dashboard/projects/new?developer=${encodeURIComponent(project.developerSlug)}`}>+ Add project</a>
           <PublishToggle
             kind="project"
             id={project.slug}
@@ -121,6 +131,9 @@ export default async function ProjectPage({
           </a>
         </div>
       </header>
+
+      {query.error ? <p className="dash-banner dash-banner--error" role="alert">{query.error}</p> : null}
+      {query.ok ? <p className="dash-banner dash-banner--ok" role="status">{query.ok}</p> : null}
 
       <section className={`fact-hero${project.heroImage ? "" : " fact-hero--empty"}`}>
         {project.heroImage ? <img src={project.heroImage} alt="" /> : null}
@@ -151,6 +164,23 @@ export default async function ProjectPage({
           <strong>{STATUSES[project.status][lang]}</strong>
         </div>
       </div>
+
+      <section className="dash-card" style={{ marginTop: "1rem" }}>
+        <div className="dash-card-head"><h2 className="dash-card-title">Edit project</h2><span className="dash-meta-row">/{project.slug}</span></div>
+        <div className="dash-card-body">
+          <ProjectForm developers={developers} project={project} action={updateProjectAction} submitLabel="Save project" />
+        </div>
+      </section>
+
+      <section className="dash-card" style={{ marginTop: "1rem" }}>
+        <div className="dash-card-head">
+          <h2 className="dash-card-title">Primary units · {inventory.length}</h2>
+          <a className="dash-btn dash-btn--gold" href={`/dashboard/inventory/new?project=${encodeURIComponent(project.slug)}`}>+ Add unit to this project</a>
+        </div>
+        <div className="dash-card-body">
+          {inventory.length ? <div className="inv-grid">{inventory.map((unit) => <PropertyCard key={unit.id} property={unit} canPublish={mayPublish} />)}</div> : <div className="dash-empty"><p>No units belong to this project yet.</p><a className="dash-link" href={`/dashboard/inventory/new?project=${encodeURIComponent(project.slug)}`}>Add the first unit →</a></div>}
+        </div>
+      </section>
 
       <section className="dash-card" style={{ marginTop: "0.9rem" }}>
         <div className="dash-card-head">

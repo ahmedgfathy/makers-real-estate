@@ -3,7 +3,8 @@ import type { Lang } from "@/data/content";
 import { whatsappLink } from "@/data/content";
 import { getSite } from "@/lib/content-db";
 import { egp } from "@/lib/format";
-import { CATEGORIES, FEATURED_PROJECT_SLUGS, REGIONS, listProjects } from "@/lib/projects";
+import { listProperties } from "@/lib/admin";
+import { REGIONS, listProjects } from "@/lib/projects";
 import Arrow from "@/components/public/Arrow";
 import LangSync from "@/components/public/LangSync";
 import PublicFooter from "@/components/public/PublicFooter";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Projects — Makers Real Estate",
   description:
-    "The SODIC developments currently offered by Makers Real Estate: locations, unit types, starting prices and payment plans.",
+    "Explore published real estate projects from Makers Real Estate's development partners.",
 };
 
 function initials(name: string) {
@@ -35,13 +36,10 @@ export default async function PublicProjectsPage({
   const params = await searchParams;
   const lang: Lang = params.lang === "ar" ? "ar" : "en";
 
-  const [{ content, contact }, projects] = await Promise.all([
+  const [{ content, contact }, projects, publishedUnits] = await Promise.all([
     getSite(),
-    listProjects({ publishedOnly: true }).then((catalogue) =>
-      catalogue.filter((project) =>
-        FEATURED_PROJECT_SLUGS.includes(project.slug as (typeof FEATURED_PROJECT_SLUGS)[number])
-      )
-    ),
+    listProjects({ publishedOnly: true }),
+    listProperties({ publishedOnly: true, limit: 500 }),
   ]);
 
   const c = content[lang];
@@ -106,6 +104,10 @@ export default async function PublicProjectsPage({
                 {projects.map((project, index) => {
                   const name = lang === "ar" ? project.nameAr : project.name;
                   const tagline = lang === "ar" ? project.taglineAr : project.tagline;
+                  const units = publishedUnits.filter((unit) => unit.project_slug === project.slug);
+                  const fromPrice = units.length
+                    ? Math.min(...units.map((unit) => unit.price))
+                    : project.priceFrom;
                   return (
                     <a
                       className="tile"
@@ -136,12 +138,12 @@ export default async function PublicProjectsPage({
                       </span>
                       <span className="tile-body">
                         <span className="tile-kicker">
-                          {REGIONS[project.region][lang]} · {CATEGORIES[project.category][lang]}
+                          {project.developerName} · {REGIONS[project.region][lang]}
                         </span>
                         <span className="tile-title">{name}</span>
                         <span className="tile-meta">
-                          {project.priceFrom ? `${t.from} ${egp(project.priceFrom, true)}` : t.onRequest} ·{" "}
-                          {tagline}
+                          {fromPrice ? `${t.from} ${egp(fromPrice, true)}` : t.onRequest} · {units.length} {t.units}
+                          {tagline ? ` · ${tagline}` : ""}
                         </span>
                       </span>
                       <span className="tile-line" />

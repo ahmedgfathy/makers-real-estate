@@ -29,7 +29,7 @@ export async function generateMetadata({
   if (!Number.isInteger(propertyId)) return { title: "Unit not found — Makers Real Estate" };
 
   const property = await getProperty(propertyId);
-  if (!property?.published) return { title: "Unit not found — Makers Real Estate" };
+  if (!isPublicProperty(property)) return { title: "Unit not found — Makers Real Estate" };
 
   return {
     title: `${property.title} — Makers Real Estate`,
@@ -59,7 +59,7 @@ export default async function PublicPropertyPage({
     getProperty(propertyId),
   ]);
 
-  if (!property?.published) notFound();
+  if (!isPublicProperty(property)) notFound();
 
   const c = content[lang];
   const whatsapp = whatsappLink(contact, lang);
@@ -165,6 +165,7 @@ export default async function PublicPropertyPage({
                 </span>
                 <h1 className="public-title">{property.title}</h1>
                 <p className="public-hero-meta">
+                  {property.developer_name ? `${property.developer_name} · ` : ""}
                   {property.project}
                   {property.phase ? ` · ${property.phase}` : ""}
                   {property.delivery ? ` · ${t.delivery} ${property.delivery}` : ""}
@@ -308,4 +309,12 @@ export default async function PublicPropertyPage({
       />
     </>
   );
+}
+
+function isPublicProperty(
+  property: Awaited<ReturnType<typeof getProperty>>
+): property is NonNullable<Awaited<ReturnType<typeof getProperty>>> {
+  if (!property?.published) return false;
+  if (!property.project_slug) return true;
+  return Boolean(property.project_published && property.developer_published);
 }

@@ -44,6 +44,7 @@ export default async function PropertyDetailPage({
           </div>
         </div>
         <div className="dash-actions">
+          <a className="dash-btn" href={`/dashboard/inventory/${property.id}/edit`}>Edit unit</a>
           <PublishToggle
             kind="property"
             id={property.id}

@@ -145,7 +145,7 @@ export default async function PublicPropertiesPage({
                       </span>
                       <span className="tile-body">
                         <span className="tile-kicker">
-                          {property.project} · {statusLabel(property.status)}
+                          {property.developer_name ? `${property.developer_name} · ` : ""}{property.project} · {statusLabel(property.status)}
                         </span>
                         <span className="tile-title">{property.title}</span>
                         <span className="tile-meta">

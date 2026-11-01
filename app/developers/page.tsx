@@ -10,6 +10,7 @@ export async function getDevelopers() {
            count(p.slug) FILTER (WHERE p.published) AS published_count
     FROM developers d
     LEFT JOIN projects p ON p.developer_slug = d.slug AND p.published = true
+    WHERE d.published = true
     GROUP BY d.slug, d.name, d.name_ar, d.description
     ORDER BY d.name
   `);

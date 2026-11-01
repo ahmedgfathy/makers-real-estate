@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { publishProjectAction, publishPropertyAction } from "@/app/dashboard/actions";
+import {
+  publishDeveloperAction,
+  publishProjectAction,
+  publishPropertyAction,
+} from "@/app/dashboard/actions";
 
 /**
  * The public website switch shown on projects and inventory units.
@@ -18,7 +22,7 @@ export default function PublishToggle({
   label = "Publish to website",
   compact = false,
 }: {
-  kind: "project" | "property";
+  kind: "developer" | "project" | "property";
   id: string | number;
   published: boolean;
   canPublish: boolean;
@@ -37,9 +41,11 @@ export default function PublishToggle({
 
     startTransition(async () => {
       const result =
-        kind === "project"
-          ? await publishProjectAction(String(id), next)
-          : await publishPropertyAction(Number(id), next);
+        kind === "developer"
+          ? await publishDeveloperAction(String(id), next)
+          : kind === "project"
+            ? await publishProjectAction(String(id), next)
+            : await publishPropertyAction(Number(id), next);
 
       if (!result.ok) {
         setOn(!next);

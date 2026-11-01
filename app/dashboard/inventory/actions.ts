@@ -7,8 +7,11 @@ import {
   createProperty,
   PROPERTY_STATUSES,
   PROPERTY_TYPES,
+  updateProperty,
   updatePropertyStatus,
 } from "@/lib/admin";
+import { getProject } from "@/lib/projects";
+import { recordAudit } from "@/lib/audit";
 
 function text(form: FormData, key: string): string | null {
   const value = form.get(key);
@@ -39,12 +42,15 @@ export async function createPropertyAction(formData: FormData) {
   const code = text(formData, "code");
   const title = text(formData, "title");
   const price = number(formData, "price");
+  const projectSlug = text(formData, "project_slug");
   const rawType = text(formData, "property_type") ?? "apartment";
   const rawStatus = text(formData, "status") ?? "available";
 
-  if (!code || !title || price == null) {
-    redirect("/dashboard/inventory/new?error=Code%2C%20title%20and%20price%20are%20required");
+  if (!code || !title || price == null || !projectSlug) {
+    redirect("/dashboard/inventory/new?error=Project%2C%20code%2C%20title%20and%20price%20are%20required");
   }
+  const project = await getProject(projectSlug);
+  if (!project) redirect("/dashboard/inventory/new?error=Choose%20a%20valid%20project");
 
   const propertyType = (PROPERTY_TYPES as readonly string[]).includes(rawType)
     ? rawType
@@ -56,7 +62,8 @@ export async function createPropertyAction(formData: FormData) {
   const id = await createProperty({
     code,
     title,
-    project: text(formData, "project") ?? "SODIC East",
+    project: project.name,
+    project_slug: project.slug,
     phase: text(formData, "phase"),
     property_type: propertyType,
     listing_type: text(formData, "listing_type") ?? "sale",
@@ -83,11 +90,67 @@ export async function createPropertyAction(formData: FormData) {
   });
 
   revalidatePath("/dashboard", "layout");
+  revalidatePath("/dashboard/primary");
+  revalidatePath(`/dashboard/projects/${project.slug}`);
 
   if (id == null) {
     redirect("/dashboard/inventory/new?error=That%20unit%20code%20already%20exists");
   }
 
+  redirect(`/dashboard/inventory/${id}`);
+}
+
+export async function updatePropertyAction(formData: FormData) {
+  const id = number(formData, "id");
+  const session = await requireAdmin(id == null ? "/dashboard/inventory" : `/dashboard/inventory/${id}`);
+  const code = text(formData, "code");
+  const title = text(formData, "title");
+  const price = number(formData, "price");
+  const projectSlug = text(formData, "project_slug");
+  if (id == null || !Number.isInteger(id) || !code || !title || price == null || !projectSlug) {
+    redirect("/dashboard/inventory?error=Project%2C%20code%2C%20title%20and%20price%20are%20required");
+  }
+  const project = await getProject(projectSlug);
+  if (!project) redirect(`/dashboard/inventory/${id}/edit?error=Choose%20a%20valid%20project`);
+
+  const rawType = text(formData, "property_type") ?? "apartment";
+  const rawStatus = text(formData, "status") ?? "available";
+  await updateProperty(id, {
+    code,
+    title,
+    project: project.name,
+    project_slug: project.slug,
+    phase: text(formData, "phase"),
+    property_type: (PROPERTY_TYPES as readonly string[]).includes(rawType) ? rawType : "apartment",
+    listing_type: text(formData, "listing_type") ?? "sale",
+    status: (PROPERTY_STATUSES as readonly string[]).includes(rawStatus) ? rawStatus : "available",
+    bedrooms: number(formData, "bedrooms"),
+    bathrooms: number(formData, "bathrooms"),
+    built_up_area: number(formData, "built_up_area"),
+    garden_area: number(formData, "garden_area"),
+    roof_area: number(formData, "roof_area"),
+    floor: text(formData, "floor"),
+    finishing: text(formData, "finishing"),
+    view: text(formData, "view"),
+    price,
+    down_payment: number(formData, "down_payment") ?? 0,
+    installment_years: number(formData, "installment_years") ?? 10,
+    monthly_installment: number(formData, "monthly_installment"),
+    delivery: text(formData, "delivery"),
+    description: text(formData, "description"),
+    amenities: list(formData, "amenities"),
+    images: list(formData, "images"),
+    video: text(formData, "video"),
+    featured: formData.get("featured") === "on",
+    published: formData.get("published") === "on",
+  });
+  await recordAudit({ actor: session.username, action: "unit.updated", entityType: "property", entityId: String(id), detail: { code, project: project.slug } });
+  revalidatePath("/dashboard/primary");
+  revalidatePath("/dashboard/inventory");
+  revalidatePath(`/dashboard/inventory/${id}`);
+  revalidatePath(`/dashboard/projects/${project.slug}`);
+  revalidatePath("/properties");
+  revalidatePath("/projects");
   redirect(`/dashboard/inventory/${id}`);
 }
 

@@ -4,14 +4,14 @@ import { notFound } from "next/navigation";
 export default async function DeveloperPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const pool = getPool();
-  const { slug } = params;
 
   // Fetch developer info
   const { rows: devRows } = await pool.query(
-    `SELECT * FROM developers WHERE slug = $1`,
+    `SELECT * FROM developers WHERE slug = $1 AND published = true`,
     [slug]
   );
   if (devRows.length === 0) notFound();

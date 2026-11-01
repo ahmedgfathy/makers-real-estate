@@ -8,10 +8,8 @@ import type { TxClient } from "./db";
  * catalogue without touching content, properties or leads:
  *   npm run db:seed:projects
  *
- * The catalogue is generated data, so it is rebuilt wholesale: rows that no
- * longer exist in `data/projects.ts` are removed. The `published` switch is
- * editorial state owned by the CRM, so an upsert updates every column except
- * that one — re-seeding never takes a project offline (or online) by surprise.
+ * Existing CRM records and edits are preserved. The source catalogue only
+ * inserts missing projects; day-to-day edits belong to the CRM database.
  */
 
 const PROJECT_COLUMNS = [
@@ -22,10 +20,6 @@ const PROJECT_COLUMNS = [
   "published",
 ] as const;
 
-const UPDATABLE_COLUMNS = PROJECT_COLUMNS.filter(
-  (column) => column !== "slug" && column !== "published"
-);
-
 const json = (value: unknown) => JSON.stringify(value);
 
 export async function seedProjects(client: TxClient): Promise<number> {
@@ -34,11 +28,6 @@ export async function seedProjects(client: TxClient): Promise<number> {
      VALUES ('sodic', 'SODIC', 'سوديك')
      ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, name_ar = EXCLUDED.name_ar, updated_at = now()`
   );
-
-  // Drop projects that were removed from the catalogue, then upsert the rest.
-  await client.query("DELETE FROM projects WHERE slug <> ALL($1::text[])", [
-    projects.map((project) => project.slug),
-  ]);
 
   for (const project of projects) {
     const values = [
@@ -68,15 +57,10 @@ export async function seedProjects(client: TxClient): Promise<number> {
       project.published ?? false,
     ];
     const placeholders = values.map((_, i) => `$${i + 1}`).join(", ");
-    const updates = UPDATABLE_COLUMNS.map(
-      (column) => `${column} = EXCLUDED.${column}`
-    ).join(", ");
-
     await client.query(
       `INSERT INTO projects (${PROJECT_COLUMNS.join(", ")})
        VALUES (${placeholders})
-       ON CONFLICT (slug) DO UPDATE
-         SET ${updates}, updated_at = now()`,
+       ON CONFLICT (slug) DO NOTHING`,
       values
     );
   }

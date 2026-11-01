@@ -40,7 +40,7 @@ const NAV: NavItem[] = [
   },
   {
     href: "/dashboard/primary",
-    label: "Primary",
+    label: "Primary portfolio",
     icon: (
       <Icon>
         <ellipse cx="12" cy="5.5" rx="7.5" ry="3" stroke="currentColor" strokeWidth="1.4" />
@@ -50,8 +50,17 @@ const NAV: NavItem[] = [
     ),
   },
   {
+    href: "/dashboard/projects",
+    label: "Projects",
+    icon: (
+      <Icon>
+        <path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M3 20h18" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      </Icon>
+    ),
+  },
+  {
     href: "/dashboard/inventory",
-    label: "Inventory",
+    label: "Units & inventory",
     icon: (
       <Icon>
         <path d="M3 20V9.5L12 4l9 5.5V20" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />

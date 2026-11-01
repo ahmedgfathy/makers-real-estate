@@ -45,8 +45,8 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
     lang === "ar"
       ? {
           kicker: "الأساسي · المشروعات",
-          title: "دليل مشروعات سوديك",
-          lede: "كل مشروعات سوديك في مكان واحد: الموقع، أنواع الوحدات، الأسعار الابتدائية، خطط السداد والخدمات — مصدرها ملفات المبيعات الرسمية.",
+          title: "دليل المشروعات",
+          lede: "استعرض مشروعات جميع المطورين، وأدر الوحدات والأسعار وخطط السداد من مكان واحد.",
           projects: "مشروعات",
           regions: "مناطق",
           active: "متاح للإطلاق والبيع",
@@ -75,8 +75,8 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         }
       : {
           kicker: "Primary · Projects",
-          title: "SODIC project catalogue",
-          lede: "Every SODIC development in one place — location, unit mix, starting prices, payment plans and amenities, compiled from the official sales material.",
+          title: "Project catalogue",
+          lede: "Manage developments across all developers, including locations, unit mix, starting prices and payment plans.",
           projects: "Projects",
           regions: "Regions",
           active: "Launching & selling",
@@ -117,6 +117,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           <p>{t.lede}</p>
         </div>
         <div className="dash-actions">
+          <a className="dash-btn dash-btn--gold" href="/dashboard/projects/new">+ Add project</a>
           <a
             className={`dash-btn${lang === "en" ? " dash-btn--gold" : ""}`}
             href={`/dashboard/projects?lang=en${filters.q ? `&q=${encodeURIComponent(filters.q)}` : ""}`}
@@ -136,7 +137,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         <div className="dash-stat">
           <div className="dash-stat-label">{t.projects}</div>
           <div className="dash-stat-value">{stats.total}</div>
-          <div className="dash-stat-hint">SODIC</div>
+          <div className="dash-stat-hint">All developers</div>
         </div>
         <div className="dash-stat">
           <div className="dash-stat-label">{t.regions}</div>

@@ -197,6 +197,11 @@ export type Property = {
   code: string;
   title: string;
   project: string;
+  project_slug: string | null;
+  developer_slug: string | null;
+  developer_name: string | null;
+  project_published: boolean | null;
+  developer_published: boolean | null;
   phase: string | null;
   property_type: string;
   listing_type: string;
@@ -232,12 +237,14 @@ export type PropertyFilters = {
   limit?: number;
   /** Only units switched on for the public website. */
   publishedOnly?: boolean;
+  projectSlug?: string;
 };
 
 export type NewPropertyInput = {
   code: string;
   title: string;
   project?: string;
+  project_slug?: string | null;
   phase?: string | null;
   property_type: string;
   listing_type?: string;
@@ -264,17 +271,20 @@ export type NewPropertyInput = {
 };
 
 const PROPERTY_SELECT = `
-  id::int AS id, code, title, project, phase, property_type, listing_type, status,
-  bedrooms, bathrooms,
-  built_up_area::float8 AS built_up_area,
-  garden_area::float8 AS garden_area,
-  roof_area::float8 AS roof_area,
-  floor, finishing, view, currency,
-  price::float8 AS price,
-  down_payment::float8 AS down_payment,
-  installment_years,
-  monthly_installment::float8 AS monthly_installment,
-  delivery, description, amenities, images, video, featured, published, created_at, updated_at
+  u.id::int AS id, u.code, u.title, COALESCE(pr.name, u.project) AS project,
+  u.project_slug, pr.developer_slug, d.name AS developer_name, pr.published AS project_published,
+  d.published AS developer_published, u.phase, u.property_type, u.listing_type, u.status,
+  u.bedrooms, u.bathrooms,
+  u.built_up_area::float8 AS built_up_area,
+  u.garden_area::float8 AS garden_area,
+  u.roof_area::float8 AS roof_area,
+  u.floor, u.finishing, u.view, u.currency,
+  u.price::float8 AS price,
+  u.down_payment::float8 AS down_payment,
+  u.installment_years,
+  u.monthly_installment::float8 AS monthly_installment,
+  u.delivery, u.description, u.amenities, u.images, u.video, u.featured,
+  u.published, u.created_at, u.updated_at
 `;
 
 export async function listProperties(filters: PropertyFilters = {}): Promise<Property[]> {
@@ -285,26 +295,34 @@ export async function listProperties(filters: PropertyFilters = {}): Promise<Pro
     params.push(`%${filters.q.trim()}%`);
     const p = `$${params.length}`;
     where.push(
-      `(code ILIKE ${p} OR title ILIKE ${p} OR project ILIKE ${p} OR COALESCE(phase, '') ILIKE ${p})`
+      `(u.code ILIKE ${p} OR u.title ILIKE ${p} OR COALESCE(pr.name, u.project) ILIKE ${p} OR COALESCE(u.phase, '') ILIKE ${p})`
     );
   }
   if (filters.status?.trim()) {
     params.push(filters.status.trim());
-    where.push(`status = $${params.length}`);
+    where.push(`u.status = $${params.length}`);
   }
   if (filters.type?.trim()) {
     params.push(filters.type.trim());
-    where.push(`property_type = $${params.length}`);
+    where.push(`u.property_type = $${params.length}`);
   }
-  if (filters.publishedOnly) where.push("published");
+  if (filters.projectSlug) {
+    params.push(filters.projectSlug);
+    where.push(`u.project_slug = $${params.length}`);
+  }
+  if (filters.publishedOnly) {
+    where.push("u.published AND (u.project_slug IS NULL OR (pr.published AND d.published))");
+  }
 
   params.push(Math.min(Math.max(filters.limit ?? 200, 1), 500));
 
   return query<Property>(
     `SELECT ${PROPERTY_SELECT}
-       FROM properties
+       FROM properties u
+       LEFT JOIN projects pr ON pr.slug = u.project_slug
+       LEFT JOIN developers d ON d.slug = pr.developer_slug
       ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-      ORDER BY featured DESC, created_at DESC, code
+      ORDER BY u.featured DESC, u.created_at DESC, u.code
       LIMIT $${params.length}`,
     params
   );
@@ -312,7 +330,11 @@ export async function listProperties(filters: PropertyFilters = {}): Promise<Pro
 
 export async function getProperty(id: number): Promise<Property | null> {
   const rows = await query<Property>(
-    `SELECT ${PROPERTY_SELECT} FROM properties WHERE id = $1`,
+    `SELECT ${PROPERTY_SELECT}
+       FROM properties u
+       LEFT JOIN projects pr ON pr.slug = u.project_slug
+       LEFT JOIN developers d ON d.slug = pr.developer_slug
+      WHERE u.id = $1`,
     [id]
   );
   return rows[0] ?? null;
@@ -342,15 +364,15 @@ export async function createProperty(input: NewPropertyInput): Promise<number | 
 
   const rows = await query<{ id: number }>(
     `INSERT INTO properties (
-       code, title, project, phase, property_type, listing_type, status,
+       code, title, project, project_slug, phase, property_type, listing_type, status,
        bedrooms, bathrooms, built_up_area, garden_area, roof_area, floor,
        finishing, view, price, down_payment, installment_years,
        monthly_installment, delivery, description, amenities, images, video,
        featured, published, published_at
      ) VALUES (
-       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-       $16, $17, $18, $19, $20, $21, $22, $23, $24, $25,
-       CASE WHEN $26 THEN now() ELSE NULL END
+       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+       $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
+       CASE WHEN $27 THEN now() ELSE NULL END
      )
      ON CONFLICT (code) DO NOTHING
      RETURNING id::int AS id`,
@@ -358,6 +380,7 @@ export async function createProperty(input: NewPropertyInput): Promise<number | 
       input.code,
       input.title,
       input.project ?? "SODIC East",
+      input.project_slug ?? null,
       empty(input.phase),
       input.property_type,
       input.listing_type ?? "sale",
@@ -385,6 +408,31 @@ export async function createProperty(input: NewPropertyInput): Promise<number | 
   );
 
   return rows[0]?.id ?? null;
+}
+
+export async function updateProperty(id: number, input: NewPropertyInput): Promise<void> {
+  const years = input.installment_years ?? 10;
+  const monthly = input.monthly_installment ?? (years > 0 ? Math.round(input.price / (years * 12)) : null);
+  await query(
+    `UPDATE properties SET
+       code = $2, title = $3, project = $4, project_slug = $5, phase = $6,
+       property_type = $7, listing_type = $8, status = $9, bedrooms = $10, bathrooms = $11,
+       built_up_area = $12, garden_area = $13, roof_area = $14, floor = $15,
+       finishing = $16, view = $17, price = $18, down_payment = $19,
+       installment_years = $20, monthly_installment = $21, delivery = $22,
+       description = $23, amenities = $24, images = $25, video = $26,
+       featured = $27, published = $28,
+       published_at = CASE WHEN $28 THEN COALESCE(published_at, now()) ELSE NULL END,
+       updated_at = now()
+     WHERE id = $1`,
+    [id, input.code, input.title, input.project ?? "", input.project_slug ?? null,
+      empty(input.phase), input.property_type, input.listing_type ?? "sale", input.status ?? "available",
+      input.bedrooms ?? null, input.bathrooms ?? null, input.built_up_area ?? null,
+      input.garden_area ?? null, input.roof_area ?? null, empty(input.floor), empty(input.finishing),
+      empty(input.view), input.price, input.down_payment ?? 0, years, monthly,
+      empty(input.delivery), empty(input.description), JSON.stringify(input.amenities ?? []),
+      JSON.stringify(input.images ?? []), empty(input.video), input.featured ?? false, input.published ?? false]
+  );
 }
 
 export type PropertyStats = {

@@ -7,10 +7,11 @@ import {
 import { canPublish, getSession } from "@/lib/auth";
 import { egp, titleCase } from "@/lib/format";
 import PropertyCard from "@/components/dashboard/PropertyCard";
+import { listProjects } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
-type Search = { q?: string; status?: string; type?: string };
+type Search = { q?: string; status?: string; type?: string; project?: string };
 
 export default async function InventoryPage({
   searchParams,
@@ -19,14 +20,16 @@ export default async function InventoryPage({
 }) {
   const filters = await searchParams;
   const mayPublish = canPublish(await getSession());
-  const [stats, properties] = await Promise.all([
+  const [stats, properties, projects] = await Promise.all([
     getPropertyStats(),
     listProperties({
       q: filters.q,
       status: filters.status,
       type: filters.type,
+      projectSlug: filters.project,
       limit: 300,
     }),
+    listProjects(),
   ]);
 
   return (
@@ -81,6 +84,14 @@ export default async function InventoryPage({
               placeholder="Code, title, project or phase"
               defaultValue={filters.q ?? ""}
             />
+          </label>
+
+          <label className="dash-field">
+            <span>Project</span>
+            <select className="dash-select" name="project" defaultValue={filters.project ?? ""}>
+              <option value="">All projects</option>
+              {projects.map((project) => <option key={project.slug} value={project.slug}>{project.developerName} · {project.name}</option>)}
+            </select>
           </label>
 
           <label className="dash-field">

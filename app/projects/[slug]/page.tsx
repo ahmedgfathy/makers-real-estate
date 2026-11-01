@@ -3,6 +3,7 @@ import type { Lang } from "@/data/content";
 import { whatsappLink } from "@/data/content";
 import { getSite } from "@/lib/content-db";
 import { area, egp } from "@/lib/format";
+import { listProperties } from "@/lib/admin";
 import { CATEGORIES, REGIONS, STATUSES, getPublishedProject } from "@/lib/projects";
 import Arrow from "@/components/public/Arrow";
 import LangSync from "@/components/public/LangSync";
@@ -56,9 +57,10 @@ export default async function PublicProjectPage({
   const query = await searchParams;
   const lang: Lang = query.lang === "ar" ? "ar" : "en";
 
-  const [{ content, contact }, project] = await Promise.all([
+  const [{ content, contact }, project, publishedUnits] = await Promise.all([
     getSite(),
     getPublishedProject(slug),
+    listProperties({ projectSlug: slug, publishedOnly: true, limit: 500 }),
   ]);
 
   const c = content[lang];
@@ -127,6 +129,7 @@ export default async function PublicProjectPage({
           amenities: "الخدمات والمرافق",
           location: "الموقع والمسافات",
           noUnits: "لم تُنشر أنواع الوحدات بعد.",
+          availableUnits: "وحدات متاحة",
           onRequest: "السعر عند الطلب",
           note: "الأسعار والمخططات استرشادية وتُعتمد في عقد الحجز.",
         }
@@ -148,6 +151,7 @@ export default async function PublicProjectPage({
           amenities: "Amenities",
           location: "Location & distances",
           noUnits: "No unit types published yet.",
+          availableUnits: "Available units",
           onRequest: "Price on request",
           note: "Prices and plans are indicative and confirmed in the reservation contract.",
         };
@@ -185,7 +189,7 @@ export default async function PublicProjectPage({
 
               <div className="public-hero-body">
                 <span className="eyebrow">
-                  {REGIONS[project.region][lang]} · {CATEGORIES[project.category][lang]}
+                  {project.developerName} · {REGIONS[project.region][lang]} · {CATEGORIES[project.category][lang]}
                 </span>
                 <h1 className="public-title">{name}</h1>
                 <p className="public-tagline">{tagline}</p>
@@ -236,6 +240,25 @@ export default async function PublicProjectPage({
                 <div className="stat-value">{CATEGORIES[project.category][lang]}</div>
                 <div className="stat-label">{t.category}</div>
               </div>
+            </div>
+
+            <div className="sec">
+              <div className="sec-head">
+                <span className="sec-title">{t.availableUnits} · {publishedUnits.length}</span>
+                <span className="sec-rule" />
+              </div>
+              {publishedUnits.length ? (
+                <div className="tiles project-units-grid">
+                  {publishedUnits.map((unit) => (
+                    <a className="tile" key={unit.id} href={`/properties/${unit.id}?lang=${lang}`}>
+                      <span className="tile-media"><img src={unit.images[0] ?? project.heroImage ?? "/img/lakes-pool.jpg"} alt={unit.title} loading="lazy" /></span>
+                      <span className="tile-veil" />
+                      <span className="tile-top"><span className="tile-index">{unit.code}</span><span className="tile-arrow"><Arrow /></span></span>
+                      <span className="tile-body"><span className="tile-kicker">{project.developerName} · {project.name}</span><span className="tile-title">{unit.title}</span><span className="tile-meta">{egp(unit.price, true)} · {unit.bedrooms ?? "—"} {t.beds}</span></span>
+                    </a>
+                  ))}
+                </div>
+              ) : <p className="detail-note">{t.noUnits}</p>}
             </div>
 
             <div className="sec">

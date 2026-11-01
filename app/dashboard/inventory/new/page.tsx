@@ -3,6 +3,7 @@ import {
   PROPERTY_TYPES,
 } from "@/lib/admin";
 import { titleCase } from "@/lib/format";
+import { listProjects } from "@/lib/projects";
 import { createPropertyAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -10,9 +11,10 @@ export const dynamic = "force-dynamic";
 export default async function NewPropertyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; project?: string }>;
 }) {
-  const { error } = await searchParams;
+  const [params, projects] = await Promise.all([searchParams, listProjects()]);
+  const { error } = params;
 
   return (
     <div className="dash-page" style={{ maxWidth: "1080px" }}>
@@ -33,7 +35,7 @@ export default async function NewPropertyPage({
 
       {error ? <p className="dash-alert" style={{ marginBottom: "1rem" }}>{error}</p> : null}
 
-      <form className="dash-form" action={createPropertyAction}>
+      {projects.length ? <form className="dash-form" action={createPropertyAction}>
         <section className="dash-form-section">
           <h2>Identity</h2>
           <div className="dash-form-grid">
@@ -46,8 +48,11 @@ export default async function NewPropertyPage({
               <input className="dash-input" name="title" required placeholder="2-bedroom apartment · Upper floors" />
             </label>
             <label className="dash-field">
-              <span>Project</span>
-              <input className="dash-input" name="project" defaultValue="SODIC East" />
+              <span>Project *</span>
+              <select className="dash-select" name="project_slug" required defaultValue={projects.some((project) => project.slug === params.project) ? params.project : ""}>
+                <option value="" disabled>Select a project</option>
+                {projects.map((project) => <option key={project.slug} value={project.slug}>{project.developerName} · {project.name}</option>)}
+              </select>
             </label>
             <label className="dash-field">
               <span>Phase</span>
@@ -199,7 +204,7 @@ export default async function NewPropertyPage({
             Cancel
           </a>
         </div>
-      </form>
+      </form> : <section className="dash-empty"><h2>Create a project first</h2><p>Every unit must belong to a developer project.</p><a className="dash-btn dash-btn--gold" href="/dashboard/projects/new">Add project</a></section>}
     </div>
   );
 }

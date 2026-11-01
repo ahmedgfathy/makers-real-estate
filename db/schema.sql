@@ -147,6 +147,8 @@ CREATE TABLE IF NOT EXISTS developers (
   description_ar   text,
   established      integer,
   website          text,
+  published        boolean NOT NULL DEFAULT false,
+  published_at     timestamptz,
   created_at       timestamptz NOT NULL DEFAULT now(),
   updated_at       timestamptz NOT NULL DEFAULT now()
 );
@@ -154,6 +156,9 @@ CREATE TABLE IF NOT EXISTS developers (
 INSERT INTO developers (slug, name, name_ar)
 VALUES ('sodic', 'SODIC', 'سوديك')
 ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, name_ar = EXCLUDED.name_ar;
+
+ALTER TABLE developers ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT false;
+ALTER TABLE developers ADD COLUMN IF NOT EXISTS published_at timestamptz;
 
 -- Project catalogue: one row per development (or phase) with its unit
 -- mix, amenities, payment plan and source documents. Belongs to a developer.
@@ -210,6 +215,29 @@ BEGIN
   END IF;
 END $$;
 
+-- Sellable units belong to a project. Keep the legacy project label for
+-- existing inventory and display fallback while the slug is the relation.
+ALTER TABLE properties ADD COLUMN IF NOT EXISTS project_slug text;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'properties_project_slug_fkey'
+      AND conrelid = 'properties'::regclass
+  ) THEN
+    ALTER TABLE properties
+      ADD CONSTRAINT properties_project_slug_fkey
+      FOREIGN KEY (project_slug) REFERENCES projects(slug) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+UPDATE properties p
+   SET project_slug = pr.slug
+  FROM projects pr
+ WHERE p.project_slug IS NULL
+   AND (lower(trim(p.project)) = lower(pr.name) OR lower(trim(p.project)) = lower(pr.slug));
+
 -- Dashboard accounts. Passwords are scrypt hashes (lib/passwords.ts); the env
 -- admin is bootstrapped by scripts/db-migrate.ts when the table is empty.
 CREATE TABLE IF NOT EXISTS admin_users (
@@ -254,6 +282,9 @@ CREATE INDEX IF NOT EXISTS idx_projects_region ON projects (region, position);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status, position);
 CREATE INDEX IF NOT EXISTS idx_projects_published ON projects (position)
   WHERE published;
+CREATE INDEX IF NOT EXISTS idx_projects_developer ON projects (developer_slug, position);
+CREATE INDEX IF NOT EXISTS idx_properties_project ON properties (project_slug, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_developers_published ON developers (name) WHERE published;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_leads_external ON leads (external_id)
   WHERE external_id IS NOT NULL;
