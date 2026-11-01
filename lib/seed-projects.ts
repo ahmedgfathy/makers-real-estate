@@ -15,7 +15,7 @@ import type { TxClient } from "./db";
  */
 
 const PROJECT_COLUMNS = [
-  "slug", "name", "name_ar", "region", "location", "category", "status",
+  "slug", "name", "name_ar", "developer_slug", "region", "location", "category", "status",
   "tagline", "tagline_ar", "description", "description_ar", "price_from",
   "payment_plan", "payment_plan_ar", "finishing", "unit_types", "amenities",
   "location_notes", "hero_image", "brochure", "masterplan", "position",
@@ -29,6 +29,12 @@ const UPDATABLE_COLUMNS = PROJECT_COLUMNS.filter(
 const json = (value: unknown) => JSON.stringify(value);
 
 export async function seedProjects(client: TxClient): Promise<number> {
+  await client.query(
+    `INSERT INTO developers (slug, name, name_ar)
+     VALUES ('sodic', 'SODIC', 'سوديك')
+     ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, name_ar = EXCLUDED.name_ar, updated_at = now()`
+  );
+
   // Drop projects that were removed from the catalogue, then upsert the rest.
   await client.query("DELETE FROM projects WHERE slug <> ALL($1::text[])", [
     projects.map((project) => project.slug),
@@ -39,6 +45,7 @@ export async function seedProjects(client: TxClient): Promise<number> {
       project.slug,
       project.name,
       project.nameAr || null,
+      "sodic",
       project.region,
       project.location,
       project.category,

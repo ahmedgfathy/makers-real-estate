@@ -30,10 +30,10 @@ export default async function LoginPage({
       <section className="login-card" aria-labelledby="login-title">
         <div className="login-brand">
           <img
-            src="/img/makers-logo.jpg"
+            src="/img/makers-logo.png"
             alt="Makers Real Estate"
-            width={1536}
-            height={1024}
+            width={1183}
+            height={752}
           />
         </div>
 

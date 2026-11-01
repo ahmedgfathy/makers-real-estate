@@ -84,6 +84,30 @@ export type Content = {
     builtWith: string;
     sections: string;
   };
+  leadForm: {
+    kicker: string;
+    title: string;
+    lede: string;
+    name: string;
+    nameHint: string;
+    phone: string;
+    phoneHint: string;
+    email: string;
+    emailHint: string;
+    project: string;
+    bedrooms: string;
+    message: string;
+    messageHint: string;
+    consent: string;
+    submit: string;
+    submitting: string;
+    successTitle: string;
+    successLede: string;
+    error: string;
+    required: string;
+    projectOptions: string[];
+    bedroomOptions: string[];
+  };
   tiles: Tile[];
   panels: Record<TileId, Panel>;
 };
@@ -150,6 +174,32 @@ const en: Content = {
     rights: "Makers Real Estate. All rights reserved.",
     builtWith: "SODIC East · The Lakes · Phase 08M",
     sections: "Sections",
+  },
+  leadForm: {
+    kicker: "Request a call back",
+    title: "Tell us what you’re looking for",
+    lede:
+      "Leave your number and an advisor calls you back — usually within the hour, seven days a week.",
+    name: "Full name",
+    nameHint: "e.g. Omar Hassan",
+    phone: "Phone",
+    phoneHint: "0100 000 0000",
+    email: "Email (optional)",
+    emailHint: "you@example.com",
+    project: "Project of interest",
+    bedrooms: "Bedrooms",
+    message: "Message (optional)",
+    messageHint: "Budget, preferred floor, view…",
+    consent: "I agree to be contacted about this enquiry.",
+    submit: "Request a call",
+    submitting: "Sending…",
+    successTitle: "Thank you — we have your enquiry.",
+    successLede:
+      "An advisor will call you back shortly. Prefer WhatsApp? Message us any time.",
+    error: "Could not send — please try again or call us directly.",
+    required: "Name and phone required.",
+    projectOptions: ["The Lakes", "Phase 08M", "SODIC East", "Other"],
+    bedroomOptions: ["Any", "1", "2", "3", "4+"],
   },
   tiles: [
     { id: "lakes", index: "01", kicker: "New launch", title: "The Lakes", meta: "1–4 Bed+N · From EGP 6.7M", image: "/img/lakes-pool.jpg" },
@@ -584,6 +634,31 @@ const ar: Content = {  meta: {
     rights: "ميكرز للعقارات. جميع الحقوق محفوظة.",
     builtWith: "سوديك إيست · البحيرات · مرحلة 08M",
     sections: "الأقسام",
+  },
+  leadForm: {
+    kicker: "اطلب مكالمة",
+    title: "أخبرنا بما تبحث عنه",
+    lede:
+      "اترك رقمك وسيقوم المستشار بالاتصال بك — عادة خلال ساعة، طوال أيام الأسبوع.",
+    name: "الاسم بالكامل",
+    nameHint: "مثال: عمر حسن",
+    phone: "رقم الهاتف",
+    phoneHint: "0100 000 0000",
+    email: "البريد الإلكتروني (اختياري)",
+    emailHint: "you@example.com",
+    project: "المشروع المعинтерес",
+    bedrooms: "عدد غرف النوم",
+    message: "رسالة (اختياري)",
+    messageHint: "الميزانية، الدور المفضل، الإطلالة…",
+    consent: "أوافق على التواصل معي بخصوص هذا الطلب.",
+    submit: "اطلب مكالمة",
+    submitting: "جارٍ الإرسال…",
+    successTitle: "شكرًا لك — استلمنا طلبك.",
+    successLede: "سيقوم المستشار بالتواصل معك قريبًا. تفضل واتساب؟ راسلنا في أي وقت.",
+    error: "تعذر الإرسال — حاول مرة أخرى أو اتصل بنا مباشرة.",
+    required: "الاسم والهاتف مطلوبان.",
+    projectOptions: ["البحيرات", "مرحلة 08M", "سوديك إيست", "أخرى"],
+    bedroomOptions: ["الكل", "1", "2", "3", "4+"],
   },
   tiles: [
     { id: "lakes", index: "01", kicker: "إطلاق جديد", title: "البحيرات", meta: "1–4 غرف + مربية · من 6.7 مليون", image: "/img/lakes-pool.jpg" },

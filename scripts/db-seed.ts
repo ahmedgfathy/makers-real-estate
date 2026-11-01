@@ -17,13 +17,13 @@ async function seedLocale(client: TxClient, lang: Lang) {
   const c = content[lang];
 
   await client.query(
-    `INSERT INTO site_content (lang, meta, brand, nav, hero, grid, panel, footer)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO site_content (lang, meta, brand, nav, hero, grid, panel, footer, lead_form)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      ON CONFLICT (lang) DO UPDATE SET
        meta = EXCLUDED.meta, brand = EXCLUDED.brand, nav = EXCLUDED.nav,
        hero = EXCLUDED.hero, grid = EXCLUDED.grid, panel = EXCLUDED.panel,
-       footer = EXCLUDED.footer, updated_at = now()`,
-    [lang, json(c.meta), json(c.brand), json(c.nav), json(c.hero), json(c.grid), json(c.panel), json(c.footer)]
+       footer = EXCLUDED.footer, lead_form = EXCLUDED.lead_form, updated_at = now()`,
+    [lang, json(c.meta), json(c.brand), json(c.nav), json(c.hero), json(c.grid), json(c.panel), json(c.footer), json(c.leadForm)]
   );
 
   // Tiles cascade-delete panels and their sections — rebuild them in order.

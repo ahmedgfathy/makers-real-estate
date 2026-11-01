@@ -41,7 +41,7 @@ export default function Header({
           <a className="header-link phone" href={phoneHref} data-cta="phone" data-cta-surface="header">
             {c.footer.call}
           </a>
-          <a className="header-link" href="#contact">
+          <a className="header-link" href="#enquiry">
             {c.nav.contact}
           </a>
         </nav>

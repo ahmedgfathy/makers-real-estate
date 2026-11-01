@@ -8,9 +8,7 @@ body.dash-nav-open { overflow: hidden; }
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 258px minmax(0, 1fr);
-  background:
-    radial-gradient(70% 55% at 100% 0%, rgba(201, 169, 124, 0.07), transparent 65%),
-    var(--bg);
+  background: #000000;
 }
 
 /* ---------- sidebar ---------- */
@@ -39,11 +37,10 @@ body.dash-nav-open { overflow: hidden; }
   line-height: 1;
 }
 
-/* The delivered logo, unchanged: its black plate is blended away. */
+/* Transparent brand asset. */
 .dash-brand img {
   width: 124px;
   height: auto;
-  mix-blend-mode: screen;
 }
 
 .dash-brand span { display: flex; flex-direction: column; gap: 0.28rem; }
@@ -443,7 +440,7 @@ body.dash-nav-open { overflow: hidden; }
   font-size: 0.62rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--ink-dim);
+  color: var(--title);
 }
 
 .dash-card-body { padding: 1.05rem; }
@@ -1538,4 +1535,64 @@ html[dir="rtl"] .dash-select { background-position: left 0.7rem center; }
   .project-card,
   .project-media img,
   .primary-tile img { transition: none; }
+}
+
+/* ---------- Makers CRM refresh ---------- */
+.dash-shell { grid-template-columns: 264px minmax(0, 1fr); background: #000000; }
+.dash-sidebar { background: #050505; border-inline-end-color: rgba(255, 255, 255, 0.12); }
+.dash-mobilebar { background: rgba(5, 5, 5, 0.96); }
+.dash-main { background: #000000; }
+.dash-page { max-width: 1680px; padding: clamp(1.25rem, 2.7vw, 2.6rem); }
+.dash-page h1, .dash-page h2, .dash-page h3, .dash-page h4, .dash-page h5, .dash-page h6 { color: #ffffff; }
+.dash-nav { gap: 0.35rem; }
+.dash-nav-link { min-height: 44px; border-radius: 6px; }
+.dash-nav-link[data-active="true"] { background: rgba(245, 190, 24, 0.1); border-color: rgba(245, 190, 24, 0.24); }
+.dash-stat,
+.dash-card,
+.inv-card,
+.project-card,
+.fact-hero,
+.detail-card { border-color: rgba(255, 255, 255, 0.12); border-radius: 8px; background: #080808; }
+.dash-stat { background: linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 70%), #080808; }
+.dash-card-head { min-height: 52px; }
+.dash-card-title { color: #ffffff; letter-spacing: 0.16em; }
+.dash-table th { color: rgba(255, 255, 255, 0.6); }
+.dash-table tbody tr:hover { background: rgba(255, 255, 255, 0.045); }
+.dash-input, .dash-select, .dash-textarea { border-radius: 5px; background: #050505; }
+.dash-input:focus, .dash-select:focus, .dash-textarea:focus { border-color: var(--gold); }
+.dash-btn { border-radius: 5px; }
+.dash-btn--gold { background: linear-gradient(110deg, #9b7410, #f5be18 52%, #ffe083); }
+.projects-grid { gap: 1rem; }
+.project-card { overflow: hidden; }
+.project-media { border-radius: 7px 7px 0 0; }
+.project-name, .primary-tile-title, .inv-title { color: #ffffff; }
+.dash-link { color: var(--gold-bright); }
+.dash-page { font-size: 1.08rem; }
+.dash-head p, .dash-note, .dash-meta-row, .dash-table,
+.dash-input, .dash-select, .dash-textarea,
+.dash-field > span, .dash-kicker,
+.dash-card-title, .dash-link, .dash-btn,
+.dash-nav-link, .dash-nav-label, .dash-site-link,
+.dash-user-meta, .dash-user-meta small,
+.dash-stat-label, .dash-stat-hint,
+.dash-table th, .dash-table td,
+.dash-table .cell-sub, .dash-pill, .dash-badge,
+.fact-list, .fact-hero p, .fact-price-row span,
+.project-loc, .project-tag, .project-index-row em,
+.primary-tile-meta, .detail-label, .detail-value,
+.dash-empty p, .dash-filterbar label { font-size: max(0.82rem, 1em); }
+.dash-head h1 { font-size: clamp(2rem, 3.3vw, 3rem); }
+.dash-stat-value { font-size: clamp(1.9rem, 2.7vw, 2.5rem); }
+.dash-table th, .dash-table td { padding-block: 0.82rem; }
+.dash-field > span, .dash-kicker, .dash-nav-label, .dash-stat-label { line-height: 1.45; }
+
+@media (max-width: 920px) {
+  .dash-page { padding: 1.2rem; }
+}
+@media (max-width: 680px) {
+  html { font-size: 17px; }
+  .dash-page { padding: 1rem 0.85rem 2rem; }
+  .dash-card { border-radius: 7px; }
+  .dash-head h1 { font-size: clamp(1.9rem, 8vw, 2.5rem); }
+  .dash-table th, .dash-table td { padding: 0.7rem 0.55rem; }
 }

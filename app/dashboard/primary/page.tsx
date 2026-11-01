@@ -3,7 +3,7 @@ import { getSite } from "@/lib/content-db";
 import { listProperties } from "@/lib/admin";
 import { canPublish, getSession } from "@/lib/auth";
 import { area, egp, titleCase } from "@/lib/format";
-import { REGIONS, STATUSES, listProjects } from "@/lib/projects";
+import { FEATURED_PROJECT_SLUGS, REGIONS, STATUSES, listProjects } from "@/lib/projects";
 import { StatusBadge } from "@/components/dashboard/Badges";
 import PublishToggle from "@/components/dashboard/PublishToggle";
 
@@ -31,10 +31,13 @@ export default async function PrimaryPage({
   const c = content[lang];
   const mayPublish = canPublish(await getSession());
 
-  const [projects, inventory] = await Promise.all([
+  const [catalogue, inventory] = await Promise.all([
     listProjects(),
     listProperties({ limit: 300 }),
   ]);
+  const projects = catalogue.filter((project) =>
+    FEATURED_PROJECT_SLUGS.includes(project.slug as (typeof FEATURED_PROJECT_SLUGS)[number])
+  );
 
   // Primary units: the units that belong to this project, straight from the
   // inventory, so the publish switch here and on /dashboard/inventory agree.

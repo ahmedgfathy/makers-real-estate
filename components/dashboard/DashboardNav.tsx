@@ -88,10 +88,10 @@ export default function DashboardNav({
       <header className="dash-mobilebar">
         <a className="dash-brand dash-brand--mobile" href="/dashboard">
           <img
-            src="/img/makers-logo.jpg"
+            src="/img/makers-logo.png"
             alt="Makers Real Estate"
-            width={1536}
-            height={1024}
+            width={1183}
+            height={752}
           />
         </a>
         <button
@@ -116,10 +116,10 @@ export default function DashboardNav({
       <aside className={`dash-sidebar${open ? " is-open" : ""}`} id="dash-sidebar">
         <a className="dash-brand" href="/dashboard">
           <img
-            src="/img/makers-logo.jpg"
+            src="/img/makers-logo.png"
             alt="Makers Real Estate"
-            width={1536}
-            height={1024}
+            width={1183}
+            height={752}
           />
           <span>
             <small>Admin</small>

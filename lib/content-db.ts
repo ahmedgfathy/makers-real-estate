@@ -34,6 +34,7 @@ type SiteRow = {
   grid: Content["grid"];
   panel: Content["panel"];
   footer: Content["footer"];
+  lead_form: Content["leadForm"] | null;
 };
 
 type TileRow = {
@@ -60,7 +61,7 @@ type PanelRow = {
 async function loadFromDb(): Promise<Site> {
   const [siteRows, tileRows, panelRows, contactRows] = await Promise.all([
     query<SiteRow>(
-      "SELECT lang, meta, brand, nav, hero, grid, panel, footer FROM site_content"
+      "SELECT lang, meta, brand, nav, hero, grid, panel, footer, lead_form FROM site_content"
     ),
     query<TileRow>(
       "SELECT lang, id, idx, kicker, title, meta, image FROM tiles ORDER BY lang, position"
@@ -137,6 +138,8 @@ async function loadFromDb(): Promise<Site> {
       grid: chrome.grid,
       panel: chrome.panel,
       footer: chrome.footer,
+      // Databases migrated before the lead form existed keep the static copy.
+      leadForm: chrome.lead_form ?? staticContent[lang].leadForm,
       tiles,
       panels,
     };

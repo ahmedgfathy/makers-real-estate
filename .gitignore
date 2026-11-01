@@ -22,3 +22,5 @@ _repo/
 _backup-local/
 .freebuff/
 makers/
+.vercel
+.env*

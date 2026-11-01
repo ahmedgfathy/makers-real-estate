@@ -12,6 +12,7 @@ import { capture } from "@/lib/analytics";
 import Header from "./Header";
 import Hero from "./Hero";
 import Collection from "./Collection";
+import LeadForm from "./LeadForm";
 import Footer from "./Footer";
 import Panel from "./Panel";
 
@@ -121,6 +122,7 @@ export default function Landing({
       <main>
         <Hero c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
         <Collection c={c} lang={lang} onOpen={open} />
+        <LeadForm c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
       </main>
 
       <Footer

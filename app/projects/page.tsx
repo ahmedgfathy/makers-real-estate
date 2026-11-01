@@ -3,7 +3,7 @@ import type { Lang } from "@/data/content";
 import { whatsappLink } from "@/data/content";
 import { getSite } from "@/lib/content-db";
 import { egp } from "@/lib/format";
-import { CATEGORIES, REGIONS, listProjects } from "@/lib/projects";
+import { CATEGORIES, FEATURED_PROJECT_SLUGS, REGIONS, listProjects } from "@/lib/projects";
 import Arrow from "@/components/public/Arrow";
 import LangSync from "@/components/public/LangSync";
 import PublicFooter from "@/components/public/PublicFooter";
@@ -37,7 +37,11 @@ export default async function PublicProjectsPage({
 
   const [{ content, contact }, projects] = await Promise.all([
     getSite(),
-    listProjects({ publishedOnly: true }),
+    listProjects({ publishedOnly: true }).then((catalogue) =>
+      catalogue.filter((project) =>
+        FEATURED_PROJECT_SLUGS.includes(project.slug as (typeof FEATURED_PROJECT_SLUGS)[number])
+      )
+    ),
   ]);
 
   const c = content[lang];

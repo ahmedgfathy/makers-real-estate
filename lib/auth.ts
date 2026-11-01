@@ -1,13 +1,15 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { touchLastLogin, verifyCredentials, type AdminUser } from "./users";
 
 /**
- * Minimal single-admin session for the dashboard.
+ * Single-dashboard session with per-user accounts.
  *
- * Credentials come from ADMIN_USERNAME / ADMIN_PASSWORD and fall back to the
- * demo pair requested for this project. Replace both (and the session secret)
- * before exposing the dashboard publicly.
+ * Credentials live in PostgreSQL (admin_users, scrypt hashes). The env pair
+ * ADMIN_USERNAME / ADMIN_PASSWORD stays as a bootstrap fallback — it works
+ * even when the database has no users yet (fresh preview deployments), and
+ * scripts/db-migrate.ts seeds it into admin_users on first migration.
  */
 
 export const SESSION_COOKIE = "makers_admin";
@@ -24,7 +26,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "zerocall";
 const SESSION_SECRET =
   process.env.ADMIN_SESSION_SECRET ?? "makers-dev-session-secret-change-me";
 
-export type AdminSession = { username: string; expiresAt: number };
+export type AdminSession = { username: string; role: Role; expiresAt: number };
 
 export type Role = "admin" | "editor";
 
@@ -34,7 +36,12 @@ export function roleOf(username: string): Role {
 }
 
 export function canPublish(session: AdminSession | null): boolean {
-  return session != null && roleOf(session.username) === "admin";
+  return session != null && session.role === "admin";
+}
+
+/** Admins may manage dashboard accounts. */
+export function canManageUsers(session: AdminSession | null): boolean {
+  return session != null && session.role === "admin";
 }
 
 function fixedHash(value: string): Buffer {
@@ -51,15 +58,35 @@ export function checkCredentials(username: string, password: string): boolean {
   return safeEqual(username, ADMIN_USERNAME) && safeEqual(password, ADMIN_PASSWORD);
 }
 
+/**
+ * Credential check: the database first (per-user accounts), then the env pair
+ * as a bootstrap fallback. Returns the acting user's role.
+ */
+export async function authenticate(
+  username: string,
+  password: string
+): Promise<{ user: AdminUser | null; role: Role } | null> {
+  const user = await verifyCredentials(username, password);
+  if (user) {
+    await touchLastLogin(user.username);
+    return { user, role: user.role };
+  }
+  if (checkCredentials(username, password)) {
+    return { user: null, role: roleOf(username) };
+  }
+  return null;
+}
+
 function sign(payload: string): string {
   return createHmac("sha256", SESSION_SECRET).update(payload).digest("base64url");
 }
 
-export function createSessionToken(username: string): string {
+export function createSessionToken(username: string, role: Role): string {
   const expiresAt = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE;
-  const payload = Buffer.from(JSON.stringify({ u: username, exp: expiresAt }), "utf8").toString(
-    "base64url"
-  );
+  const payload = Buffer.from(
+    JSON.stringify({ u: username, r: role, exp: expiresAt }),
+    "utf8"
+  ).toString("base64url");
   return `${payload}.${sign(payload)}`;
 }
 
@@ -71,11 +98,14 @@ export function verifySessionToken(token: string): AdminSession | null {
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
       u?: unknown;
+      r?: unknown;
       exp?: unknown;
     };
     if (typeof data.u !== "string" || typeof data.exp !== "number") return null;
     if (data.exp <= Math.floor(Date.now() / 1000)) return null;
-    return { username: data.u, expiresAt: data.exp };
+    // Older tokens carry no role; fall back to the env-based mapping.
+    const role: Role = data.r === "admin" || data.r === "editor" ? data.r : roleOf(data.u);
+    return { username: data.u, role, expiresAt: data.exp };
   } catch {
     return null;
   }

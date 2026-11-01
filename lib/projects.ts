@@ -21,6 +21,9 @@ import {
 export { CATEGORIES, REGIONS, STATUSES };
 export type { ProjectCategory, ProjectRegion, ProjectStatus, ProjectUnit };
 
+/** The two SODIC East developments featured on the public site and CRM Primary page. */
+export const FEATURED_PROJECT_SLUGS = ["sodic-east", "the-lakes"] as const;
+
 export type Project = {
   slug: string;
   name: string;

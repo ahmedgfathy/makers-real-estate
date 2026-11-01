@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS locales (
   label text NOT NULL
 );
 
--- Page chrome: meta, brand, nav, hero, grid, panel UI strings, footer.
+-- Page chrome: meta, brand, nav, hero, grid, panel UI strings, footer, lead form.
 CREATE TABLE IF NOT EXISTS site_content (
   lang       text PRIMARY KEY REFERENCES locales (code) ON DELETE CASCADE,
   meta       jsonb NOT NULL,
@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS site_content (
   grid       jsonb NOT NULL,
   panel      jsonb NOT NULL,
   footer     jsonb NOT NULL,
+  lead_form  jsonb,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -137,13 +138,31 @@ CREATE TABLE IF NOT EXISTS properties (
   updated_at          timestamptz NOT NULL DEFAULT now()
 );
 
--- SODIC project catalogue: one row per development (or phase) with its unit
--- mix, amenities, payment plan and source documents. Bilingual text lives in
--- paired columns so the CRM can switch language without a join.
+-- Developer catalogue: one row per developer/company launching projects.
+CREATE TABLE IF NOT EXISTS developers (
+  slug             text PRIMARY KEY,
+  name             text NOT NULL,
+  name_ar          text,
+  description      text,
+  description_ar   text,
+  established      integer,
+  website          text,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO developers (slug, name, name_ar)
+VALUES ('sodic', 'SODIC', 'سوديك')
+ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, name_ar = EXCLUDED.name_ar;
+
+-- Project catalogue: one row per development (or phase) with its unit
+-- mix, amenities, payment plan and source documents. Belongs to a developer.
 CREATE TABLE IF NOT EXISTS projects (
   slug             text PRIMARY KEY,
   name             text NOT NULL,
   name_ar          text,
+  developer_slug   text NOT NULL
+                   REFERENCES developers(slug) ON DELETE CASCADE,
   region           text NOT NULL
                    CHECK (region IN ('east-cairo', 'new-cairo', 'west-cairo', 'north-coast')),
   location         text NOT NULL,
@@ -173,6 +192,49 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at       timestamptz NOT NULL DEFAULT now()
 );
 
+-- Upgrade databases that already had a project catalogue before developers
+-- were introduced. Existing rows belong to the single seeded SODIC developer.
+ALTER TABLE projects
+  ADD COLUMN IF NOT EXISTS developer_slug text NOT NULL DEFAULT 'sodic';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'projects_developer_slug_fkey'
+      AND conrelid = 'projects'::regclass
+  ) THEN
+    ALTER TABLE projects
+      ADD CONSTRAINT projects_developer_slug_fkey
+      FOREIGN KEY (developer_slug) REFERENCES developers(slug) ON DELETE CASCADE;
+  END IF;
+END $$;
+
+-- Dashboard accounts. Passwords are scrypt hashes (lib/passwords.ts); the env
+-- admin is bootstrapped by scripts/db-migrate.ts when the table is empty.
+CREATE TABLE IF NOT EXISTS admin_users (
+  username      text PRIMARY KEY,
+  password_hash text NOT NULL,
+  display_name  text,
+  role          text NOT NULL DEFAULT 'editor'
+                CHECK (role IN ('admin', 'editor')),
+  active        boolean NOT NULL DEFAULT true,
+  last_login_at timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
+
+-- Append-only audit trail: who changed what in the dashboard.
+CREATE TABLE IF NOT EXISTS audit_log (
+  id          bigserial PRIMARY KEY,
+  at          timestamptz NOT NULL DEFAULT now(),
+  actor       text NOT NULL,
+  action      text NOT NULL,
+  entity_type text NOT NULL,
+  entity_id   text,
+  detail      jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+
 CREATE INDEX IF NOT EXISTS idx_tiles_lang_pos ON tiles (lang, position);
 CREATE INDEX IF NOT EXISTS idx_sections_lookup ON panel_sections (lang, tile_id, position);
 -- Existing installs: add the publish switches without dropping data.
@@ -180,6 +242,13 @@ ALTER TABLE properties ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAU
 ALTER TABLE properties ADD COLUMN IF NOT EXISTS published_at timestamptz;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT false;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS published_at timestamptz;
+
+-- Existing installs: add the lead-form chrome and audit trail without dropping data.
+ALTER TABLE site_content ADD COLUMN IF NOT EXISTS lead_form jsonb;
+
+CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log (at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log (actor, at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log (entity_type, entity_id, at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_projects_region ON projects (region, position);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status, position);

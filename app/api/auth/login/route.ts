@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit";
 import {
   SESSION_COOKIE,
-  checkCredentials,
+  authenticate,
   createSessionToken,
   safeNext,
   sessionCookieOptions,
@@ -44,15 +45,33 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!checkCredentials(username, password)) {
+  const auth = await authenticate(username, password);
+  if (!auth) {
+    await recordAudit({
+      actor: username,
+      action: "auth.login_failed",
+      entityType: "session",
+      detail: { ip: req.headers.get("x-real-ip") ?? null },
+    });
     return NextResponse.json(
       { ok: false, error: "Invalid username or password." },
       { status: 401 }
     );
   }
 
+  await recordAudit({
+    actor: username,
+    action: "auth.login",
+    entityType: "session",
+    detail: { role: auth.role },
+  });
+
   const redirectTo = safeNext(typeof body.next === "string" ? body.next : null);
   const response = NextResponse.json({ ok: true, redirect: redirectTo });
-  response.cookies.set(SESSION_COOKIE, createSessionToken(username), sessionCookieOptions());
+  response.cookies.set(
+    SESSION_COOKIE,
+    createSessionToken(username, auth.role),
+    sessionCookieOptions()
+  );
   return response;
 }

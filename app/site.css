@@ -45,7 +45,7 @@ html[lang="ar"] .collection-lede {
 }
 
 .collection-count {
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -117,7 +117,7 @@ html[lang="ar"] .collection-count { letter-spacing: 0.02em; text-transform: none
 
 .tile-index {
   font-family: var(--font-sans);
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   letter-spacing: 0.22em;
   color: rgba(244, 240, 233, 0.72);
   font-variant-numeric: tabular-nums;
@@ -156,13 +156,13 @@ html[dir="rtl"] .tile:hover .tile-arrow { transform: rotate(45deg); }
 }
 
 .tile-kicker {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--sand);
 }
 
-html[lang="ar"] .tile-kicker { letter-spacing: 0.02em; text-transform: none; font-size: 0.72rem; }
+html[lang="ar"] .tile-kicker { letter-spacing: 0.02em; text-transform: none; font-size: 0.88rem; }
 
 .tile-title {
   font-family: var(--font-display);
@@ -180,7 +180,7 @@ html[lang="ar"] .tile-title {
 }
 
 .tile-meta {
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   letter-spacing: 0.04em;
   color: var(--ink-dim);
   line-height: 1.5;
@@ -353,7 +353,7 @@ html[lang="ar"] .panel-lede { line-height: 1.95; }
 
 .sec-title {
   font-family: var(--font-sans);
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   font-weight: 400;
   letter-spacing: 0.26em;
   text-transform: uppercase;
@@ -406,7 +406,7 @@ html[lang="ar"] .stat-value {
   line-height: 1.45;
 }
 
-html[lang="ar"] .stat-label { letter-spacing: 0.02em; text-transform: none; font-size: 0.7rem; }
+html[lang="ar"] .stat-label { letter-spacing: 0.02em; text-transform: none; font-size: 0.82rem; }
 
 /* lists */
 
@@ -453,7 +453,7 @@ html[lang="ar"] .li { line-height: 1.85; }
   white-space: nowrap;
 }
 
-html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; font-size: 0.72rem; }
+html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; font-size: 0.88rem; }
 
 .tbl tbody td {
   padding: 0.72rem 1rem 0.72rem 0;
@@ -473,7 +473,7 @@ html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; fo
 
 .tbl-note {
   margin-top: 0.8rem;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   line-height: 1.7;
   color: var(--ink-faint);
   max-width: 70ch;
@@ -493,9 +493,9 @@ html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; fo
 }
 
 .price-label { font-size: 0.9rem; color: var(--ink); }
-.price-area { font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.04em; }
+.price-area { font-size: 0.88rem; color: var(--ink-faint); letter-spacing: 0.04em; }
 .price-value { font-size: 0.94rem; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
-.price-month { font-size: 0.7rem; color: var(--gold-bright); text-shadow: 0 0 12px var(--gold-glow); font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.95; }
+.price-month { font-size: 0.82rem; color: var(--gold-bright); text-shadow: 0 0 12px var(--gold-glow); font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.95; }
 
 /* note */
 
@@ -558,7 +558,7 @@ html[lang="ar"] .tbl thead th { letter-spacing: 0.02em; text-transform: none; fo
 }
 
 .panel-foot-meta {
-  font-size: 0.66rem;
+  font-size: 0.88rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -795,7 +795,7 @@ html[lang="ar"] .public-title {
   font-variant-numeric: tabular-nums;
 }
 
-html[lang="ar"] .detail-fact span { letter-spacing: 0.02em; text-transform: none; font-size: 0.7rem; }
+html[lang="ar"] .detail-fact span { letter-spacing: 0.02em; text-transform: none; font-size: 0.82rem; }
 
 .public-video {
   border: 1px solid var(--line);
@@ -821,3 +821,40 @@ html[lang="ar"] .detail-fact span { letter-spacing: 0.02em; text-transform: none
   .public-hero-body { padding-top: 0; }
   .public-facts { grid-template-columns: 1fr 1fr; }
 }
+
+/* Brand system for the project catalogue and detail pages. */
+.public-main { background: #000000; }
+.public-main .collection { padding-top: clamp(8rem, 13vh, 11rem); }
+.public-main .collection-lede { color: #ffffff; }
+.public-main .tile { border-radius: 6px; }
+.public-main .tile-title { color: #ffffff; }
+.public-hero,
+.project-detail,
+.public-video { border-color: rgba(255, 255, 255, 0.14); }
+.public-hero,
+.detail-card { background: #080808; }
+.public-hero-title,
+.public-title,
+.detail-title { color: #ffffff; }
+
+/* Lift small captions and project facts to readable sizes. */
+.collection-count,
+.tile-index,
+.tile-kicker,
+.tile-meta,
+.panel-kicker,
+.panel-meta,
+.sec-title,
+.stat-label,
+.tbl thead th,
+.tbl-note,
+.price-area,
+.price-month,
+.detail-fact span,
+.public-sublede { font-size: max(0.82rem, 1em); }
+.panel-lede,
+.li,
+.tbl tbody td,
+.price-label,
+.price-value,
+.detail-fact strong { font-size: max(0.94rem, 1em); }

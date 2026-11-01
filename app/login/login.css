@@ -60,11 +60,10 @@
   margin-bottom: clamp(1.6rem, 4vw, 2.4rem);
 }
 
-/* The delivered logo, unchanged: its black plate is blended away. */
+/* Transparent brand asset. */
 .login-brand img {
   width: 152px;
   height: auto;
-  mix-blend-mode: screen;
 }
 
 .login-brand span {
