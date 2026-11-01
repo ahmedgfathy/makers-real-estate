@@ -103,24 +103,44 @@ export default function LeadForm({
           </h2>
           <p className="enquiry-lede">{f.lede}</p>
 
-          <div className="enquiry-alt">
+          <div className="enquiry-contact-list">
             <a
-              className="btn btn--ghost btn--sm"
+              className="enquiry-contact-link"
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
               data-cta="whatsapp"
               data-cta-surface="enquiry"
             >
-              <span>{c.footer.whatsapp}</span>
+              <span className="enquiry-contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M20 11.7a8.1 8.1 0 0 1-11.9 7.1L4 20l1.2-4A8.1 8.1 0 1 1 20 11.7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                  <path d="M8.6 8.6c.4 2.5 2.3 4.4 4.9 4.9l1-1.1 1.7.8c.2.1.3.3.2.5-.2.8-.8 1.3-1.7 1.3-3.5 0-7.4-3.9-7.4-7.4 0-.9.5-1.5 1.3-1.7.2-.1.4 0 .5.2l.8 1.7-1.3.8Z" fill="currentColor" />
+                </svg>
+              </span>
+              <span className="enquiry-contact-copy">
+                <small>{lang === "ar" ? "راسل مستشارًا" : "Message an advisor"}</small>
+                <strong>{c.footer.whatsapp}</strong>
+              </span>
+              <span className="enquiry-contact-arrow" aria-hidden="true">↗</span>
             </a>
             <a
-              className="btn btn--ghost btn--sm phone"
+              className="enquiry-contact-link"
               href={phoneHref}
+              dir="ltr"
               data-cta="phone"
               data-cta-surface="enquiry"
             >
-              <span>{c.footer.call}</span>
+              <span className="enquiry-contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M7.2 3.8h2.2l1.2 4.1-1.8 1.6a15.3 15.3 0 0 0 5.7 5.7l1.6-1.8 4.1 1.2v2.2c0 1.1-.9 2-2 2A15.2 15.2 0 0 1 5.2 5.8c0-1.1.9-2 2-2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span className="enquiry-contact-copy">
+                <small>{lang === "ar" ? "اتصل بفريقنا" : "Call our team"}</small>
+                <strong>{c.footer.call}</strong>
+              </span>
+              <span className="enquiry-contact-arrow" aria-hidden="true">↗</span>
             </a>
           </div>
         </div>

@@ -1016,6 +1016,175 @@ html[lang="ar"] .consent-text { font-size: 0.82rem; }
   .hero-stat-card { padding-inline: 0.55rem; }
 }
 
+/* ---------- callback experience ---------- */
+.enquiry {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(4.5rem, 9vw, 8rem) var(--pad);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(ellipse at 14% 18%, rgba(245, 190, 24, 0.09), transparent 36%),
+    #030303;
+}
+.enquiry::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: min(28vw, 380px);
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.enquiry-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(2.5rem, 7vw, 7rem);
+  align-items: center;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+}
+.enquiry-intro { max-width: 600px; }
+.enquiry-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--gold-bright);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.enquiry-kicker::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: currentColor;
+}
+.enquiry-title {
+  max-width: 12ch;
+  margin-top: 1rem;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6.3vw, 5.6rem);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+.enquiry-lede {
+  max-width: 39ch;
+  margin-top: 1.25rem;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  line-height: 1.75;
+}
+.enquiry-contact-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+.enquiry-contact-link {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+  min-height: 76px;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.035);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.enquiry-contact-link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 190, 24, 0.58);
+  background: rgba(245, 190, 24, 0.07);
+}
+.enquiry-contact-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(245, 190, 24, 0.32);
+  border-radius: 50%;
+  color: var(--gold-bright);
+}
+.enquiry-contact-icon svg { width: 19px; height: 19px; }
+.enquiry-contact-copy { display: flex; min-width: 0; flex-direction: column; gap: 0.2rem; }
+.enquiry-contact-copy small { color: rgba(255, 255, 255, 0.56); font-size: 0.76rem; line-height: 1.3; }
+.enquiry-contact-copy strong { color: #ffffff; font-size: 0.95rem; font-weight: 500; line-height: 1.35; white-space: nowrap; }
+.enquiry-contact-arrow { margin-inline-start: auto; color: var(--gold); font-size: 1.1rem; }
+.enquiry-card {
+  min-width: 0;
+  padding: clamp(1.15rem, 2.5vw, 2.1rem);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), transparent 60%), #090909;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.04);
+}
+.enquiry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.05rem 0.9rem; }
+.enquiry-hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.enquiry-field { display: flex; min-width: 0; flex-direction: column; gap: 0.45rem; }
+.enquiry-field > span { color: rgba(255, 255, 255, 0.84); font-size: 0.84rem; font-weight: 400; line-height: 1.45; }
+.enquiry-field > span b { color: var(--gold); font-weight: 500; }
+.enquiry-field input,
+.enquiry-field select,
+.enquiry-field textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 5px;
+  outline: none;
+  background: #050505;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.enquiry-field textarea { min-height: 100px; resize: vertical; }
+.enquiry-field input::placeholder, .enquiry-field textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+.enquiry-field input:focus, .enquiry-field select:focus, .enquiry-field textarea:focus {
+  border-color: var(--gold);
+  background: #080808;
+  box-shadow: 0 0 0 3px rgba(245, 190, 24, 0.13);
+}
+.enquiry-field--wide { grid-column: 1 / -1; }
+.enquiry-consent { display: flex; align-items: flex-start; gap: 0.65rem; color: rgba(255, 255, 255, 0.72); font-size: 0.82rem; line-height: 1.55; }
+.enquiry-consent input { flex: 0 0 18px; width: 18px; height: 18px; margin: 0.1rem 0 0; accent-color: var(--gold); }
+.enquiry-error { color: #ffaaa0; font-size: 0.85rem; }
+.enquiry-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem; }
+.enquiry-actions .btn { min-height: 50px; padding-inline: 1.3rem; border-radius: 5px; font-size: 0.88rem; }
+.enquiry-required { color: rgba(255, 255, 255, 0.5); font-size: 0.75rem; }
+.enquiry-done { display: grid; min-height: 270px; align-content: center; gap: 0.9rem; }
+.enquiry-done h3 { color: #ffffff; font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 400; line-height: 1.15; }
+.enquiry-done p { max-width: 48ch; color: rgba(255, 255, 255, 0.72); font-size: 1rem; line-height: 1.7; }
+.enquiry-done .enquiry-alt { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 0.6rem; }
+
+@media (max-width: 900px) {
+  .enquiry-inner { grid-template-columns: 1fr; gap: 2rem; max-width: 720px; }
+  .enquiry-title { max-width: 16ch; font-size: clamp(2.8rem, 9vw, 4.4rem); }
+  .enquiry-lede { max-width: 55ch; }
+}
+@media (max-width: 560px) {
+  .enquiry { padding-inline: 1rem; }
+  .enquiry-inner { gap: 1.5rem; }
+  .enquiry-title { font-size: clamp(2.6rem, 12vw, 3.5rem); }
+  .enquiry-contact-list { grid-template-columns: 1fr; margin-top: 1.4rem; }
+  .enquiry-contact-link { min-height: 68px; }
+  .enquiry-card { padding: 1rem; border-radius: 8px; }
+  .enquiry-form { grid-template-columns: 1fr; gap: 0.85rem; }
+  .enquiry-field--wide { grid-column: auto; }
+  .enquiry-actions { align-items: flex-start; flex-direction: column; }
+  .enquiry-actions .btn { width: 100%; justify-content: center; }
+}
+
 /* Readability baseline: preserve the desktop scale on small screens too. */
 @media (max-width: 760px) {
   html { font-size: 17px; }
