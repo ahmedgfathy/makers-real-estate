@@ -40,7 +40,7 @@ export default async function LoginPage({
         <span className="login-eyebrow">Admin dashboard</span>
         <h1 id="login-title">Welcome back</h1>
         <p className="login-intro">
-          Sign in to manage leads, primary data and the property inventory for SODIC East.
+          Sign in to manage developers, projects, leads and unit inventory.
         </p>
 
         <LoginForm next={safeNext(params.next)} />

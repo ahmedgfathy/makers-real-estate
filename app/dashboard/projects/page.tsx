@@ -70,7 +70,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           filter: "تصفية",
           reset: "إعادة ضبط",
           empty: "لا يوجد مشروع مطابق لهذه التصفية.",
-          note: "تُقرأ البيانات من جدول projects في PostgreSQL. عدّل data/projects.ts ثم نفّذ npm run db:seed للتحديث. مفتاح النشر يتحكم بظهور المشروع على الموقع العام /projects.",
+          note: "المشروعات محفوظة في قاعدة البيانات. يتحكم مفتاح النشر في ظهور المشروع على الموقع العام /projects.",
           open: "عرض المشروع",
         }
       : {
@@ -100,7 +100,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
           filter: "Filter",
           reset: "Reset",
           empty: "No project matches this filter.",
-          note: "Read from the projects table in PostgreSQL. Edit data/projects.ts, then run npm run db:seed. The publish switch controls whether the project appears on the public /projects page.",
+          note: "Projects are managed in the CRM and stored in the database. The publish switch controls whether a project appears on the public /projects page.",
           open: "Open project",
         };
 

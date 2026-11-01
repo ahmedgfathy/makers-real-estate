@@ -32,10 +32,9 @@ export default async function DashboardPage() {
       <header className="dash-head">
         <div>
           <span className="dash-kicker">Overview</span>
-          <h1>Welcome back, admin.</h1>
+          <h1>Welcome back.</h1>
           <p>
-            Leads, project content and live inventory for The Lakes at SODIC East — all in one
-            place.
+            Manage your developers, projects, leads and unit inventory in one place.
           </p>
         </div>
         <div className="dash-actions">
