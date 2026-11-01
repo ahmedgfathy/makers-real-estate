@@ -64,7 +64,7 @@ export default async function NewLeadPage({
             </label>
             <label className="dash-field">
               <span>Form / campaign</span>
-              <input className="dash-input" name="form_name" placeholder="e.g. The Lakes — Request a call" />
+              <input className="dash-input" name="form_name" placeholder="Lead form name" />
             </label>
             <label className="dash-field">
               <span>Facebook campaign</span>
@@ -96,7 +96,7 @@ export default async function NewLeadPage({
           <div className="dash-form-grid">
             <label className="dash-field">
               <span>Project</span>
-              <input className="dash-input" name="project" placeholder="The Lakes / SODIC East / Phase 08M" />
+              <input className="dash-input" name="project" placeholder="Project name" />
             </label>
             <label className="dash-field">
               <span>Unit type</span>

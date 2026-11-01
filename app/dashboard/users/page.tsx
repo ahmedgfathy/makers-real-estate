@@ -164,12 +164,12 @@ export default async function UsersPage({
                   minLength={3}
                   maxLength={32}
                   pattern="[a-zA-Z0-9_.\-]{3,32}"
-                  placeholder="e.g. karim"
+                  placeholder="Username"
                 />
               </label>
               <label className="dash-field">
                 <span>Display name</span>
-                <input className="dash-input" name="display_name" placeholder="e.g. Karim Adel" />
+                <input className="dash-input" name="display_name" placeholder="Full name" />
               </label>
               <label className="dash-field">
                 <span>Password</span>

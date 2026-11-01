@@ -41,11 +41,11 @@ export default async function NewPropertyPage({
           <div className="dash-form-grid">
             <label className="dash-field">
               <span>Unit code *</span>
-              <input className="dash-input" name="code" required placeholder="e.g. B20-31" />
+              <input className="dash-input" name="code" required placeholder="Enter unit code" />
             </label>
             <label className="dash-field span-2">
               <span>Title *</span>
-              <input className="dash-input" name="title" required placeholder="2-bedroom apartment · Upper floors" />
+              <input className="dash-input" name="title" required placeholder="Describe the unit" />
             </label>
             <label className="dash-field">
               <span>Project *</span>
@@ -56,7 +56,7 @@ export default async function NewPropertyPage({
             </label>
             <label className="dash-field">
               <span>Phase</span>
-              <input className="dash-input" name="phase" placeholder="Phase 08M / SODIC East 2" />
+              <input className="dash-input" name="phase" placeholder="Phase or release" />
             </label>
             <label className="dash-field">
               <span>Property type</span>
@@ -173,12 +173,12 @@ export default async function NewPropertyPage({
               <textarea
                 className="dash-textarea"
                 name="images"
-                placeholder={"/img/lakes-pool.jpg\n/img/lakes-garden.jpg\n/img/lakes-building.jpg"}
+                placeholder={"/img/unit-photo-1.jpg\n/img/unit-photo-2.jpg"}
               />
             </label>
             <label className="dash-field">
               <span>Video URL</span>
-              <input className="dash-input" name="video" placeholder="/video/hero.mp4" />
+              <input className="dash-input" name="video" placeholder="/video/unit-tour.mp4" />
             </label>
             <label className="dash-field span-3">
               <span>Amenities</span>
