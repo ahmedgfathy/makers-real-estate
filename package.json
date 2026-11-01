@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run db:migrate && next build",
     "start": "next start",
     "preview": "next build && next start",
     "typecheck": "tsc --noEmit",
-    "db:migrate": "tsx --env-file=.env scripts/db-migrate.ts",
+    "db:migrate": "node --env-file-if-exists=.env --import tsx scripts/db-migrate.ts",
     "db:seed": "tsx --env-file=.env scripts/db-seed.ts",
     "db:seed:projects": "tsx --env-file=.env scripts/db-seed-projects.ts",
     "db:setup": "npm run db:migrate && npm run db:seed"
