@@ -1,6 +1,10 @@
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { getPool, pingDb } from "../lib/db";
+import { getPool, pingDb, withTransaction } from "../lib/db";
+import { seedProjects } from "../lib/seed-projects";
+
+const PORTFOLIO_CLEANUP = "sodic_lakes_eastvale_only_v1";
+const ACTIVE_PROJECT_SLUGS = ["the-lakes", "eastvale"] as const;
 
 /**
  * Applies db/schema.sql (idempotent — safe to run repeatedly).
@@ -21,6 +25,74 @@ async function main() {
   console.log(`[migrate] applying ${file}`);
   const pool = getPool();
   await pool.query(sql);
+
+  // One-time portfolio cleanup. Keep CRM-created data intact on future builds.
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS app_migrations (
+       name text PRIMARY KEY,
+       applied_at timestamptz NOT NULL DEFAULT now()
+     )`
+  );
+  const portfolioCleanup = await withTransaction(async (client) => {
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [PORTFOLIO_CLEANUP]);
+    const applied = await client.query<{ name: string }>(
+      "SELECT name FROM app_migrations WHERE name = $1",
+      [PORTFOLIO_CLEANUP]
+    );
+    if (applied.rows.length) return null;
+
+    // Ensure both requested SODIC project records exist before pruning the rest.
+    await seedProjects(client);
+    await client.query(
+      `UPDATE projects
+          SET developer_slug = 'sodic',
+              position = CASE slug WHEN 'the-lakes' THEN 1 WHEN 'eastvale' THEN 2 END,
+              updated_at = now()
+        WHERE slug = ANY($1::text[])`,
+      [ACTIVE_PROJECT_SLUGS]
+    );
+
+    const removedUnits = await client.query<{ id: number }>(
+      `DELETE FROM properties
+        WHERE project_slug IS NULL OR project_slug <> ALL($1::text[])
+        RETURNING id`,
+      [ACTIVE_PROJECT_SLUGS]
+    );
+    const removedProjects = await client.query<{ slug: string }>(
+      `DELETE FROM projects WHERE slug <> ALL($1::text[]) RETURNING slug`,
+      [ACTIVE_PROJECT_SLUGS]
+    );
+    const removedDevelopers = await client.query<{ slug: string }>(
+      `DELETE FROM developers WHERE slug <> 'sodic' RETURNING slug`
+    );
+    await client.query("INSERT INTO app_migrations (name) VALUES ($1)", [PORTFOLIO_CLEANUP]);
+
+    return {
+      units: removedUnits.rows.length,
+      projects: removedProjects.rows.length,
+      developers: removedDevelopers.rows.length,
+    };
+  });
+  if (portfolioCleanup) {
+    console.log(
+      `[migrate] portfolio pruned: ${portfolioCleanup.developers} developers, ` +
+        `${portfolioCleanup.projects} projects, ${portfolioCleanup.units} units removed`
+    );
+  }
+
+  const { rows: portfolioCounts } = await pool.query<{
+    developers: number;
+    projects: number;
+    units: number;
+  }>(
+    `SELECT (SELECT count(*)::int FROM developers) AS developers,
+            (SELECT count(*)::int FROM projects) AS projects,
+            (SELECT count(*)::int FROM properties) AS units`
+  );
+  console.log(
+    `[migrate] portfolio: ${portfolioCounts[0].developers} developers, ` +
+      `${portfolioCounts[0].projects} projects, ${portfolioCounts[0].units} units`
+  );
 
   const ping = await pingDb();
   if (!ping.ok) throw new Error(`connection check failed: ${ping.error}`);

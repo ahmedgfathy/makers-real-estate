@@ -76,7 +76,7 @@ export const STATUSES: Record<ProjectStatus, { en: string; ar: string }> = {
   completed: { en: "Completed", ar: "مكتمل" },
 };
 
-export const projects: ProjectSeed[] = [
+const projectCatalogue: ProjectSeed[] = [
   /* ------------------------------------------------------------------ */
   /* East Cairo                                                          */
   /* ------------------------------------------------------------------ */
@@ -1053,3 +1053,10 @@ export const projects: ProjectSeed[] = [
     position: 22,
   },
 ];
+
+const ACTIVE_PROJECT_SLUGS = new Set(["the-lakes", "eastvale"]);
+
+/** Only these two SODIC projects are part of the current public portfolio. */
+export const projects: ProjectSeed[] = projectCatalogue
+  .filter((project) => ACTIVE_PROJECT_SLUGS.has(project.slug))
+  .map((project, position) => ({ ...project, position: position + 1 }));

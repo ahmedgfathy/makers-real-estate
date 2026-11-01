@@ -141,7 +141,7 @@ const en: Content = {
   },
   grid: {
     label: "Choose a collection",
-    title: "Six ways into SODIC East",
+    title: "Explore SODIC projects",
     lede:
       "Open any tile for the full brief — units, areas, prices, amenities and delivery dates. Everything below is current inventory held by Makers Real Estate.",
     open: "Open",
@@ -198,7 +198,7 @@ const en: Content = {
       "An advisor will call you back shortly. Prefer WhatsApp? Message us any time.",
     error: "Could not send — please try again or call us directly.",
     required: "Name and phone required.",
-    projectOptions: ["The Lakes", "Phase 08M", "SODIC East", "Other"],
+    projectOptions: ["The Lakes", "EastVale"],
     bedroomOptions: ["Any", "1", "2", "3", "4+"],
   },
   tiles: [
@@ -601,7 +601,7 @@ const ar: Content = {  meta: {
   },
   grid: {
     label: "اختر مجموعة",
-    title: "ستة أبواب إلى سوديك إيست",
+    title: "استكشف مشروعات سوديك",
     lede:
       "افتح أي مربع لتحصل على الملف الكامل: الوحدات، المساحات، الأسعار، الخدمات ومواعيد التسليم. كل ما بالأسفل متاح فعليًا عبر ميكرز للعقارات.",
     open: "افتح",
@@ -657,7 +657,7 @@ const ar: Content = {  meta: {
     successLede: "سيقوم المستشار بالتواصل معك قريبًا. تفضل واتساب؟ راسلنا في أي وقت.",
     error: "تعذر الإرسال — حاول مرة أخرى أو اتصل بنا مباشرة.",
     required: "الاسم والهاتف مطلوبان.",
-    projectOptions: ["البحيرات", "مرحلة 08M", "سوديك إيست", "أخرى"],
+    projectOptions: ["ذا ليكس", "إيست ڤيل"],
     bedroomOptions: ["الكل", "1", "2", "3", "4+"],
   },
   tiles: [

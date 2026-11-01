@@ -1,8 +1,20 @@
 "use client";
 
-import type { Content, Lang, TileId } from "@/data/content";
+import type { Content, Lang } from "@/data/content";
 import { ui } from "@/lib/labels";
+import { egp } from "@/lib/format";
 import Reveal from "./Reveal";
+
+export type HomeProject = {
+  slug: string;
+  name: string;
+  nameAr: string;
+  developerName: string;
+  regionName: Record<Lang, string>;
+  heroImage: string | null;
+  priceFrom: number | null;
+  unitCount: number;
+};
 
 function Arrow() {
   return (
@@ -15,13 +27,29 @@ function Arrow() {
 export default function Collection({
   c,
   lang,
-  onOpen,
+  projects,
 }: {
   c: Content;
   lang: Lang;
-  onOpen: (id: TileId, el: HTMLButtonElement) => void;
+  projects: HomeProject[];
 }) {
   const t = ui[lang];
+  const labels =
+    lang === "ar"
+      ? {
+          from: "تبدأ من",
+          onRequest: "السعر عند الطلب",
+          units: "وحدات",
+          empty: "يتم تجهيز المشروعات. عد قريبًا.",
+          view: "عرض المشروع",
+        }
+      : {
+          from: "From",
+          onRequest: "Price on request",
+          units: "units",
+          empty: "Projects are being prepared. Check back soon.",
+          view: "View project",
+        };
 
   return (
     <section className="collection" id="collection">
@@ -33,44 +61,70 @@ export default function Collection({
           <Reveal delay={100} className="collection-meta">
             <span className="eyebrow">{c.grid.label}</span>
             <span className="collection-count">
-              {c.tiles.length} {t.collections} — SODIC East
+              {projects.length} {t.collections} — SODIC
             </span>
           </Reveal>
         </div>
 
         <div className="tiles">
-          {c.tiles.map((tile, i) => (
-            <Reveal key={tile.id} delay={i * 70}>
-              <button
-                type="button"
-                className="tile"
-                onClick={(e) => onOpen(tile.id, e.currentTarget)}
-                aria-label={`${t.openTile} — ${tile.title}`}
-              >
-                <span className="tile-media">
-                  <img
-                    src={tile.image}
-                    alt={tile.title}
-                    loading={i < 3 ? "eager" : "lazy"}
-                    decoding="async"
-                  />
-                </span>
-                <span className="tile-veil" />
-                <span className="tile-top">
-                  <span className="tile-index">{tile.index}</span>
-                  <span className="tile-arrow">
-                    <Arrow />
-                  </span>
-                </span>
-                <span className="tile-body">
-                  <span className="tile-kicker">{tile.kicker}</span>
-                  <span className="tile-title">{tile.title}</span>
-                  <span className="tile-meta">{tile.meta}</span>
-                </span>
-                <span className="tile-line" />
-              </button>
-            </Reveal>
-          ))}
+          {projects.length ? (
+            projects.map((project, index) => {
+              const name = lang === "ar" ? project.nameAr : project.name;
+              const monogram = project.name
+                .split(/\s+/)
+                .map((part) => part[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase();
+
+              return (
+                <Reveal key={project.slug} delay={index * 70}>
+                  <a
+                    className="tile"
+                    href={`/projects/${project.slug}?lang=${lang}`}
+                    aria-label={`${labels.view} — ${name}`}
+                  >
+                    <span className="tile-media">
+                      {project.heroImage ? (
+                        <img
+                          src={project.heroImage}
+                          alt={name}
+                          loading={index < 2 ? "eager" : "lazy"}
+                          decoding="async"
+                        />
+                      ) : (
+                        <span className="tile-media-empty" aria-hidden="true">
+                          <span className="tile-monogram">{monogram}</span>
+                        </span>
+                      )}
+                    </span>
+                    <span className="tile-veil" />
+                    <span className="tile-top">
+                      <span className="tile-index">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="tile-arrow">
+                        <Arrow />
+                      </span>
+                    </span>
+                    <span className="tile-body">
+                      <span className="tile-kicker">
+                        {project.developerName} · {project.regionName[lang]}
+                      </span>
+                      <span className="tile-title">{name}</span>
+                      <span className="tile-meta">
+                        {project.priceFrom
+                          ? `${labels.from} ${egp(project.priceFrom, true)}`
+                          : labels.onRequest}{" "}
+                        · {project.unitCount} {labels.units}
+                      </span>
+                    </span>
+                    <span className="tile-line" />
+                  </a>
+                </Reveal>
+              );
+            })
+          ) : (
+            <p className="public-empty">{labels.empty}</p>
+          )}
         </div>
       </div>
     </section>

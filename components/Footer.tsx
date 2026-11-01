@@ -1,8 +1,9 @@
 "use client";
 
-import type { Contact, Content, Lang, TileId } from "@/data/content";
+import type { Contact, Content, Lang } from "@/data/content";
 import { requestConsent } from "@/lib/analytics";
 import { ui } from "@/lib/labels";
+import type { HomeProject } from "./Collection";
 
 export default function Footer({
   c,
@@ -10,14 +11,14 @@ export default function Footer({
   lang,
   whatsapp,
   phoneHref,
-  onOpen,
+  projects,
 }: {
   c: Content;
   contact: Contact;
   lang: Lang;
   whatsapp: string;
   phoneHref: string;
-  onOpen: (id: TileId) => void;
+  projects: HomeProject[];
 }) {
   return (
     <footer className="site-footer" id="contact">
@@ -58,15 +59,10 @@ export default function Footer({
           <div>
             <p className="footer-disclaimer">{c.footer.disclaimer}</p>
             <div className="footer-links" style={{ marginTop: "1.4rem" }}>
-              {c.tiles.map((tile) => (
-                <button
-                  key={tile.id}
-                  type="button"
-                  className="footer-link"
-                  onClick={() => onOpen(tile.id)}
-                >
-                  {tile.index} — {tile.title}
-                </button>
+              {projects.map((project, index) => (
+                <a key={project.slug} className="footer-link" href={`/projects/${project.slug}?lang=${lang}`}>
+                  {String(index + 1).padStart(2, "0")} — {lang === "ar" ? project.nameAr : project.name}
+                </a>
               ))}
             </div>
           </div>
