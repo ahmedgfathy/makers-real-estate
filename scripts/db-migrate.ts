@@ -4,6 +4,7 @@ import { getPool, pingDb, withTransaction } from "../lib/db";
 import { seedProjects } from "../lib/seed-projects";
 
 const PORTFOLIO_CLEANUP = "sodic_lakes_eastvale_only_v1";
+const PORTFOLIO_PUBLICATION = "sodic_lakes_eastvale_publish_v1";
 const ACTIVE_PROJECT_SLUGS = ["the-lakes", "eastvale"] as const;
 
 /**
@@ -77,6 +78,46 @@ async function main() {
     console.log(
       `[migrate] portfolio pruned: ${portfolioCleanup.developers} developers, ` +
         `${portfolioCleanup.projects} projects, ${portfolioCleanup.units} units removed`
+    );
+  }
+
+  const portfolioPublication = await withTransaction(async (client) => {
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [PORTFOLIO_PUBLICATION]);
+    const applied = await client.query<{ name: string }>(
+      "SELECT name FROM app_migrations WHERE name = $1",
+      [PORTFOLIO_PUBLICATION]
+    );
+    if (applied.rows.length) return null;
+
+    const developer = await client.query(
+      `UPDATE developers
+          SET published = true, published_at = COALESCE(published_at, now()), updated_at = now()
+        WHERE slug = 'sodic' RETURNING slug`
+    );
+    const projects = await client.query(
+      `UPDATE projects
+          SET published = true, published_at = COALESCE(published_at, now()), updated_at = now()
+        WHERE slug = ANY($1::text[]) AND developer_slug = 'sodic' RETURNING slug`,
+      [ACTIVE_PROJECT_SLUGS]
+    );
+    const units = await client.query(
+      `UPDATE properties
+          SET published = true, published_at = COALESCE(published_at, now()), updated_at = now()
+        WHERE project_slug = ANY($1::text[]) RETURNING id`,
+      [ACTIVE_PROJECT_SLUGS]
+    );
+    await client.query("INSERT INTO app_migrations (name) VALUES ($1)", [PORTFOLIO_PUBLICATION]);
+
+    return {
+      developers: developer.rows.length,
+      projects: projects.rows.length,
+      units: units.rows.length,
+    };
+  });
+  if (portfolioPublication) {
+    console.log(
+      `[migrate] portfolio published: ${portfolioPublication.developers} developers, ` +
+        `${portfolioPublication.projects} projects, ${portfolioPublication.units} units`
     );
   }
 
