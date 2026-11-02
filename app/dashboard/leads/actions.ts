@@ -14,6 +14,69 @@ import {
   setFollowUpDate,
   updateLeadStatus,
 } from "@/lib/admin";
+import { importLeadsFromCsv } from "@/lib/lead-import";
+
+/** Uploaded spreadsheets are parsed in-request; keep the payload bounded. */
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+
+/** `/dashboard/leads?notice=…` — the page renders this as a banner. */
+function importNotice(notice: string, tone: "ok" | "bad" = "bad"): never {
+  redirect(
+    `/dashboard/leads?notice=${encodeURIComponent(notice)}&tone=${tone}`
+  );
+}
+
+/**
+ * Bulk-import a legacy lead spreadsheet from the dashboard.
+ *
+ * Runs the same rules as `npm run db:import-leads`: rows are classified from
+ * their notes and matched on phone digits, so re-uploading a file updates
+ * nothing that a consultant has already worked on.
+ */
+export async function importLeadsAction(formData: FormData) {
+  const username = await actor();
+
+  const file = formData.get("csv");
+  if (!(file instanceof File) || file.size === 0) importNotice("Choose a .csv file first");
+  if (file.size > MAX_UPLOAD_BYTES) {
+    importNotice(`File is ${(file.size / 1024 / 1024).toFixed(1)} MB — the limit is 2 MB`);
+  }
+  if (!/\.csv$/i.test(file.name) && !/csv|text\/plain/.test(file.type)) {
+    importNotice(`"${file.name}" does not look like a CSV`);
+  }
+
+  let result;
+  try {
+    result = await importLeadsFromCsv(await file.text());
+  } catch (err) {
+    importNotice(err instanceof Error ? err.message : "The import failed");
+  }
+
+  await recordAudit({
+    actor: username,
+    action: "lead.import",
+    entityType: "lead",
+    detail: {
+      file: file.name,
+      created: result.created,
+      existing: result.existing,
+      skipped: result.skipped,
+      failed: result.errors.length,
+      lead_ids: result.leadIds.slice(0, 1000),
+    },
+  });
+
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/dashboard/leads");
+  revalidatePath("/dashboard/follow-ups");
+
+  importNotice(
+    `${result.created} leads imported, ${result.existing} already in the CRM` +
+      (result.skipped ? `, ${result.skipped} empty rows skipped` : "") +
+      (result.errors.length ? `, ${result.errors.length} rows failed` : ""),
+    "ok"
+  );
+}
 
 function text(form: FormData, key: string): string | null {
   const value = form.get(key);

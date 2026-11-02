@@ -6,6 +6,7 @@ import {
   listLeads,
 } from "@/lib/admin";
 import { budget, phoneDigits, timeAgo, titleCase } from "@/lib/format";
+import { importLeadsAction } from "./actions";
 import { FollowUpBadge, SourceBadge, StatusBadge, TemperatureBadge } from "@/components/dashboard/Badges";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,8 @@ type Search = {
   status?: string;
   temperature?: string;
   followUp?: string;
+  notice?: string;
+  tone?: string;
 };
 
 const FOLLOW_UP_FILTERS = [
@@ -55,11 +58,29 @@ export default async function LeadsPage({
           </p>
         </div>
         <div className="dash-actions">
+          <form action={importLeadsAction} className="dash-import">
+            <label className="dash-filepicker">
+              <input type="file" name="csv" accept=".csv,text/csv" required />
+              <span>Choose CSV</span>
+            </label>
+            <button className="dash-btn" type="submit">
+              Import leads
+            </button>
+          </form>
           <a className="dash-btn dash-btn--gold" href="/dashboard/leads/new">
             + New lead
           </a>
         </div>
       </header>
+
+      {filters.notice ? (
+        <p
+          className={filters.tone === "ok" ? "dash-alert dash-alert--ok" : "dash-alert"}
+          style={{ marginBottom: "0.9rem" }}
+        >
+          {filters.notice}
+        </p>
+      ) : null}
 
       <section className="dash-stats" aria-label="Lead totals">
         <div className="dash-stat">
