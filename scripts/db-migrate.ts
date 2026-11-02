@@ -1,17 +1,30 @@
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { getPool, pingDb, withTransaction } from "../lib/db";
-import { seedProjects } from "../lib/seed-projects";
+import { getPool, pingDb, withTransaction, type TxClient } from "../lib/db";
 
-const PORTFOLIO_CLEANUP = "sodic_lakes_eastvale_only_v1";
-const PORTFOLIO_PUBLICATION = "sodic_lakes_eastvale_publish_v1";
-const ACTIVE_PROJECT_SLUGS = ["the-lakes", "eastvale"] as const;
+const REMOVE_PORTFOLIO_TABLES = "remove_portfolio_tables_v1";
+const REMOVE_PORTFOLIO_CONTENT = "remove_portfolio_content_v1";
+const REMOVE_DEMO_LEADS = "remove_demo_leads_v1";
+const PURGE_TEST_LEADS = "purge_test_leads_v1";
+const DEMO_LEAD_PHONES = [
+  "0100 214 8831",
+  "0112 905 7744",
+  "0109 441 2208",
+  "0128 330 1190",
+  "0106 778 4521",
+  "0115 602 3377",
+  "0100 887 5512",
+  "0122 410 6688",
+  "0110 553 9024",
+  "0101 202 7745",
+  "0127 911 4402",
+  "0104 668 1123",
+  "01000000000",
+  "01000000001",
+] as const;
+const TEST_LEAD_NAMES = ["Dev Test", "Test User", "Dev Test FP", "Test", "ABC", "test"] as const;
 
-/**
- * Applies db/schema.sql (idempotent — safe to run repeatedly).
- *   npm run db:migrate
- */
-
+/** Applies db/schema.sql, including removal of the retired portfolio tables. */
 function schemaPath(): string {
   const root = process.env.INIT_CWD || process.cwd();
   const candidate = path.resolve(root, "db/schema.sql");
@@ -19,120 +32,79 @@ function schemaPath(): string {
   throw new Error(`schema.sql not found at ${candidate}`);
 }
 
+/** Runs `fn` exactly once per database, guarded by the app_migrations table. */
+async function runOnce<T>(name: string, fn: (client: TxClient) => Promise<T>): Promise<T | null> {
+  return withTransaction(async (client) => {
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [name]);
+    const applied = await client.query<{ name: string }>(
+      "SELECT name FROM app_migrations WHERE name = $1",
+      [name]
+    );
+    if (applied.rows.length) return null;
+    const result = await fn(client);
+    await client.query("INSERT INTO app_migrations (name) VALUES ($1)", [name]);
+    return result;
+  });
+}
+
+/** Deletes leads whose rows were produced by testing rather than by a buyer. */
+async function deleteTestLeads(client: TxClient): Promise<number> {
+  const result = await client.query<{ id: number }>(
+    `DELETE FROM leads
+      WHERE email ILIKE '%@example.com'
+         OR external_id LIKE 'fb-lead-%'
+         OR full_name ILIKE 'test%'
+         OR full_name = ANY($1::text[])
+         OR phone = ANY($2::text[])
+         OR campaign ILIKE '%test%'
+      RETURNING id`,
+    [TEST_LEAD_NAMES, DEMO_LEAD_PHONES]
+  );
+  if (result.rows.length) {
+    await client.query(
+      "DELETE FROM audit_log WHERE entity_type = 'lead' AND entity_id = ANY($1::text[])",
+      [result.rows.map((row) => String(row.id))]
+    );
+  }
+  return result.rows.length;
+}
+
 async function main() {
   const file = schemaPath();
-  const sql = readFileSync(file, "utf8");
-
   console.log(`[migrate] applying ${file}`);
   const pool = getPool();
-  await pool.query(sql);
+  await pool.query(readFileSync(file, "utf8"));
 
-  // One-time portfolio cleanup. Keep CRM-created data intact on future builds.
   await pool.query(
     `CREATE TABLE IF NOT EXISTS app_migrations (
        name text PRIMARY KEY,
        applied_at timestamptz NOT NULL DEFAULT now()
      )`
   );
-  const portfolioCleanup = await withTransaction(async (client) => {
-    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [PORTFOLIO_CLEANUP]);
-    const applied = await client.query<{ name: string }>(
-      "SELECT name FROM app_migrations WHERE name = $1",
-      [PORTFOLIO_CLEANUP]
-    );
-    if (applied.rows.length) return null;
 
-    // Ensure both requested SODIC project records exist before pruning the rest.
-    await seedProjects(client);
-    await client.query(
-      `UPDATE projects
-          SET developer_slug = 'sodic',
-              position = CASE slug WHEN 'the-lakes' THEN 1 WHEN 'eastvale' THEN 2 END,
-              updated_at = now()
-        WHERE slug = ANY($1::text[])`,
-      [ACTIVE_PROJECT_SLUGS]
-    );
-
-    const removedUnits = await client.query<{ id: number }>(
-      `DELETE FROM properties
-        WHERE project_slug IS NULL OR project_slug <> ALL($1::text[])
-        RETURNING id`,
-      [ACTIVE_PROJECT_SLUGS]
-    );
-    const removedProjects = await client.query<{ slug: string }>(
-      `DELETE FROM projects WHERE slug <> ALL($1::text[]) RETURNING slug`,
-      [ACTIVE_PROJECT_SLUGS]
-    );
-    const removedDevelopers = await client.query<{ slug: string }>(
-      `DELETE FROM developers WHERE slug <> 'sodic' RETURNING slug`
-    );
-    await client.query("INSERT INTO app_migrations (name) VALUES ($1)", [PORTFOLIO_CLEANUP]);
-
-    return {
-      units: removedUnits.rows.length,
-      projects: removedProjects.rows.length,
-      developers: removedDevelopers.rows.length,
-    };
+  // One-time destructive migrations from the retired portfolio front end.
+  const removedTables = await runOnce(REMOVE_PORTFOLIO_TABLES, async (client) => {
+    await client.query("DROP TABLE IF EXISTS properties, projects, developers CASCADE");
+    return true;
   });
-  if (portfolioCleanup) {
-    console.log(
-      `[migrate] portfolio pruned: ${portfolioCleanup.developers} developers, ` +
-        `${portfolioCleanup.projects} projects, ${portfolioCleanup.units} units removed`
-    );
+  if (removedTables) {
+    console.log("[migrate] removed developer, project, and property inventory tables and data");
   }
 
-  const portfolioPublication = await withTransaction(async (client) => {
-    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [PORTFOLIO_PUBLICATION]);
-    const applied = await client.query<{ name: string }>(
-      "SELECT name FROM app_migrations WHERE name = $1",
-      [PORTFOLIO_PUBLICATION]
-    );
-    if (applied.rows.length) return null;
-
-    const developer = await client.query(
-      `UPDATE developers
-          SET published = true, published_at = COALESCE(published_at, now()), updated_at = now()
-        WHERE slug = 'sodic' RETURNING slug`
-    );
-    const projects = await client.query(
-      `UPDATE projects
-          SET published = true, published_at = COALESCE(published_at, now()), updated_at = now()
-        WHERE slug = ANY($1::text[]) AND developer_slug = 'sodic' RETURNING slug`,
-      [ACTIVE_PROJECT_SLUGS]
-    );
-    const units = await client.query(
-      `UPDATE properties
-          SET published = true, published_at = COALESCE(published_at, now()), updated_at = now()
-        WHERE project_slug = ANY($1::text[]) RETURNING id`,
-      [ACTIVE_PROJECT_SLUGS]
-    );
-    await client.query("INSERT INTO app_migrations (name) VALUES ($1)", [PORTFOLIO_PUBLICATION]);
-
-    return {
-      developers: developer.rows.length,
-      projects: projects.rows.length,
-      units: units.rows.length,
-    };
+  const removedContent = await runOnce(REMOVE_PORTFOLIO_CONTENT, async (client) => {
+    await client.query("DROP TABLE IF EXISTS panel_sections, panels, tiles CASCADE");
+    await client.query("ALTER TABLE site_content DROP COLUMN IF EXISTS grid, DROP COLUMN IF EXISTS panel");
+    return true;
   });
-  if (portfolioPublication) {
-    console.log(
-      `[migrate] portfolio published: ${portfolioPublication.developers} developers, ` +
-        `${portfolioPublication.projects} projects, ${portfolioPublication.units} units`
-    );
+  if (removedContent) {
+    console.log("[migrate] removed collection tiles, detail panels and unit/price sections");
   }
 
-  const { rows: portfolioCounts } = await pool.query<{
-    developers: number;
-    projects: number;
-    units: number;
-  }>(
-    `SELECT (SELECT count(*)::int FROM developers) AS developers,
-            (SELECT count(*)::int FROM projects) AS projects,
-            (SELECT count(*)::int FROM properties) AS units`
-  );
+  const removedDemoLeads = await runOnce(REMOVE_DEMO_LEADS, deleteTestLeads);
+  const purgedTestLeads = await runOnce(PURGE_TEST_LEADS, deleteTestLeads);
   console.log(
-    `[migrate] portfolio: ${portfolioCounts[0].developers} developers, ` +
-      `${portfolioCounts[0].projects} projects, ${portfolioCounts[0].units} units`
+    `[migrate] removed ${(removedDemoLeads ?? 0) + (purgedTestLeads ?? 0)} demo/test lead records` +
+      (purgedTestLeads === null ? " (purge already applied)" : "")
   );
 
   const ping = await pingDb();
@@ -144,19 +116,18 @@ async function main() {
       WHERE table_schema = 'public'
       ORDER BY table_name`
   );
-  console.log("[migrate] ok — tables:", rows.map((r) => r.name).join(", "));
+  console.log("[migrate] ok — tables:", rows.map((row) => row.name).join(", "));
 
-  const { rows: counts } = await pool.query<{ locale: string; tiles: number }>(
-    `SELECT l.code AS locale, count(t.id)::int AS tiles
-       FROM locales l LEFT JOIN tiles t ON t.lang = l.code
+  const { rows: counts } = await pool.query<{ locale: string; pages: number }>(
+    `SELECT l.code AS locale, count(s.lang)::int AS pages
+       FROM locales l LEFT JOIN site_content s ON s.lang = l.code
       GROUP BY l.code ORDER BY l.code`
   );
-  for (const c of counts) console.log(`[migrate] locale ${c.locale}: ${c.tiles} tiles`);
+  for (const locale of counts) console.log(`[migrate] locale ${locale.locale}: ${locale.pages} landing chrome`);
+  await pool.end();
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((err: unknown) => {
-    console.error("[migrate] failed:", err instanceof Error ? err.message : err);
-    process.exit(1);
-  });
+main().catch((error: unknown) => {
+  console.error("[migrate] failed:", error instanceof Error ? error.message : error);
+  process.exit(1);
+});

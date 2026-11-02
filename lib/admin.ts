@@ -4,11 +4,62 @@ import { query } from "./db";
 /* Leads                                                               */
 /* ------------------------------------------------------------------ */
 
-export const LEAD_SOURCES = ["facebook", "instagram", "website", "whatsapp", "manual"] as const;
+export const LEAD_SOURCES = [
+  "facebook",
+  "instagram",
+  "website",
+  "whatsapp",
+  "referral",
+  "walk-in",
+  "legacy",
+  "manual",
+] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
 
-export const LEAD_STATUSES = ["new", "contacted", "qualified", "viewing", "won", "lost"] as const;
+export const LEAD_STATUSES = [
+  "new",
+  "contacted",
+  "qualified",
+  "viewing",
+  "nurture",
+  "won",
+  "lost",
+] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+/** Stages that no longer need a follow-up, so they leave the queue. */
+export const CLOSED_STATUSES = ["won", "lost"] as const;
+
+export const LEAD_TEMPERATURES = ["hot", "warm", "cold"] as const;
+export type LeadTemperature = (typeof LEAD_TEMPERATURES)[number];
+
+export const LEAD_INTENTS = ["buyer", "investor", "renter"] as const;
+export type LeadIntent = (typeof LEAD_INTENTS)[number];
+
+export const LEAD_PAYMENTS = ["cash", "installments", "mortgage", "undecided"] as const;
+export type LeadPayment = (typeof LEAD_PAYMENTS)[number];
+
+export const FOLLOW_UP_CHANNELS = [
+  "call",
+  "whatsapp",
+  "email",
+  "visit",
+  "meeting",
+  "other",
+] as const;
+export type FollowUpChannel = (typeof FOLLOW_UP_CHANNELS)[number];
+
+export const FOLLOW_UP_OUTCOMES = [
+  "reached",
+  "no_answer",
+  "callback_later",
+  "wrong_number",
+  "not_interested",
+  "viewing_booked",
+  "sent_brief",
+  "other",
+] as const;
+export type FollowUpOutcome = (typeof FOLLOW_UP_OUTCOMES)[number];
 
 export type Lead = {
   id: number;
@@ -22,50 +73,89 @@ export type Lead = {
   project: string | null;
   property_type: string | null;
   bedrooms: number | null;
+  preferred_area: string | null;
   budget_min: number | null;
   budget_max: number | null;
+  payment_preference: LeadPayment | null;
+  intent: LeadIntent | null;
+  temperature: LeadTemperature | null;
   message: string | null;
   status: LeadStatus;
   assigned_to: string | null;
   consent: boolean;
+  next_follow_up_on: string | null;
+  last_follow_up_at: Date | null;
+  follow_up_count: number;
   created_at: Date;
   updated_at: Date;
+};
+
+export type FollowUp = {
+  id: number;
+  lead_id: number;
+  logged_at: Date;
+  author: string;
+  channel: FollowUpChannel;
+  outcome: FollowUpOutcome;
+  note: string | null;
+  follow_up_on: string | null;
 };
 
 export type LeadFilters = {
   q?: string;
   source?: string;
   status?: string;
+  temperature?: string;
+  assignedTo?: string;
+  /** "overdue" | "today" | "due" (today or earlier) | "none" (never scheduled) */
+  followUp?: string;
   limit?: number;
+  /** Only leads that are still in play (not won / lost). */
+  open?: boolean;
+  /** "received" (default) or "follow_up" — put the follow-up queue first. */
+  order?: string;
 };
 
 export type NewLeadInput = {
   full_name: string;
   phone: string;
   email?: string | null;
-  source?: string;
+  source?: string | null;
   form_name?: string | null;
   campaign?: string | null;
   external_id?: string | null;
   project?: string | null;
   property_type?: string | null;
   bedrooms?: number | null;
+  preferred_area?: string | null;
   budget_min?: number | null;
   budget_max?: number | null;
+  payment_preference?: string | null;
+  intent?: string | null;
+  temperature?: string | null;
   message?: string | null;
-  status?: string;
+  status?: string | null;
   assigned_to?: string | null;
   consent?: boolean;
+  next_follow_up_on?: string | null;
 };
 
 const LEAD_SELECT = `
   id::int AS id,
   full_name, phone, email, source, form_name, campaign, external_id,
-  project, property_type, bedrooms,
+  project, property_type, bedrooms, preferred_area,
   budget_min::float8 AS budget_min,
   budget_max::float8 AS budget_max,
-  message, status, assigned_to, consent, created_at, updated_at
+  payment_preference, intent, temperature, message, status, assigned_to, consent,
+  to_char(next_follow_up_on, 'YYYY-MM-DD') AS next_follow_up_on,
+  last_follow_up_at, follow_up_count, created_at, updated_at
 `;
+
+const OPEN_LEADS = `status NOT IN ('won', 'lost')`;
+
+function oneOf<T extends readonly string[]>(values: T, value: string | null | undefined, fallback: string | null): string | null {
+  return value && (values as readonly string[]).includes(value) ? value : fallback;
+}
 
 export async function listLeads(filters: LeadFilters = {}): Promise<Lead[]> {
   const where: string[] = [];
@@ -75,7 +165,7 @@ export async function listLeads(filters: LeadFilters = {}): Promise<Lead[]> {
     params.push(`%${filters.q.trim()}%`);
     const p = `$${params.length}`;
     where.push(
-      `(full_name ILIKE ${p} OR phone ILIKE ${p} OR COALESCE(email, '') ILIKE ${p} OR COALESCE(project, '') ILIKE ${p})`
+      `(full_name ILIKE ${p} OR phone ILIKE ${p} OR COALESCE(email, '') ILIKE ${p} OR COALESCE(project, '') ILIKE ${p} OR COALESCE(message, '') ILIKE ${p} OR COALESCE(assigned_to, '') ILIKE ${p})`
     );
   }
   if (filters.source?.trim()) {
@@ -86,15 +176,47 @@ export async function listLeads(filters: LeadFilters = {}): Promise<Lead[]> {
     params.push(filters.status.trim());
     where.push(`status = $${params.length}`);
   }
+  const temperature = oneOf(LEAD_TEMPERATURES, filters.temperature, null);
+  if (temperature) {
+    params.push(temperature);
+    where.push(`temperature = $${params.length}`);
+  }
+  if (filters.assignedTo?.trim()) {
+    params.push(filters.assignedTo.trim());
+    where.push(`assigned_to = $${params.length}`);
+  }
+  switch (filters.followUp) {
+    case "overdue":
+      where.push(`${OPEN_LEADS} AND next_follow_up_on < CURRENT_DATE`);
+      break;
+    case "today":
+      where.push(`${OPEN_LEADS} AND next_follow_up_on = CURRENT_DATE`);
+      break;
+    case "due":
+      where.push(`${OPEN_LEADS} AND next_follow_up_on <= CURRENT_DATE`);
+      break;
+    case "none":
+      where.push(`${OPEN_LEADS} AND next_follow_up_on IS NULL`);
+      break;
+    default:
+      break;
+  }
+  if (filters.open) where.push(OPEN_LEADS);
 
   params.push(Math.min(Math.max(filters.limit ?? 100, 1), 500));
+  const limit = `$${params.length}`;
+
+  const order =
+    filters.order === "follow_up"
+      ? "next_follow_up_on ASC NULLS LAST, created_at DESC"
+      : "created_at DESC";
 
   return query<Lead>(
     `SELECT ${LEAD_SELECT}
        FROM leads
       ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-      ORDER BY created_at DESC
-      LIMIT $${params.length}`,
+      ORDER BY ${order}
+      LIMIT ${limit}`,
     params
   );
 }
@@ -104,14 +226,30 @@ export async function getLead(id: number): Promise<Lead | null> {
   return rows[0] ?? null;
 }
 
+/**
+ * Match a lead by its contact string: digits for a phone number, or the
+ * lowercased `@handle` when the consultant only has a social contact.
+ */
+export async function findLeadByContact(key: string): Promise<Lead | null> {
+  const rows = await query<Lead>(
+    `SELECT ${LEAD_SELECT} FROM leads
+      WHERE regexp_replace(phone, '\\D', '', 'g') = $1
+           OR lower(replace(phone, ' ', '')) = $1
+      ORDER BY id LIMIT 1`,
+    [key]
+  );
+  return rows[0] ?? null;
+}
+
 export async function createLead(input: NewLeadInput): Promise<number> {
   const rows = await query<{ id: number }>(
     `INSERT INTO leads (
        full_name, phone, email, source, form_name, campaign, external_id,
-       project, property_type, bedrooms, budget_min, budget_max, message,
-       status, assigned_to, consent
+       project, property_type, bedrooms, preferred_area, budget_min, budget_max,
+       payment_preference, intent, temperature, message, status, assigned_to,
+       consent, next_follow_up_on
      ) VALUES (
-       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
      )
      ON CONFLICT (external_id) WHERE external_id IS NOT NULL DO NOTHING
      RETURNING id::int AS id`,
@@ -119,19 +257,24 @@ export async function createLead(input: NewLeadInput): Promise<number> {
       input.full_name,
       input.phone,
       empty(input.email),
-      input.source ?? "manual",
+      oneOf(LEAD_SOURCES, input.source, "manual"),
       empty(input.form_name),
       empty(input.campaign),
       empty(input.external_id),
       empty(input.project),
       empty(input.property_type),
       input.bedrooms ?? null,
+      empty(input.preferred_area),
       input.budget_min ?? null,
       input.budget_max ?? null,
+      oneOf(LEAD_PAYMENTS, input.payment_preference, null),
+      oneOf(LEAD_INTENTS, input.intent, null),
+      oneOf(LEAD_TEMPERATURES, input.temperature, null),
       empty(input.message),
-      input.status ?? "new",
+      oneOf(LEAD_STATUSES, input.status, "new"),
       empty(input.assigned_to),
       input.consent ?? false,
+      input.next_follow_up_on ?? null,
     ]
   );
 
@@ -145,15 +288,90 @@ export async function createLead(input: NewLeadInput): Promise<number> {
   return existing[0].id;
 }
 
+/** Pipeline status only — used by the quick action on the lead page. */
 export async function updateLeadStatus(id: number, status: string): Promise<void> {
-  await query("UPDATE leads SET status = $2, updated_at = now() WHERE id = $1", [id, status]);
+  const valid = oneOf(LEAD_STATUSES, status, null);
+  if (!valid) return;
+  await query("UPDATE leads SET status = $2, updated_at = now() WHERE id = $1", [id, valid]);
 }
+
+/** Schedule (or clear) the next follow-up date. */
+export async function setFollowUpDate(id: number, date: string | null): Promise<void> {
+  await query("UPDATE leads SET next_follow_up_on = $2, updated_at = now() WHERE id = $1", [
+    id,
+    date,
+  ]);
+}
+
+export type FollowUpInput = {
+  lead_id: number;
+  author: string;
+  channel?: string | null;
+  outcome?: string | null;
+  note?: string | null;
+  follow_up_on?: string | null;
+  logged_at?: Date;
+};
+
+/**
+ * Records one contact attempt and moves the lead's follow-up counters:
+ * the log is the source of truth, the lead row carries the queue state.
+ */
+export async function addFollowUp(input: FollowUpInput): Promise<number> {
+  const rows = await query<{ id: number }>(
+    `INSERT INTO lead_follow_ups (lead_id, logged_at, author, channel, outcome, note, follow_up_on)
+     VALUES ($1, COALESCE($2, now()), $3, $4, $5, $6, $7)
+     RETURNING id::int AS id`,
+    [
+      input.lead_id,
+      input.logged_at ?? null,
+      input.author,
+      oneOf(FOLLOW_UP_CHANNELS, input.channel, "call"),
+      oneOf(FOLLOW_UP_OUTCOMES, input.outcome, "reached"),
+      empty(input.note),
+      input.follow_up_on ?? null,
+    ]
+  );
+
+  await query(
+    `UPDATE leads
+        SET follow_up_count = follow_up_count + 1,
+            last_follow_up_at = COALESCE($2, now()),
+            next_follow_up_on = COALESCE($3, next_follow_up_on),
+            updated_at = now()
+      WHERE id = $1`,
+    [input.lead_id, input.logged_at ?? null, input.follow_up_on ?? null]
+  );
+
+  if (!rows[0]) throw new Error("Follow-up could not be recorded");
+  return rows[0].id;
+}
+
+export async function listFollowUps(leadId: number): Promise<FollowUp[]> {
+  return query<FollowUp>(
+    `SELECT id::int AS id,
+            lead_id::int AS lead_id,
+            logged_at, author, channel, outcome, note,
+            to_char(follow_up_on, 'YYYY-MM-DD') AS follow_up_on
+       FROM lead_follow_ups
+      WHERE lead_id = $1
+      ORDER BY logged_at DESC, id DESC`,
+    [leadId]
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Dashboard aggregates                                                */
+/* ------------------------------------------------------------------ */
 
 export type LeadStats = {
   total: number;
   new: number;
   facebook: number;
   qualified: number;
+  open: number;
+  hot: number;
+  unassigned: number;
 };
 
 export async function getLeadStats(): Promise<LeadStats> {
@@ -161,10 +379,13 @@ export async function getLeadStats(): Promise<LeadStats> {
     `SELECT count(*)::int AS total,
             count(*) FILTER (WHERE status = 'new')::int AS new,
             count(*) FILTER (WHERE source = 'facebook')::int AS facebook,
-            count(*) FILTER (WHERE status IN ('qualified', 'viewing', 'won'))::int AS qualified
+            count(*) FILTER (WHERE status IN ('qualified', 'viewing', 'won'))::int AS qualified,
+            count(*) FILTER (WHERE ${OPEN_LEADS})::int AS open,
+            count(*) FILTER (WHERE temperature = 'hot' AND ${OPEN_LEADS})::int AS hot,
+            count(*) FILTER (WHERE COALESCE(assigned_to, '') = '' AND ${OPEN_LEADS})::int AS unassigned
        FROM leads`
   );
-  return rows[0] ?? { total: 0, new: 0, facebook: 0, qualified: 0 };
+  return rows[0] ?? { total: 0, new: 0, facebook: 0, qualified: 0, open: 0, hot: 0, unassigned: 0 };
 }
 
 export async function getLeadSourceBreakdown(): Promise<{ source: string; count: number }[]> {
@@ -176,285 +397,56 @@ export async function getLeadSourceBreakdown(): Promise<{ source: string; count:
   );
 }
 
+export async function getConsultantBreakdown(): Promise<{ consultant: string; count: number; due: number }[]> {
+  return query<{ consultant: string; count: number; due: number }>(
+    `SELECT COALESCE(NULLIF(assigned_to, ''), 'Unassigned') AS consultant,
+            count(*)::int AS count,
+            count(*) FILTER (WHERE ${OPEN_LEADS} AND next_follow_up_on <= CURRENT_DATE)::int AS due
+       FROM leads
+      GROUP BY 1
+      ORDER BY count DESC, consultant`
+  );
+}
+
+export type FollowUpAlerts = {
+  overdue: number;
+  dueToday: number;
+  upcoming: number;
+  unscheduled: number;
+};
+
+/** The bell on every dashboard page: how much of the queue is waiting. */
+export async function getFollowUpAlerts(): Promise<FollowUpAlerts> {
+  const rows = await query<{ overdue: number; due_today: number; upcoming: number; unscheduled: number }>(
+    `SELECT count(*) FILTER (WHERE next_follow_up_on < CURRENT_DATE)::int AS overdue,
+            count(*) FILTER (WHERE next_follow_up_on = CURRENT_DATE)::int AS due_today,
+            count(*) FILTER (WHERE next_follow_up_on > CURRENT_DATE
+                              AND next_follow_up_on <= CURRENT_DATE + 7)::int AS upcoming,
+            count(*) FILTER (WHERE next_follow_up_on IS NULL)::int AS unscheduled
+       FROM leads
+      WHERE ${OPEN_LEADS}`
+  );
+  const row = rows[0] ?? { overdue: 0, due_today: 0, upcoming: 0, unscheduled: 0 };
+  return {
+    overdue: row.overdue,
+    dueToday: row.due_today,
+    upcoming: row.upcoming,
+    unscheduled: row.unscheduled,
+  };
+}
+
+/** Leads whose follow-up is due today or already overdue, oldest first. */
+export async function getDueFollowUps(limit = 8): Promise<Lead[]> {
+  return query<Lead>(
+    `SELECT ${LEAD_SELECT}
+       FROM leads
+      WHERE ${OPEN_LEADS} AND next_follow_up_on <= CURRENT_DATE
+      ORDER BY next_follow_up_on ASC
+      LIMIT ${Math.min(Math.max(limit, 1), 200)}`
+  );
+}
+
 /* ------------------------------------------------------------------ */
-/* Property inventory                                                  */
-/* ------------------------------------------------------------------ */
-
-export const PROPERTY_TYPES = [
-  "studio",
-  "apartment",
-  "duplex",
-  "penthouse",
-  "townhouse",
-  "villa",
-  "chalet",
-] as const;
-
-export const PROPERTY_STATUSES = ["available", "reserved", "sold", "off_plan"] as const;
-
-export type Property = {
-  id: number;
-  code: string;
-  title: string;
-  project: string;
-  project_slug: string | null;
-  developer_slug: string | null;
-  developer_name: string | null;
-  project_published: boolean | null;
-  developer_published: boolean | null;
-  phase: string | null;
-  property_type: string;
-  listing_type: string;
-  status: string;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  built_up_area: number | null;
-  garden_area: number | null;
-  roof_area: number | null;
-  floor: string | null;
-  finishing: string | null;
-  view: string | null;
-  currency: string;
-  price: number;
-  down_payment: number;
-  installment_years: number;
-  monthly_installment: number | null;
-  delivery: string | null;
-  description: string | null;
-  amenities: string[];
-  images: string[];
-  video: string | null;
-  featured: boolean;
-  published: boolean;
-  created_at: Date;
-  updated_at: Date;
-};
-
-export type PropertyFilters = {
-  q?: string;
-  status?: string;
-  type?: string;
-  limit?: number;
-  /** Only units switched on for the public website. */
-  publishedOnly?: boolean;
-  projectSlug?: string;
-};
-
-export type NewPropertyInput = {
-  code: string;
-  title: string;
-  project?: string;
-  project_slug?: string | null;
-  phase?: string | null;
-  property_type: string;
-  listing_type?: string;
-  status?: string;
-  bedrooms?: number | null;
-  bathrooms?: number | null;
-  built_up_area?: number | null;
-  garden_area?: number | null;
-  roof_area?: number | null;
-  floor?: string | null;
-  finishing?: string | null;
-  view?: string | null;
-  price: number;
-  down_payment?: number;
-  installment_years?: number;
-  monthly_installment?: number | null;
-  delivery?: string | null;
-  description?: string | null;
-  amenities?: string[];
-  images?: string[];
-  video?: string | null;
-  featured?: boolean;
-  published?: boolean;
-};
-
-const PROPERTY_SELECT = `
-  u.id::int AS id, u.code, u.title, COALESCE(pr.name, u.project) AS project,
-  u.project_slug, pr.developer_slug, d.name AS developer_name, pr.published AS project_published,
-  d.published AS developer_published, u.phase, u.property_type, u.listing_type, u.status,
-  u.bedrooms, u.bathrooms,
-  u.built_up_area::float8 AS built_up_area,
-  u.garden_area::float8 AS garden_area,
-  u.roof_area::float8 AS roof_area,
-  u.floor, u.finishing, u.view, u.currency,
-  u.price::float8 AS price,
-  u.down_payment::float8 AS down_payment,
-  u.installment_years,
-  u.monthly_installment::float8 AS monthly_installment,
-  u.delivery, u.description, u.amenities, u.images, u.video, u.featured,
-  u.published, u.created_at, u.updated_at
-`;
-
-export async function listProperties(filters: PropertyFilters = {}): Promise<Property[]> {
-  const where: string[] = [];
-  const params: unknown[] = [];
-
-  if (filters.q?.trim()) {
-    params.push(`%${filters.q.trim()}%`);
-    const p = `$${params.length}`;
-    where.push(
-      `(u.code ILIKE ${p} OR u.title ILIKE ${p} OR COALESCE(pr.name, u.project) ILIKE ${p} OR COALESCE(u.phase, '') ILIKE ${p})`
-    );
-  }
-  if (filters.status?.trim()) {
-    params.push(filters.status.trim());
-    where.push(`u.status = $${params.length}`);
-  }
-  if (filters.type?.trim()) {
-    params.push(filters.type.trim());
-    where.push(`u.property_type = $${params.length}`);
-  }
-  if (filters.projectSlug) {
-    params.push(filters.projectSlug);
-    where.push(`u.project_slug = $${params.length}`);
-  }
-  if (filters.publishedOnly) {
-    where.push("u.published AND (u.project_slug IS NULL OR (pr.published AND d.published))");
-  }
-
-  params.push(Math.min(Math.max(filters.limit ?? 200, 1), 500));
-
-  return query<Property>(
-    `SELECT ${PROPERTY_SELECT}
-       FROM properties u
-       LEFT JOIN projects pr ON pr.slug = u.project_slug
-       LEFT JOIN developers d ON d.slug = pr.developer_slug
-      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-      ORDER BY u.featured DESC, u.created_at DESC, u.code
-      LIMIT $${params.length}`,
-    params
-  );
-}
-
-export async function getProperty(id: number): Promise<Property | null> {
-  const rows = await query<Property>(
-    `SELECT ${PROPERTY_SELECT}
-       FROM properties u
-       LEFT JOIN projects pr ON pr.slug = u.project_slug
-       LEFT JOIN developers d ON d.slug = pr.developer_slug
-      WHERE u.id = $1`,
-    [id]
-  );
-  return rows[0] ?? null;
-}
-
-export async function updatePropertyStatus(id: number, status: string): Promise<void> {
-  await query("UPDATE properties SET status = $2, updated_at = now() WHERE id = $1", [id, status]);
-}
-
-/** Flips the public website switch. Only admin sessions may call this. */
-export async function setPropertyPublished(id: number, published: boolean): Promise<void> {
-  await query(
-    `UPDATE properties
-        SET published = $2,
-            published_at = CASE WHEN $2 THEN COALESCE(published_at, now()) ELSE NULL END,
-            updated_at = now()
-      WHERE id = $1`,
-    [id, published]
-  );
-}
-
-export async function createProperty(input: NewPropertyInput): Promise<number | null> {
-  const years = input.installment_years ?? 10;
-  const monthly =
-    input.monthly_installment ??
-    (years > 0 ? Math.round(input.price / (years * 12)) : null);
-
-  const rows = await query<{ id: number }>(
-    `INSERT INTO properties (
-       code, title, project, project_slug, phase, property_type, listing_type, status,
-       bedrooms, bathrooms, built_up_area, garden_area, roof_area, floor,
-       finishing, view, price, down_payment, installment_years,
-       monthly_installment, delivery, description, amenities, images, video,
-       featured, published, published_at
-     ) VALUES (
-       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-       $17, $18, $19, $20, $21, $22, $23, $24, $25, $26,
-       CASE WHEN $27 THEN now() ELSE NULL END
-     )
-     ON CONFLICT (code) DO NOTHING
-     RETURNING id::int AS id`,
-    [
-      input.code,
-      input.title,
-      input.project ?? "SODIC East",
-      input.project_slug ?? null,
-      empty(input.phase),
-      input.property_type,
-      input.listing_type ?? "sale",
-      input.status ?? "available",
-      input.bedrooms ?? null,
-      input.bathrooms ?? null,
-      input.built_up_area ?? null,
-      input.garden_area ?? null,
-      input.roof_area ?? null,
-      empty(input.floor),
-      empty(input.finishing),
-      empty(input.view),
-      input.price,
-      input.down_payment ?? 0,
-      years,
-      monthly,
-      empty(input.delivery),
-      empty(input.description),
-      JSON.stringify(input.amenities ?? []),
-      JSON.stringify(input.images ?? []),
-      empty(input.video),
-      input.featured ?? false,
-      input.published ?? false,
-    ]
-  );
-
-  return rows[0]?.id ?? null;
-}
-
-export async function updateProperty(id: number, input: NewPropertyInput): Promise<void> {
-  const years = input.installment_years ?? 10;
-  const monthly = input.monthly_installment ?? (years > 0 ? Math.round(input.price / (years * 12)) : null);
-  await query(
-    `UPDATE properties SET
-       code = $2, title = $3, project = $4, project_slug = $5, phase = $6,
-       property_type = $7, listing_type = $8, status = $9, bedrooms = $10, bathrooms = $11,
-       built_up_area = $12, garden_area = $13, roof_area = $14, floor = $15,
-       finishing = $16, view = $17, price = $18, down_payment = $19,
-       installment_years = $20, monthly_installment = $21, delivery = $22,
-       description = $23, amenities = $24, images = $25, video = $26,
-       featured = $27, published = $28,
-       published_at = CASE WHEN $28 THEN COALESCE(published_at, now()) ELSE NULL END,
-       updated_at = now()
-     WHERE id = $1`,
-    [id, input.code, input.title, input.project ?? "", input.project_slug ?? null,
-      empty(input.phase), input.property_type, input.listing_type ?? "sale", input.status ?? "available",
-      input.bedrooms ?? null, input.bathrooms ?? null, input.built_up_area ?? null,
-      input.garden_area ?? null, input.roof_area ?? null, empty(input.floor), empty(input.finishing),
-      empty(input.view), input.price, input.down_payment ?? 0, years, monthly,
-      empty(input.delivery), empty(input.description), JSON.stringify(input.amenities ?? []),
-      JSON.stringify(input.images ?? []), empty(input.video), input.featured ?? false, input.published ?? false]
-  );
-}
-
-export type PropertyStats = {
-  total: number;
-  available: number;
-  featured: number;
-  published: number;
-  value: number;
-};
-
-export async function getPropertyStats(): Promise<PropertyStats> {
-  const rows = await query<PropertyStats>(
-    `SELECT count(*)::int AS total,
-            count(*) FILTER (WHERE status = 'available')::int AS available,
-            count(*) FILTER (WHERE featured)::int AS featured,
-            count(*) FILTER (WHERE published)::int AS published,
-            COALESCE(sum(price), 0)::float8 AS value
-       FROM properties`
-  );
-  return rows[0] ?? { total: 0, available: 0, featured: 0, published: 0, value: 0 };
-}
-
 function empty(value: string | null | undefined): string | null {
   if (value == null) return null;
   const trimmed = value.trim();

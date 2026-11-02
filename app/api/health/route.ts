@@ -18,7 +18,6 @@ export async function GET() {
         ? { version: (db.version ?? "").split(" ").slice(0, 2).join(" ") }
         : { error: db.error },
       locales: Object.keys(site.content),
-      tiles: { en: site.content.en.tiles.length, ar: site.content.ar.tiles.length },
       contact: { name: site.contact.name.en, phone: site.contact.phoneLabel },
       uptimeSec: Math.round(process.uptime()),
       ts: new Date().toISOString(),

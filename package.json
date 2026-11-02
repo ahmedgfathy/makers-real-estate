@@ -9,8 +9,8 @@
     "preview": "next build && next start",
     "typecheck": "tsc --noEmit",
     "db:migrate": "node --env-file-if-exists=.env --import tsx scripts/db-migrate.ts",
-    "db:seed": "tsx --env-file=.env scripts/db-seed.ts",
-    "db:seed:projects": "tsx --env-file=.env scripts/db-seed-projects.ts",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/db-seed.ts",
+    "db:import-leads": "tsx --env-file-if-exists=.env scripts/db-import-leads.ts",
     "db:setup": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {

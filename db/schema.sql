@@ -1,6 +1,7 @@
 -- Makers Real Estate — PostgreSQL schema
--- Content is stored per locale (en / ar). Sections are polymorphic, so their
--- payload lives in jsonb while the structural columns stay relational.
+-- The public site is a single landing page whose chrome is stored per locale
+-- (en / ar). Everything else in here is CRM: leads, their follow-up log,
+-- dashboard accounts and the audit trail.
 
 BEGIN;
 
@@ -10,60 +11,16 @@ CREATE TABLE IF NOT EXISTS locales (
   label text NOT NULL
 );
 
--- Page chrome: meta, brand, nav, hero, grid, panel UI strings, footer, lead form.
+-- Page chrome: meta, brand, nav, hero, footer, lead form.
 CREATE TABLE IF NOT EXISTS site_content (
   lang       text PRIMARY KEY REFERENCES locales (code) ON DELETE CASCADE,
   meta       jsonb NOT NULL,
   brand      jsonb NOT NULL,
   nav        jsonb NOT NULL,
   hero       jsonb NOT NULL,
-  grid       jsonb NOT NULL,
-  panel      jsonb NOT NULL,
   footer     jsonb NOT NULL,
   lead_form  jsonb,
   updated_at timestamptz NOT NULL DEFAULT now()
-);
-
--- The six collection tiles, ordered.
-CREATE TABLE IF NOT EXISTS tiles (
-  lang     text NOT NULL REFERENCES locales (code) ON DELETE CASCADE,
-  id       text NOT NULL,
-  position integer NOT NULL CHECK (position >= 0),
-  idx      text NOT NULL,
-  kicker   text NOT NULL,
-  title    text NOT NULL,
-  meta     text NOT NULL,
-  image    text NOT NULL,
-  PRIMARY KEY (lang, id),
-  UNIQUE (lang, position)
-);
-
--- One detail panel per tile.
-CREATE TABLE IF NOT EXISTS panels (
-  lang     text NOT NULL REFERENCES locales (code) ON DELETE CASCADE,
-  tile_id  text NOT NULL,
-  position integer NOT NULL,
-  kicker   text NOT NULL,
-  title    text NOT NULL,
-  lede     text NOT NULL,
-  image    text NOT NULL,
-  cta      text NOT NULL,
-  PRIMARY KEY (lang, tile_id),
-  UNIQUE (lang, position),
-  FOREIGN KEY (lang, tile_id) REFERENCES tiles (lang, id) ON DELETE CASCADE
-);
-
--- Polymorphic panel sections: kind + payload (stats/table/units/list/prices/gallery/note).
-CREATE TABLE IF NOT EXISTS panel_sections (
-  lang      text NOT NULL,
-  tile_id   text NOT NULL,
-  position  integer NOT NULL CHECK (position >= 0),
-  kind      text NOT NULL CHECK (
-              kind IN ('stats', 'table', 'units', 'list', 'prices', 'gallery', 'note')
-            ),
-  payload   jsonb NOT NULL,
-  PRIMARY KEY (lang, tile_id, position),
-  FOREIGN KEY (lang, tile_id) REFERENCES panels (lang, tile_id) ON DELETE CASCADE
 );
 
 -- Small key/value settings that are not per-locale (currently: contact block).
@@ -74,169 +31,65 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 -- Sales leads, whatever the entry point: Facebook / Instagram lead ads,
--- the website form, WhatsApp or a consultant's manual entry.
+-- the website form, WhatsApp, a consultant's manual entry or a imported list.
 CREATE TABLE IF NOT EXISTS leads (
   id            bigserial PRIMARY KEY,
   full_name     text NOT NULL,
   phone         text NOT NULL,
   email         text,
+
+  -- Where the enquiry came from. `legacy` is a list that predates the CRM.
   source        text NOT NULL DEFAULT 'manual'
-                CHECK (source IN ('facebook', 'instagram', 'website', 'whatsapp', 'manual')),
+                CHECK (source IN ('facebook', 'instagram', 'website', 'whatsapp',
+                                  'referral', 'walk-in', 'legacy', 'manual')),
   form_name     text,
   campaign      text,
   external_id   text,
-  project       text,
-  property_type text,
-  bedrooms      integer,
-  budget_min    bigint,
-  budget_max    bigint,
-  message       text,
+
+  -- What the buyer is looking for.
+  project         text,
+  property_type   text,
+  bedrooms        integer,
+  preferred_area  text,
+  budget_min      bigint,
+  budget_max      bigint,
+  payment_preference text CHECK (payment_preference IN ('cash', 'installments', 'mortgage', 'undecided')),
+  intent          text CHECK (intent IN ('buyer', 'investor', 'renter')),
+  temperature     text CHECK (temperature IN ('hot', 'warm', 'cold')),
+  message         text,
+
+  -- Where the lead sits in the pipeline. `nurture` keeps a lead in the
+  -- follow-up queue without counting it as active interest.
   status        text NOT NULL DEFAULT 'new'
-                CHECK (status IN ('new', 'contacted', 'qualified', 'viewing', 'won', 'lost')),
+                CHECK (status IN ('new', 'contacted', 'qualified', 'viewing',
+                                  'nurture', 'won', 'lost')),
   assigned_to   text,
   consent       boolean NOT NULL DEFAULT false,
+
+  -- Follow-up scheduling. `next_follow_up_on` drives the dashboard alerts;
+  -- last_follow_up_at / follow_up_count are maintained by the log below.
+  next_follow_up_on date,
+  last_follow_up_at timestamptz,
+  follow_up_count   integer NOT NULL DEFAULT 0 CHECK (follow_up_count >= 0),
+
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
--- Standard property inventory: one row per sellable unit, with media URLs.
-CREATE TABLE IF NOT EXISTS properties (
-  id                  bigserial PRIMARY KEY,
-  code                text NOT NULL UNIQUE,
-  title               text NOT NULL,
-  project             text NOT NULL DEFAULT 'SODIC East',
-  phase               text,
-  property_type       text NOT NULL
-                      CHECK (property_type IN ('studio', 'apartment', 'duplex', 'penthouse', 'townhouse', 'villa', 'chalet')),
-  listing_type        text NOT NULL DEFAULT 'sale'
-                      CHECK (listing_type IN ('sale', 'resale', 'rent')),
-  status              text NOT NULL DEFAULT 'available'
-                      CHECK (status IN ('available', 'reserved', 'sold', 'off_plan')),
-  bedrooms            integer,
-  bathrooms           integer,
-  built_up_area       numeric(9, 2),
-  garden_area         numeric(9, 2),
-  roof_area           numeric(9, 2),
-  floor               text,
-  finishing           text,
-  view                text,
-  currency            text NOT NULL DEFAULT 'EGP',
-  price               bigint NOT NULL,
-  down_payment        bigint NOT NULL DEFAULT 0,
-  installment_years   integer NOT NULL DEFAULT 10,
-  monthly_installment bigint,
-  delivery            text,
-  description         text,
-  amenities           jsonb NOT NULL DEFAULT '[]'::jsonb,
-  images              jsonb NOT NULL DEFAULT '[]'::jsonb,
-  video               text,
-  featured            boolean NOT NULL DEFAULT false,
-  -- editorial switch: when true the unit is listed on the public website
-  published           boolean NOT NULL DEFAULT false,
-  published_at        timestamptz,
-  created_at          timestamptz NOT NULL DEFAULT now(),
-  updated_at          timestamptz NOT NULL DEFAULT now()
+-- Every contact attempt on a lead: the call, the WhatsApp, the viewing.
+CREATE TABLE IF NOT EXISTS lead_follow_ups (
+  id          bigserial PRIMARY KEY,
+  lead_id     bigint NOT NULL REFERENCES leads (id) ON DELETE CASCADE,
+  logged_at   timestamptz NOT NULL DEFAULT now(),
+  author      text NOT NULL DEFAULT 'admin',
+  channel     text NOT NULL DEFAULT 'call'
+              CHECK (channel IN ('call', 'whatsapp', 'email', 'visit', 'meeting', 'other')),
+  outcome     text NOT NULL DEFAULT 'reached'
+              CHECK (outcome IN ('reached', 'no_answer', 'callback_later', 'wrong_number',
+                                 'not_interested', 'viewing_booked', 'sent_brief', 'other')),
+  note        text,
+  follow_up_on date
 );
-
--- Developer catalogue: one row per developer/company launching projects.
-CREATE TABLE IF NOT EXISTS developers (
-  slug             text PRIMARY KEY,
-  name             text NOT NULL,
-  name_ar          text,
-  description      text,
-  description_ar   text,
-  established      integer,
-  website          text,
-  published        boolean NOT NULL DEFAULT false,
-  published_at     timestamptz,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now()
-);
-
-INSERT INTO developers (slug, name, name_ar)
-VALUES ('sodic', 'SODIC', 'سوديك')
-ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, name_ar = EXCLUDED.name_ar;
-
-ALTER TABLE developers ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT false;
-ALTER TABLE developers ADD COLUMN IF NOT EXISTS published_at timestamptz;
-
--- Project catalogue: one row per development (or phase) with its unit
--- mix, amenities, payment plan and source documents. Belongs to a developer.
-CREATE TABLE IF NOT EXISTS projects (
-  slug             text PRIMARY KEY,
-  name             text NOT NULL,
-  name_ar          text,
-  developer_slug   text NOT NULL
-                   REFERENCES developers(slug) ON DELETE CASCADE,
-  region           text NOT NULL
-                   CHECK (region IN ('east-cairo', 'new-cairo', 'west-cairo', 'north-coast')),
-  location         text NOT NULL,
-  category         text NOT NULL
-                   CHECK (category IN ('residential', 'mixed-use', 'commercial', 'branded', 'serviced')),
-  status           text NOT NULL DEFAULT 'selling'
-                   CHECK (status IN ('launching', 'selling', 'delivering', 'sold-out', 'completed')),
-  tagline          text,
-  tagline_ar       text,
-  description      text NOT NULL,
-  description_ar   text,
-  price_from       bigint,
-  payment_plan     text,
-  payment_plan_ar  text,
-  finishing        text,
-  unit_types       jsonb NOT NULL DEFAULT '[]'::jsonb,
-  amenities        jsonb NOT NULL DEFAULT '[]'::jsonb,
-  location_notes   jsonb NOT NULL DEFAULT '[]'::jsonb,
-  hero_image       text,
-  brochure         text,
-  masterplan       text,
-  position         integer NOT NULL DEFAULT 0,
-  -- editorial switch: when true the project appears on the public website
-  published        boolean NOT NULL DEFAULT false,
-  published_at     timestamptz,
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  updated_at       timestamptz NOT NULL DEFAULT now()
-);
-
--- Upgrade databases that already had a project catalogue before developers
--- were introduced. Existing rows belong to the single seeded SODIC developer.
-ALTER TABLE projects
-  ADD COLUMN IF NOT EXISTS developer_slug text NOT NULL DEFAULT 'sodic';
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'projects_developer_slug_fkey'
-      AND conrelid = 'projects'::regclass
-  ) THEN
-    ALTER TABLE projects
-      ADD CONSTRAINT projects_developer_slug_fkey
-      FOREIGN KEY (developer_slug) REFERENCES developers(slug) ON DELETE CASCADE;
-  END IF;
-END $$;
-
--- Sellable units belong to a project. Keep the legacy project label for
--- existing inventory and display fallback while the slug is the relation.
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS project_slug text;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'properties_project_slug_fkey'
-      AND conrelid = 'properties'::regclass
-  ) THEN
-    ALTER TABLE properties
-      ADD CONSTRAINT properties_project_slug_fkey
-      FOREIGN KEY (project_slug) REFERENCES projects(slug) ON DELETE SET NULL;
-  END IF;
-END $$;
-
-UPDATE properties p
-   SET project_slug = pr.slug
-  FROM projects pr
- WHERE p.project_slug IS NULL
-   AND (lower(trim(p.project)) = lower(pr.name) OR lower(trim(p.project)) = lower(pr.slug));
 
 -- Dashboard accounts. Passwords are scrypt hashes (lib/passwords.ts); the env
 -- admin is bootstrapped by scripts/db-migrate.ts when the table is empty.
@@ -263,39 +116,56 @@ CREATE TABLE IF NOT EXISTS audit_log (
   detail      jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 
-CREATE INDEX IF NOT EXISTS idx_tiles_lang_pos ON tiles (lang, position);
-CREATE INDEX IF NOT EXISTS idx_sections_lookup ON panel_sections (lang, tile_id, position);
--- Existing installs: add the publish switches without dropping data.
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT false;
-ALTER TABLE properties ADD COLUMN IF NOT EXISTS published_at timestamptz;
-ALTER TABLE projects ADD COLUMN IF NOT EXISTS published boolean NOT NULL DEFAULT false;
-ALTER TABLE projects ADD COLUMN IF NOT EXISTS published_at timestamptz;
-
--- Existing installs: add the lead-form chrome and audit trail without dropping data.
+-- Existing installs: widen the lead enums and add the follow-up columns
+-- without dropping data.
 ALTER TABLE site_content ADD COLUMN IF NOT EXISTS lead_form jsonb;
+
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS preferred_area     text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS payment_preference text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS intent             text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS temperature        text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS next_follow_up_on  date;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_follow_up_at  timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS follow_up_count    integer NOT NULL DEFAULT 0;
+
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_source_check;
+ALTER TABLE leads ADD CONSTRAINT leads_source_check CHECK (
+  source IN ('facebook', 'instagram', 'website', 'whatsapp',
+             'referral', 'walk-in', 'legacy', 'manual')
+);
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_status_check;
+ALTER TABLE leads ADD CONSTRAINT leads_status_check CHECK (
+  status IN ('new', 'contacted', 'qualified', 'viewing', 'nurture', 'won', 'lost')
+);
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_payment_preference_check;
+ALTER TABLE leads ADD CONSTRAINT leads_payment_preference_check CHECK (
+  payment_preference IN ('cash', 'installments', 'mortgage', 'undecided')
+);
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_intent_check;
+ALTER TABLE leads ADD CONSTRAINT leads_intent_check CHECK (
+  intent IN ('buyer', 'investor', 'renter')
+);
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_temperature_check;
+ALTER TABLE leads ADD CONSTRAINT leads_temperature_check CHECK (
+  temperature IN ('hot', 'warm', 'cold')
+);
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_follow_up_count_check;
+ALTER TABLE leads ADD CONSTRAINT leads_follow_up_count_check CHECK (follow_up_count >= 0);
 
 CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log (at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log (actor, at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log (entity_type, entity_id, at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_projects_region ON projects (region, position);
-CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status, position);
-CREATE INDEX IF NOT EXISTS idx_projects_published ON projects (position)
-  WHERE published;
-CREATE INDEX IF NOT EXISTS idx_projects_developer ON projects (developer_slug, position);
-CREATE INDEX IF NOT EXISTS idx_properties_project ON properties (project_slug, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_developers_published ON developers (name) WHERE published;
-
 CREATE UNIQUE INDEX IF NOT EXISTS idx_leads_external ON leads (external_id)
   WHERE external_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads (status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_source ON leads (source, created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_properties_status ON properties (status, price);
-CREATE INDEX IF NOT EXISTS idx_properties_type ON properties (property_type, status);
-CREATE INDEX IF NOT EXISTS idx_properties_featured ON properties (featured, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_properties_published ON properties (created_at DESC)
-  WHERE published;
+-- Follow-up queue: open leads ordered by the day they are due.
+CREATE INDEX IF NOT EXISTS idx_leads_follow_up ON leads (next_follow_up_on)
+  WHERE status NOT IN ('won', 'lost');
+CREATE INDEX IF NOT EXISTS idx_follow_ups_lead ON lead_follow_ups (lead_id, logged_at DESC);
+CREATE INDEX IF NOT EXISTS idx_follow_ups_on ON lead_follow_ups (follow_up_on)
+  WHERE follow_up_on IS NOT NULL;
 
 INSERT INTO locales (code, dir, label) VALUES
   ('en', 'ltr', 'English'),

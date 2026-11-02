@@ -1,10 +1,29 @@
-import { getLeadStats, LEAD_SOURCES, LEAD_STATUSES, listLeads } from "@/lib/admin";
-import { budget, timeAgo, titleCase } from "@/lib/format";
-import { SourceBadge, StatusBadge } from "@/components/dashboard/Badges";
+import {
+  getLeadStats,
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  LEAD_TEMPERATURES,
+  listLeads,
+} from "@/lib/admin";
+import { budget, phoneDigits, timeAgo, titleCase } from "@/lib/format";
+import { FollowUpBadge, SourceBadge, StatusBadge, TemperatureBadge } from "@/components/dashboard/Badges";
 
 export const dynamic = "force-dynamic";
 
-type Search = { q?: string; source?: string; status?: string };
+type Search = {
+  q?: string;
+  source?: string;
+  status?: string;
+  temperature?: string;
+  followUp?: string;
+};
+
+const FOLLOW_UP_FILTERS = [
+  { value: "overdue", label: "Overdue" },
+  { value: "today", label: "Due today" },
+  { value: "due", label: "Due today or earlier" },
+  { value: "none", label: "Not scheduled" },
+];
 
 export default async function LeadsPage({
   searchParams,
@@ -14,7 +33,14 @@ export default async function LeadsPage({
   const filters = await searchParams;
   const [stats, leads] = await Promise.all([
     getLeadStats(),
-    listLeads({ q: filters.q, source: filters.source, status: filters.status, limit: 200 }),
+    listLeads({
+      q: filters.q,
+      source: filters.source,
+      status: filters.status,
+      temperature: filters.temperature,
+      followUp: filters.followUp,
+      limit: 500,
+    }),
   ]);
 
   return (
@@ -24,8 +50,8 @@ export default async function LeadsPage({
           <span className="dash-kicker">Leads</span>
           <h1>Pipeline</h1>
           <p>
-            Every enquiry from Facebook lead forms, Instagram, the website, WhatsApp and manual
-            entry — with the brief the buyer asked about.
+            Every enquiry from Facebook lead forms, the website, WhatsApp, referrals and manual
+            entry — with the brief the buyer asked about and who owns the follow-up.
           </p>
         </div>
         <div className="dash-actions">
@@ -42,19 +68,19 @@ export default async function LeadsPage({
           <div className="dash-stat-hint">across every channel</div>
         </div>
         <div className="dash-stat">
-          <div className="dash-stat-label">New</div>
-          <div className="dash-stat-value">{stats.new}</div>
-          <div className="dash-stat-hint">not contacted yet</div>
+          <div className="dash-stat-label">Open</div>
+          <div className="dash-stat-value">{stats.open}</div>
+          <div className="dash-stat-hint">not won or lost</div>
         </div>
         <div className="dash-stat">
-          <div className="dash-stat-label">Facebook</div>
-          <div className="dash-stat-value">{stats.facebook}</div>
-          <div className="dash-stat-hint">lead-ad submissions</div>
+          <div className="dash-stat-label">Hot</div>
+          <div className="dash-stat-value">{stats.hot}</div>
+          <div className="dash-stat-hint">marked hot and still open</div>
         </div>
         <div className="dash-stat">
-          <div className="dash-stat-label">Qualified+</div>
-          <div className="dash-stat-value">{stats.qualified}</div>
-          <div className="dash-stat-hint">qualified, viewing or won</div>
+          <div className="dash-stat-label">Unassigned</div>
+          <div className="dash-stat-value">{stats.unassigned}</div>
+          <div className="dash-stat-hint">no consultant yet</div>
         </div>
       </section>
 
@@ -66,7 +92,7 @@ export default async function LeadsPage({
               className="dash-input"
               type="search"
               name="q"
-              placeholder="Name, phone, email or project"
+              placeholder="Name, phone, notes or project"
               defaultValue={filters.q ?? ""}
             />
           </label>
@@ -95,6 +121,30 @@ export default async function LeadsPage({
             </select>
           </label>
 
+          <label className="dash-field">
+            <span>Temperature</span>
+            <select className="dash-select" name="temperature" defaultValue={filters.temperature ?? ""}>
+              <option value="">Any</option>
+              {LEAD_TEMPERATURES.map((temperature) => (
+                <option key={temperature} value={temperature}>
+                  {titleCase(temperature)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="dash-field">
+            <span>Follow-up</span>
+            <select className="dash-select" name="followUp" defaultValue={filters.followUp ?? ""}>
+              <option value="">Any</option>
+              {FOLLOW_UP_FILTERS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <button type="submit" className="dash-btn">
             Filter
           </button>
@@ -112,8 +162,10 @@ export default async function LeadsPage({
                   <th>Source</th>
                   <th>Interest</th>
                   <th>Budget</th>
+                  <th>Heat</th>
                   <th>Status</th>
-                  <th>Received</th>
+                  <th>Follow-up</th>
+                  <th>Owner</th>
                   <th />
                 </tr>
               </thead>
@@ -125,26 +177,36 @@ export default async function LeadsPage({
                         {lead.full_name}
                       </a>
                       <span className="cell-sub">
-                        {lead.phone}
+                        {phoneDigits(lead.phone) ? lead.phone : "WhatsApp handle"}
                         {lead.email ? ` · ${lead.email}` : ""}
                       </span>
                     </td>
                     <td>
                       <SourceBadge source={lead.source} />
-                      {lead.form_name ? <span className="cell-sub">{lead.form_name}</span> : null}
+                      <span className="cell-sub">{timeAgo(lead.created_at)}</span>
                     </td>
                     <td>
                       {lead.project ?? "—"}
                       <span className="cell-sub">
                         {lead.property_type ?? "No unit type"}
                         {lead.bedrooms ? ` · ${lead.bedrooms} bed` : ""}
+                        {lead.preferred_area ? ` · ${lead.preferred_area}` : ""}
                       </span>
                     </td>
                     <td className="cell-num">{budget(lead.budget_min, lead.budget_max)}</td>
                     <td>
+                      <TemperatureBadge temperature={lead.temperature} />
+                    </td>
+                    <td>
                       <StatusBadge status={lead.status} />
                     </td>
-                    <td className="cell-nowrap">{timeAgo(lead.created_at)}</td>
+                    <td className="cell-nowrap">
+                      <FollowUpBadge date={lead.next_follow_up_on} />
+                      {lead.follow_up_count > 0 ? (
+                        <span className="cell-sub">{lead.follow_up_count} logged</span>
+                      ) : null}
+                    </td>
+                    <td>{lead.assigned_to ?? <span className="cell-sub">Unassigned</span>}</td>
                     <td className="cell-nowrap">
                       <a className="dash-link" href={`/dashboard/leads/${lead.id}`}>
                         Open

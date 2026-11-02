@@ -4,7 +4,6 @@ import { Cairo, Cormorant_Garamond, Inter } from "next/font/google";
 import Analytics from "@/components/Analytics";
 import { getSite } from "@/lib/content-db";
 import "./globals.css";
-import "./site.css";
 
 const sans = Inter({
   subsets: ["latin"],
@@ -61,7 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#f3f7fc",
   width: "device-width",
   initialScale: 1,
 };
@@ -76,9 +75,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         {children}
         <Analytics />
-        <noscript>
-          <style>{`.reveal{opacity:1;transform:none}`}</style>
-        </noscript>
       </body>
     </html>
   );

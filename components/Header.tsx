@@ -35,9 +35,6 @@ export default function Header({
 
       <div className="header-right">
         <nav className="header-nav" aria-label={c.footer.sections}>
-          <a className="header-link" href="#collection">
-            {c.nav.collection}
-          </a>
           <a className="header-link phone" href={phoneHref} data-cta="phone" data-cta-surface="header">
             {c.footer.call}
           </a>

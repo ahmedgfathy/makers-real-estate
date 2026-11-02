@@ -91,12 +91,23 @@ export function normalizeLead(body: LeadBody): NewLeadInput | { error: string } 
     project: first(field("project", "project_interest", "which_project"), body.project),
     property_type: first(field("property_type", "unit_type"), body.property_type),
     bedrooms: toNumber(first(field("bedrooms", "bedrooms_count"), body.bedrooms)),
+    preferred_area: first(
+      field("preferred_area", "area", "location", "preferred_location"),
+      body.preferred_area
+    ),
     budget_min: toNumber(first(field("budget_min"), body.budget_min, body.budget)),
     budget_max: toNumber(first(field("budget_max"), body.budget_max)),
+    payment_preference: first(
+      field("payment_preference", "payment_plan", "financing"),
+      body.payment_preference
+    ),
+    intent: first(field("intent", "buying_for", "purpose"), body.intent),
+    temperature: first(field("temperature", "lead_quality", "quality"), body.temperature),
     message: first(field("message", "notes"), body.message, body.notes),
     status: "new",
-    assigned_to: null,
+    assigned_to: first(field("consultant", "assigned_to", "sales"), body.assigned_to),
     consent: isFacebook ? true : toBool(body.consent),
+    next_follow_up_on: first(body.next_follow_up_on, body.follow_up_on),
   };
 }
 

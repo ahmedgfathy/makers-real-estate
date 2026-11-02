@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import type { Content, Lang } from "@/data/content";
 import { capture } from "@/lib/analytics";
-import { ui } from "@/lib/labels";
 
 /**
  * Public "request a call back" form (section #enquiry on the landing page).
@@ -91,7 +90,6 @@ export default function LeadForm({
     }
   }
 
-  const t = ui[lang];
 
   return (
     <section className="enquiry" id="enquiry" aria-labelledby="enquiry-title">

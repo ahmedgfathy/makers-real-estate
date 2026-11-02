@@ -30,7 +30,7 @@ export default async function LoginPage({
       <section className="login-card" aria-labelledby="login-title">
         <div className="login-brand">
           <img
-            src="/img/makers-logo.png"
+            src="/img/makers-logo-black.png"
             alt="Makers Real Estate"
             width={1183}
             height={752}
@@ -40,7 +40,7 @@ export default async function LoginPage({
         <span className="login-eyebrow">Admin dashboard</span>
         <h1 id="login-title">Welcome back</h1>
         <p className="login-intro">
-          Sign in to manage developers, projects, leads and unit inventory.
+          Sign in to review enquiries and manage dashboard accounts.
         </p>
 
         <LoginForm next={safeNext(params.next)} />

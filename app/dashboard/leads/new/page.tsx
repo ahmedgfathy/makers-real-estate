@@ -1,4 +1,10 @@
-import { LEAD_SOURCES, LEAD_STATUSES } from "@/lib/admin";
+import {
+  LEAD_INTENTS,
+  LEAD_PAYMENTS,
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  LEAD_TEMPERATURES,
+} from "@/lib/admin";
 import { titleCase } from "@/lib/format";
 import { createLeadAction } from "../actions";
 
@@ -10,6 +16,9 @@ export default async function NewLeadPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   return (
     <div className="dash-page" style={{ maxWidth: "980px" }}>
@@ -40,11 +49,82 @@ export default async function NewLeadPage({
             </label>
             <label className="dash-field">
               <span>Phone *</span>
-              <input className="dash-input" name="phone" required autoComplete="off" />
+              <input className="dash-input" name="phone" required autoComplete="off" placeholder="0100 000 0000" />
             </label>
             <label className="dash-field">
               <span>Email</span>
               <input className="dash-input" type="email" name="email" autoComplete="off" />
+            </label>
+          </div>
+        </section>
+
+        <section className="dash-form-section">
+          <h2>Requirement</h2>
+          <div className="dash-form-grid">
+            <label className="dash-field">
+              <span>Project</span>
+              <input className="dash-input" name="project" placeholder="SODIC East, The Lakes…" />
+            </label>
+            <label className="dash-field">
+              <span>Unit type</span>
+              <input className="dash-input" name="property_type" placeholder="Apartment, duplex, villa…" />
+            </label>
+            <label className="dash-field">
+              <span>Bedrooms</span>
+              <input className="dash-input" type="number" name="bedrooms" min="0" max="10" />
+            </label>
+            <label className="dash-field">
+              <span>Preferred area</span>
+              <input className="dash-input" name="preferred_area" placeholder="New Heliopolis, Fifth Settlement…" />
+            </label>
+            <label className="dash-field">
+              <span>Budget from (EGP)</span>
+              <input className="dash-input" type="number" name="budget_min" min="0" step="100000" />
+            </label>
+            <label className="dash-field">
+              <span>Budget to (EGP)</span>
+              <input className="dash-input" type="number" name="budget_max" min="0" step="100000" />
+            </label>
+            <label className="dash-field">
+              <span>Payment preference</span>
+              <select className="dash-select" name="payment_preference" defaultValue="">
+                <option value="">Not discussed</option>
+                {LEAD_PAYMENTS.map((option) => (
+                  <option key={option} value={option}>
+                    {titleCase(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field">
+              <span>Buying for</span>
+              <select className="dash-select" name="intent" defaultValue="">
+                <option value="">Unknown</option>
+                {LEAD_INTENTS.map((option) => (
+                  <option key={option} value={option}>
+                    {titleCase(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field">
+              <span>Lead temperature</span>
+              <select className="dash-select" name="temperature" defaultValue="warm">
+                <option value="">Unrated</option>
+                {LEAD_TEMPERATURES.map((option) => (
+                  <option key={option} value={option}>
+                    {titleCase(option)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field span-3">
+              <span>Brief / notes</span>
+              <textarea
+                className="dash-textarea"
+                name="message"
+                placeholder="What did the buyer ask for? Budget, floor, view, anything they said."
+              />
             </label>
           </div>
         </section>
@@ -88,39 +168,18 @@ export default async function NewLeadPage({
               <span>Assigned to</span>
               <input className="dash-input" name="assigned_to" placeholder="Consultant" />
             </label>
-          </div>
-        </section>
-
-        <section className="dash-form-section">
-          <h2>Requirement</h2>
-          <div className="dash-form-grid">
             <label className="dash-field">
-              <span>Project</span>
-              <input className="dash-input" name="project" placeholder="Project name" />
-            </label>
-            <label className="dash-field">
-              <span>Unit type</span>
-              <input className="dash-input" name="property_type" placeholder="Apartment, duplex, villa…" />
-            </label>
-            <label className="dash-field">
-              <span>Bedrooms</span>
-              <input className="dash-input" type="number" name="bedrooms" min="0" max="10" />
-            </label>
-            <label className="dash-field">
-              <span>Budget from (EGP)</span>
-              <input className="dash-input" type="number" name="budget_min" min="0" step="100000" />
-            </label>
-            <label className="dash-field">
-              <span>Budget to (EGP)</span>
-              <input className="dash-input" type="number" name="budget_max" min="0" step="100000" />
+              <span>Follow up on</span>
+              <input
+                className="dash-input"
+                type="date"
+                name="next_follow_up_on"
+                defaultValue={tomorrow.toISOString().slice(0, 10)}
+              />
             </label>
             <label className="dash-check" style={{ alignSelf: "end", paddingBottom: "0.55rem" }}>
               <input type="checkbox" name="consent" />
               Marketing consent given
-            </label>
-            <label className="dash-field span-3">
-              <span>Message / notes</span>
-              <textarea className="dash-textarea" name="message" placeholder="What did the buyer ask for?" />
             </label>
           </div>
         </section>

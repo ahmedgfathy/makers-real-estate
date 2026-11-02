@@ -26,7 +26,7 @@ export default function Hero({
 
   return (
     <section className="hero" id="top">
-      {/* Edge-to-edge widescreen background video layer */}
+      {/* The film, sized to the whole hero section behind the copy. */}
       <div className="hero-media-wrap" aria-hidden="true">
         <div className="hero-media">
           {reduced ? (
@@ -47,11 +47,9 @@ export default function Hero({
           )}
         </div>
         <div className="hero-scrim" />
-        <div className="hero-vignette" />
       </div>
 
-      {/* Main hero typography & interactive actions */}
-      <div className="hero-container">
+      <div className="hero-inner">
         <div className="hero-content">
           <div className="hero-badge">
             <span className="hero-badge-dot" />
@@ -60,25 +58,25 @@ export default function Hero({
 
           <h1 className="hero-title">
             <span className="hero-title-line">{c.hero.titleLine1}</span>
-            <span className="hero-title-line hero-title-line--italic">{c.hero.titleLine2}</span>
+            {c.hero.titleLine2 ? (
+              <span className="hero-title-line hero-title-line--italic">{c.hero.titleLine2}</span>
+            ) : null}
           </h1>
 
           <div className="hero-location">
             <span className="hero-place">{c.hero.place}</span>
           </div>
 
-          {c.hero.lede && (
-            <p className="hero-lede">{c.hero.lede}</p>
-          )}
+          {c.hero.lede && <p className="hero-lede">{c.hero.lede}</p>}
 
           <div className="hero-actions">
             <a
               className="btn btn--solid hero-btn-primary"
-              href="#collection"
+              href="#enquiry"
               data-cta="explore"
               data-cta-surface="hero"
             >
-              <span>{c.hero.primary}</span>
+              <span>{c.nav.contact}</span>
               <svg className="hero-btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -106,25 +104,22 @@ export default function Hero({
         </div>
       </div>
 
-      {/* Full-width docked frosted HUD stats bar */}
-      <div className="hero-hud">
-        <div className="hero-hud-inner">
-          <div className="hero-stats">
-            {c.hero.stats.map((s) => (
-              <div key={s.label} className="hero-stat-card">
-                <div className="hero-stat-value">{s.value}</div>
-                <div className="hero-stat-label">{s.label}</div>
-              </div>
-            ))}
+      <div className="hero-stats">
+        {c.hero.stats.map((s) => (
+          <div key={s.label} className="hero-stat-card">
+            <div className="hero-stat-value">{s.value}</div>
+            <div className="hero-stat-label">{s.label}</div>
           </div>
+        ))}
+      </div>
 
-          <a href="#collection" className="hero-scroll-cue" aria-label={c.hero.scroll}>
-            <span className="hero-scroll-text">{c.hero.scroll}</span>
-            <span className="hero-scroll-indicator">
-              <span className="hero-scroll-dot" />
-            </span>
-          </a>
-        </div>
+      <div className="hero-foot">
+        <a href="#enquiry" className="hero-scroll-cue" aria-label={c.hero.scroll}>
+          <span className="hero-scroll-text">{c.hero.scroll}</span>
+          <span className="hero-scroll-indicator" aria-hidden="true">
+            <span className="hero-scroll-dot" />
+          </span>
+        </a>
       </div>
     </section>
   );

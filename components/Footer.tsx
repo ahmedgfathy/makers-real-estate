@@ -3,7 +3,6 @@
 import type { Contact, Content, Lang } from "@/data/content";
 import { requestConsent } from "@/lib/analytics";
 import { ui } from "@/lib/labels";
-import type { HomeProject } from "./Collection";
 
 export default function Footer({
   c,
@@ -11,14 +10,12 @@ export default function Footer({
   lang,
   whatsapp,
   phoneHref,
-  projects,
 }: {
   c: Content;
   contact: Contact;
   lang: Lang;
   whatsapp: string;
   phoneHref: string;
-  projects: HomeProject[];
 }) {
   return (
     <footer className="site-footer" id="contact">
@@ -58,19 +55,9 @@ export default function Footer({
         <div className="footer-grid">
           <div>
             <p className="footer-disclaimer">{c.footer.disclaimer}</p>
-            <div className="footer-links" style={{ marginTop: "1.4rem" }}>
-              {projects.map((project, index) => (
-                <a key={project.slug} className="footer-link" href={`/projects/${project.slug}?lang=${lang}`}>
-                  {String(index + 1).padStart(2, "0")} — {lang === "ar" ? project.nameAr : project.name}
-                </a>
-              ))}
-            </div>
           </div>
 
           <div className="footer-links">
-            <a className="footer-link" href="#collection">
-              {c.nav.collection}
-            </a>
             <a className="footer-link" href="#top">
               {ui[lang].top}
             </a>

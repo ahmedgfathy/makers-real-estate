@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth";
+import { getFollowUpAlerts } from "@/lib/admin";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import Identify from "@/components/dashboard/Identify";
 import "./dashboard.css";
@@ -13,12 +14,12 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const session = await requireAdmin();
+  const [session, alerts] = await Promise.all([requireAdmin(), getFollowUpAlerts()]);
 
   return (
     <div className="dash-shell">
       <Identify username={session.username} />
-      <DashboardNav username={session.username} role={session.role} />
+      <DashboardNav username={session.username} role={session.role} alerts={alerts} />
       <div className="dash-main">{children}</div>
     </div>
   );

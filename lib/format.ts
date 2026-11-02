@@ -49,3 +49,40 @@ export function budget(min: number | null, max: number | null): string {
   if (min != null && max != null) return `${egp(min, true)} – ${egp(max, true)}`;
   return egp(min ?? max, true);
 }
+
+/** Whole days between a `YYYY-MM-DD` date and today; positive means overdue. */
+export function daysOverdue(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const due = Date.parse(`${value}T00:00:00`);
+  if (Number.isNaN(due)) return null;
+  const today = new Date();
+  const midnight = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const dueDay = new Date(due);
+  const dueMidnight = Date.UTC(dueDay.getFullYear(), dueDay.getMonth(), dueDay.getDate());
+  return Math.round((midnight - dueMidnight) / 86_400_000);
+}
+
+/** "Overdue by 3 days" / "Due today" / "In 4 days" for the follow-up queue. */
+export function followUpLabel(value: string | null | undefined): string {
+  const days = daysOverdue(value);
+  if (days == null) return "Not scheduled";
+  if (days > 0) return `Overdue by ${days} day${days === 1 ? "" : "s"}`;
+  if (days === 0) return "Due today";
+  const inDays = Math.abs(days);
+  if (inDays === 1) return "Tomorrow";
+  return `In ${inDays} days`;
+}
+
+/** Digits only — empty when the "phone" is really a WhatsApp / Telegram handle. */
+export function phoneDigits(phone: string): string {
+  return phone.replace(/\D/g, "");
+}
+
+/** "overdue" | "today" | "soon" — the tone a follow-up badge is rendered with. */
+export function followUpTone(value: string | null | undefined): "overdue" | "today" | "soon" | "none" {
+  const days = daysOverdue(value);
+  if (days == null) return "none";
+  if (days > 0) return "overdue";
+  if (days === 0) return "today";
+  return "soon";
+}

@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { forgetUser } from "@/lib/analytics";
+import type { FollowUpAlerts } from "@/lib/admin";
 
 type NavItem = { href: string; label: string; icon: ReactNode };
 
@@ -39,32 +40,12 @@ const NAV: NavItem[] = [
     ),
   },
   {
-    href: "/dashboard/primary",
-    label: "Primary portfolio",
+    href: "/dashboard/follow-ups",
+    label: "Follow-ups",
     icon: (
       <Icon>
-        <ellipse cx="12" cy="5.5" rx="7.5" ry="3" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M4.5 5.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M4.5 11.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6" stroke="currentColor" strokeWidth="1.4" />
-      </Icon>
-    ),
-  },
-  {
-    href: "/dashboard/projects",
-    label: "Projects",
-    icon: (
-      <Icon>
-        <path d="M4 20V8l8-4 8 4v12M8 20v-6h8v6M3 20h18" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      </Icon>
-    ),
-  },
-  {
-    href: "/dashboard/inventory",
-    label: "Units & inventory",
-    icon: (
-      <Icon>
-        <path d="M3 20V9.5L12 4l9 5.5V20" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-        <path d="M9 20v-6h6v6M6.5 11.5h11" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="8.4" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M12 7.4V12l3.2 2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </Icon>
     ),
   },
@@ -73,9 +54,11 @@ const NAV: NavItem[] = [
 export default function DashboardNav({
   username,
   role,
+  alerts,
 }: {
   username: string;
   role: "admin" | "editor";
+  alerts: FollowUpAlerts;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -92,17 +75,28 @@ export default function DashboardNav({
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
+  const due = alerts.overdue + alerts.dueToday;
+
   return (
     <>
       <header className="dash-mobilebar">
         <a className="dash-brand dash-brand--mobile" href="/dashboard">
           <img
-            src="/img/makers-logo.png"
+            src="/img/makers-logo-black.png"
             alt="Makers Real Estate"
             width={1183}
             height={752}
           />
         </a>
+        {due > 0 ? (
+          <a className="dash-bell" href="/dashboard/follow-ups" aria-label={`${due} follow-ups due`}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M18 15.5V11a6 6 0 10-12 0v4.5L4.6 17.6h14.8L18 15.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+              <path d="M9.8 20.4a2.4 2.4 0 004.4 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+            <span className="dash-bell-count">{due > 99 ? "99+" : due}</span>
+          </a>
+        ) : null}
         <button
           type="button"
           className="dash-menu-btn"
@@ -125,7 +119,7 @@ export default function DashboardNav({
       <aside className={`dash-sidebar${open ? " is-open" : ""}`} id="dash-sidebar">
         <a className="dash-brand" href="/dashboard">
           <img
-            src="/img/makers-logo.png"
+            src="/img/makers-logo-black.png"
             alt="Makers Real Estate"
             width={1183}
             height={752}
@@ -137,19 +131,44 @@ export default function DashboardNav({
 
         <nav className="dash-nav" aria-label="Dashboard">
           <span className="dash-nav-label">Workspace</span>
-          {NAV.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="dash-nav-link"
-              data-active={isActive(item.href)}
-              aria-current={isActive(item.href) ? "page" : undefined}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </a>
-          ))}
+          {NAV.map((item) => {
+            const badge = item.href === "/dashboard/follow-ups" && due > 0 ? due : null;
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className="dash-nav-link"
+                data-active={isActive(item.href)}
+                aria-current={isActive(item.href) ? "page" : undefined}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+                {badge ? (
+                  <em className="dash-nav-badge" aria-label={`${badge} follow-ups due`}>
+                    {badge > 99 ? "99+" : badge}
+                  </em>
+                ) : null}
+              </a>
+            );
+          })}
         </nav>
+
+        {due > 0 ? (
+          <a className="dash-queue-card" href="/dashboard/follow-ups">
+            <strong>
+              {alerts.overdue > 0
+                ? `${alerts.overdue} follow-up${alerts.overdue === 1 ? "" : "s"} overdue`
+                : `${alerts.dueToday} follow-up${alerts.dueToday === 1 ? "" : "s"} due today`}
+            </strong>
+            <small>
+              {alerts.overdue > 0 && alerts.dueToday > 0
+                ? `+ ${alerts.dueToday} due today`
+                : alerts.overdue > 0
+                  ? "Oldest first — open the queue"
+                  : "Schedule the next round"}
+            </small>
+          </a>
+        ) : null}
 
         <div className="dash-sidebar-foot">
           <a className="dash-site-link" href="/" target="_blank" rel="noopener noreferrer">

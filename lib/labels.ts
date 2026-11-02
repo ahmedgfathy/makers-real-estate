@@ -1,23 +1,11 @@
 import type { Lang } from "@/data/content";
 
+/** Chrome strings that live outside the database-backed page content. */
 export const ui = {
   en: {
-    ground: "Ground",
-    groundGarden: "Ground + garden",
-    perMonth: "/ mo",
-    approx: "≈",
-    egp: "EGP",
-    m2: "m²",
     book: "Book a viewing",
-    explore: "Explore",
-    units: "units",
-    collections: "offerings",
-    siteBy: "Makers Real Estate",
-    openTile: "Open",
     top: "Back to top",
     login: "Login",
-    projects: "Projects",
-    properties: "Units",
     cookies: "Cookie preferences",
     consentText:
       "We measure how this site is used (PostHog) to improve the listings. Nothing is tracked unless you allow it.",
@@ -25,22 +13,9 @@ export const ui = {
     consentDecline: "Decline",
   },
   ar: {
-    ground: "أرضي",
-    groundGarden: "أرضي + حديقة",
-    perMonth: "/ شهر",
-    approx: "≈",
-    egp: "جنيه",
-    m2: "م²",
     book: "احجز معاينة",
-    explore: "استكشف",
-    units: "وحدة",
-    collections: "مجموعات",
-    siteBy: "ميكرز للعقارات",
-    openTile: "افتح",
     top: "أعلى الصفحة",
     login: "دخول",
-    projects: "المشروعات",
-    properties: "الوحدات",
     cookies: "تفضيلات الكوكيز",
     consentText:
       "نقيس كيفية استخدام الموقع (PostHog) لتحسين المعروض. لا يتم تتبع أي شيء بدون موافقتك.",

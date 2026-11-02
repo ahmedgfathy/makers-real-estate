@@ -10,19 +10,15 @@ import {
 import { capture } from "@/lib/analytics";
 import Header from "./Header";
 import Hero from "./Hero";
-import Collection from "./Collection";
 import LeadForm from "./LeadForm";
 import Footer from "./Footer";
-import type { HomeProject } from "./Collection";
 
 export default function Landing({
   content,
   contact,
-  projects,
 }: {
   content: Record<Lang, Content>;
   contact: Contact;
-  projects: HomeProject[];
 }) {
   const [lang, setLang] = useState<Lang>("en");
 
@@ -55,12 +51,10 @@ export default function Landing({
 
   return (
     <>
-      <div className="grain" aria-hidden="true" />
       <Header c={c} lang={lang} onLang={changeLang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
 
       <main>
         <Hero c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
-        <Collection c={c} lang={lang} projects={projects} />
         <LeadForm c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
       </main>
 
@@ -70,7 +64,6 @@ export default function Landing({
         lang={lang}
         whatsapp={whatsapp}
         phoneHref={contact.phoneHref}
-        projects={projects}
       />
     </>
   );
