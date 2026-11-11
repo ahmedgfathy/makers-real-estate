@@ -1,5 +1,10 @@
+"use client";
+
+import { useRef } from "react";
 import type { Contact, Content, Lang } from "@/data/content";
 import { ui } from "@/lib/labels";
+
+const START_AT = 1.2;
 
 export default function Hero({
   c,
@@ -14,11 +19,33 @@ export default function Hero({
   whatsapp: string;
   phoneHref: string;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const seekPastBlackFrame = () => {
+    const video = videoRef.current;
+    if (video && video.currentTime < START_AT) video.currentTime = START_AT;
+  };
+
   return (
     <section className="hero" id="top">
       <div className="hero-media-wrap" aria-hidden="true">
         <div className="hero-media">
-          <img src="/img/lakes-sunset.jpg" alt="" />
+          <video
+            ref={videoRef}
+            src="/video/hero.mp4#t=1.2"
+            poster="/img/lakes-sunset.jpg"
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            tabIndex={-1}
+            disablePictureInPicture
+            onLoadedMetadata={seekPastBlackFrame}
+            onEnded={(event) => {
+              event.currentTarget.currentTime = START_AT;
+              void event.currentTarget.play();
+            }}
+          />
         </div>
         <div className="hero-scrim" />
       </div>
