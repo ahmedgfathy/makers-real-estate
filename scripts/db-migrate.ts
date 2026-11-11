@@ -1,11 +1,17 @@
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
+import {
+  contact,
+  content as landingContent,
+  type Lang,
+} from "../data/content";
 import { getPool, pingDb, withTransaction, type TxClient } from "../lib/db";
 
 const REMOVE_PORTFOLIO_TABLES = "remove_portfolio_tables_v1";
 const REMOVE_PORTFOLIO_CONTENT = "remove_portfolio_content_v1";
 const REMOVE_DEMO_LEADS = "remove_demo_leads_v1";
 const PURGE_TEST_LEADS = "purge_test_leads_v1";
+const REFRESH_LANDING = "refresh_landing_primary_v1";
 const DEMO_LEAD_PHONES = [
   "0100 214 8831",
   "0112 905 7744",
@@ -69,6 +75,42 @@ async function deleteTestLeads(client: TxClient): Promise<number> {
   return result.rows.length;
 }
 
+/**
+ * Publishes the redesigned landing page and the new sales numbers once.
+ * Existing installs get the new copy without a manual `npm run db:seed`;
+ * later database edits are left alone because this migration runs once.
+ */
+async function refreshLanding(client: TxClient): Promise<void> {
+  for (const lang of ["en", "ar"] as Lang[]) {
+    const locale = landingContent[lang];
+    await client.query(
+      `INSERT INTO site_content (lang, meta, brand, nav, hero, footer, lead_form, sections)
+       VALUES ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5::jsonb, $6::jsonb, $7::jsonb, $8::jsonb)
+       ON CONFLICT (lang) DO UPDATE SET
+         meta = EXCLUDED.meta, brand = EXCLUDED.brand, nav = EXCLUDED.nav,
+         hero = EXCLUDED.hero, footer = EXCLUDED.footer,
+         lead_form = EXCLUDED.lead_form, sections = EXCLUDED.sections,
+         updated_at = now()`,
+      [
+        lang,
+        JSON.stringify(locale.meta),
+        JSON.stringify(locale.brand),
+        JSON.stringify(locale.nav),
+        JSON.stringify(locale.hero),
+        JSON.stringify(locale.footer),
+        JSON.stringify(locale.leadForm),
+        JSON.stringify(locale.sections),
+      ]
+    );
+  }
+
+  await client.query(
+    `INSERT INTO settings (key, value) VALUES ('contact', $1::jsonb)
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
+    [JSON.stringify(contact)]
+  );
+}
+
 async function main() {
   const file = schemaPath();
   console.log(`[migrate] applying ${file}`);
@@ -97,7 +139,7 @@ async function main() {
     return true;
   });
   if (removedContent) {
-    console.log("[migrate] removed collection tiles, detail panels and unit/price sections");
+    console.log("[migrate] removed collection tiles and detail panels");
   }
 
   const removedDemoLeads = await runOnce(REMOVE_DEMO_LEADS, deleteTestLeads);
@@ -106,6 +148,14 @@ async function main() {
     `[migrate] removed ${(removedDemoLeads ?? 0) + (purgedTestLeads ?? 0)} demo/test lead records` +
       (purgedTestLeads === null ? " (purge already applied)" : "")
   );
+
+  const refreshed = await runOnce(REFRESH_LANDING, async (client) => {
+    await refreshLanding(client);
+    return true;
+  });
+  if (refreshed) {
+    console.log("[migrate] published the primary-sales landing page and new contact numbers");
+  }
 
   const ping = await pingDb();
   if (!ping.ok) throw new Error(`connection check failed: ${ping.error}`);

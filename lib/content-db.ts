@@ -27,12 +27,13 @@ type SiteRow = {
   hero: Content["hero"];
   footer: Content["footer"];
   lead_form: Content["leadForm"] | null;
+  sections: Content["sections"] | null;
 };
 
 async function loadFromDb(): Promise<Site> {
   const [siteRows, contactRows] = await Promise.all([
     query<SiteRow>(
-      "SELECT lang, meta, brand, nav, hero, footer, lead_form FROM site_content"
+      "SELECT lang, meta, brand, nav, hero, footer, lead_form, sections FROM site_content"
     ),
     query<{ value: Contact }>("SELECT value FROM settings WHERE key = 'contact'"),
   ]);
@@ -44,7 +45,21 @@ async function loadFromDb(): Promise<Site> {
     throw new Error("settings.contact is missing — run `npm run db:seed` first");
   }
 
-  const contact = contactRows[0].value;
+  /**
+   * The two phone numbers are fixed by the sales team, so the numbers from
+   * data/content.ts always win over a stale settings row. Name and welcome
+   * message still come from the database when present.
+   */
+  const dbContact = contactRows[0].value;
+  const contact: Contact = {
+    ...staticContact,
+    ...dbContact,
+    phoneLabel: staticContact.phoneLabel,
+    phoneHref: staticContact.phoneHref,
+    whatsappLabel: staticContact.whatsappLabel,
+    whatsapp: staticContact.whatsapp,
+  };
+
   const built = {} as Record<Lang, Content>;
 
   for (const lang of LANGS) {
@@ -57,8 +72,10 @@ async function loadFromDb(): Promise<Site> {
       nav: chrome.nav,
       hero: chrome.hero,
       footer: chrome.footer,
-      // Databases migrated before the lead form existed keep the static copy.
+      // Databases migrated before the lead form / new sections existed keep
+      // the static copy so the redesigned page still renders in full.
       leadForm: chrome.lead_form ?? staticContent[lang].leadForm,
+      sections: chrome.sections ?? staticContent[lang].sections,
     };
   }
 

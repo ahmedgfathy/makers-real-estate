@@ -2,10 +2,20 @@ export type Lang = "en" | "ar";
 
 export type Stat = { value: string; label: string };
 
+export type Project = {
+  name: string;
+  location: string;
+  type: string;
+  priceFrom: string;
+  status: string;
+  image: string;
+  note: string;
+};
+
 export type Content = {
   meta: { title: string; description: string };
   brand: { name: string; tagline: string; sub: string };
-  nav: { contact: string; call: string };
+  nav: { projects: string; why: string; payment: string; contact: string; call: string };
   hero: {
     eyebrow: string;
     titleLine1: string;
@@ -16,6 +26,41 @@ export type Content = {
     secondary: string;
     scroll: string;
     stats: Stat[];
+  };
+  sections: {
+    intro: {
+      kicker: string;
+      title: string;
+      lede: string;
+      body: string;
+      facts: Stat[];
+    };
+    projects: {
+      kicker: string;
+      title: string;
+      lede: string;
+      items: Project[];
+    };
+    advantages: {
+      kicker: string;
+      title: string;
+      lede: string;
+      items: { title: string; text: string }[];
+    };
+    amenities: {
+      kicker: string;
+      title: string;
+      lede: string;
+      image: string;
+      items: string[];
+    };
+    payment: {
+      kicker: string;
+      title: string;
+      lede: string;
+      stats: Stat[];
+      note: string;
+    };
   };
   footer: {
     title: string;
@@ -55,51 +100,150 @@ export type Content = {
   };
 };
 
-
 const en: Content = {
   meta: {
-    title: "Makers Real Estate — The Lakes at SODIC East",
+    title: "Makers Real Estate — Primary Residences at SODIC East",
     description:
-      "Makers Real Estate presents The Lakes at SODIC East, New Heliopolis. Apartments and duplexes from EGP 6.7M, 0% down payment, ten-year installments, delivery December 2026.",
+      "First-release primary residences at The Lakes and EastVale, SODIC East. Apartments and duplexes from EGP 6.7M, 0% down, ten-year plans — sold directly by the developer.",
   },
   brand: { name: "Makers", tagline: "Real Estate", sub: "SODIC East · New Heliopolis" },
-  nav: { contact: "Contact", call: "Call" },
+  nav: {
+    projects: "Projects",
+    why: "Why primary",
+    payment: "Payment",
+    contact: "Contact",
+    call: "Call",
+  },
   hero: {
-    eyebrow: "Makers Real Estate · SODIC East",
-    titleLine1: "The",
-    titleLine2: "Lakes",
+    eyebrow: "Primary sales · Direct from the developer",
+    titleLine1: "The Lakes",
+    titleLine2: "SODIC East",
     place: "New Heliopolis · East Cairo",
     lede:
-      "Water, landscape and everyday life wrapped around a swimmable central lagoon. Homes from EGP 6.7M with 0% down and ten years to pay.",
-    primary: "Explore the collection",
-    secondary: "Speak to an advisor",
-    scroll: "Scroll to explore",
+      "First-release apartments and duplexes, sold directly by the developer. Official pricing, 0% down and ten years to pay — with no resale premium.",
+    primary: "Explore the residences",
+    secondary: "WhatsApp our team",
+    scroll: "Discover SODIC East",
     stats: [
       { value: "655", label: "Acres master plan" },
-      { value: "55%", label: "Open space" },
+      { value: "55%", label: "Open landscape" },
       { value: "0%", label: "Down payment" },
-      { value: "10 yrs", label: "Installments" },
+      { value: "10 yrs", label: "Instalments" },
     ],
   },
+  sections: {
+    intro: {
+      kicker: "Primary only",
+      title: "A first-release address, handled properly.",
+      lede:
+        "Makers Real Estate sells primary units at SODIC East — homes released by the developer, not resold by an owner.",
+      body:
+        "That changes what you see: the official price list, live availability, the developer's own payment schedule and the real handover dates. No inflated resale ticket, no inherited problems, no guessing what the unit is worth.",
+      facts: [
+        { value: "2", label: "SODIC East addresses" },
+        { value: "100%", label: "Primary releases" },
+        { value: "7 days", label: "Sales support" },
+      ],
+    },
+    projects: {
+      kicker: "The portfolio",
+      title: "Two addresses. One standard.",
+      lede:
+        "First-release residences selected for layout, light and long-term value — all within SODIC East, New Heliopolis.",
+      items: [
+        {
+          name: "The Lakes",
+          location: "SODIC East · New Heliopolis",
+          type: "Apartments & duplexes",
+          priceFrom: "From EGP 6.7M",
+          status: "Now releasing",
+          image: "/img/lakes-pool.jpg",
+          note: "0% down · 10-year plan · Delivery December 2026",
+        },
+        {
+          name: "EastVale",
+          location: "SODIC East · New Heliopolis",
+          type: "Apartments & townhouses",
+          priceFrom: "Price list on request",
+          status: "Primary allocation",
+          image: "/img/lakes-sunset.jpg",
+          note: "Official launch pricing · Developer payment plans",
+        },
+      ],
+    },
+    advantages: {
+      kicker: "Why primary",
+      title: "Buy first. Not second.",
+      lede:
+        "A primary purchase is the cleanest route into a developer's project — and the only one that starts at the official price.",
+      items: [
+        {
+          title: "Developer price",
+          text: "The launch price from the source, with no resale premium layered on top.",
+        },
+        {
+          title: "Official payment plan",
+          text: "The developer's down payment and instalment schedule, confirmed in writing.",
+        },
+        {
+          title: "Clean allocation",
+          text: "First-release units with clear title and the developer as the seller.",
+        },
+        {
+          title: "Delivery certainty",
+          text: "Phased handover dates and construction updates, straight from the project.",
+        },
+      ],
+    },
+    amenities: {
+      kicker: "The master plan",
+      title: "655 acres, built around water.",
+      lede:
+        "A swimmable central lagoon, a green spine and everyday amenities inside SODIC East — planned as one complete neighbourhood.",
+      image: "/img/lakes-sunset.jpg",
+      items: [
+        "Swimmable central lagoon",
+        "55% open landscape",
+        "SODIC Sports Club",
+        "International school",
+        "Cycling and running spine",
+        "Retail and dining promenade",
+      ],
+    },
+    payment: {
+      kicker: "Payment",
+      title: "A plan that starts at zero.",
+      lede:
+        "Selected first-release residences are available with 0% down and ten years to pay — the developer's schedule, confirmed in the reservation contract.",
+      stats: [
+        { value: "0%", label: "Down payment" },
+        { value: "10 yrs", label: "Instalments" },
+        { value: "120", label: "Monthly payments" },
+        { value: "Dec 2026", label: "First delivery" },
+      ],
+      note:
+        "Monthly figures are indicative and calculated at 0% interest. The final schedule, delivery date and unit price are set by the developer in the reservation contract.",
+    },
+  },
   footer: {
-    title: "Let’s find your address.",
+    title: "Request the primary price list.",
     lede:
-      "Seif El Din Tarek walks you through layouts, availability and payment schedules — usually within the hour.",
-    advisor: "Seif El Din Tarek",
-    role: "Senior Property Consultant · SODIC",
+      "Speak to Ahmed Hassan for live availability, floor plans and the developer's payment schedule — usually within the hour.",
+    advisor: "Ahmed Hassan",
+    role: "Primary Sales Consultant · Makers Real Estate",
     whatsapp: "WhatsApp",
-    call: "0100 950 0083",
+    call: "0111 620 4890",
     disclaimer:
-      "Prices, areas and availability are indicative and subject to change without notice. Images are artist impressions of The Lakes at SODIC East. Delivery dates are per phase.",
+      "Primary sales only. Makers Real Estate is an authorised sales partner for the developments shown. Prices, areas, availability and payment plans are indicative, subject to developer confirmation and change without notice. Images are artist impressions.",
     rights: "Makers Real Estate. All rights reserved.",
-    builtWith: "SODIC East · The Lakes · Phase 08M",
+    builtWith: "SODIC East · The Lakes · EastVale",
     sections: "Sections",
   },
   leadForm: {
     kicker: "Request a call back",
-    title: "Tell us what you’re looking for",
+    title: "Tell us what you are looking for.",
     lede:
-      "Leave your number and an advisor calls you back — usually within the hour, seven days a week.",
+      "Leave your number and a primary-sales advisor calls you back with live availability, floor plans and the developer's payment schedule.",
     name: "Full name",
     nameHint: "",
     phone: "Phone",
@@ -109,13 +253,13 @@ const en: Content = {
     project: "Project of interest",
     bedrooms: "Bedrooms",
     message: "Message (optional)",
-    messageHint: "Budget, preferred floor, view…",
+    messageHint: "Preferred floor, view, budget…",
     consent: "I agree to be contacted about this enquiry.",
     submit: "Request a call",
     submitting: "Sending…",
     successTitle: "Thank you — we have your enquiry.",
     successLede:
-      "An advisor will call you back shortly. Prefer WhatsApp? Message us any time.",
+      "A primary-sales advisor will call you back shortly. Prefer WhatsApp? Message us any time.",
     error: "Could not send — please try again or call us directly.",
     required: "Name and phone required.",
     projectOptions: ["The Lakes", "EastVale"],
@@ -125,48 +269,148 @@ const en: Content = {
 
 const ar: Content = {
   meta: {
-    title: "ميكرز للعقارات — البحيرات في سوديك إيست",
+    title: "ميكرز للعقارات — وحدات أولية في سوديك إيست",
     description:
-      "ميكرز للعقارات تقدم البحيرات داخل سوديك إيست، هليوبوليس الجديدة. شقق ودوبلكس تبدأ من 6.7 مليون جنيه، بدون مقدم، وتقسيط على 10 سنوات، والتسليم ديسمبر 2026.",
+      "وحدات أولية من المطور في البحيرات وإيست فيل داخل سوديك إيست. شقق ودوبلكس تبدأ من 6.7 مليون جنيه، بدون مقدم وتقسيط 10 سنوات — بيع مباشر من المطور.",
   },
   brand: { name: "ميكرز", tagline: "للعقارات", sub: "سوديك إيست · هليوبوليس الجديدة" },
-  nav: { contact: "تواصل", call: "اتصل" },
+  nav: {
+    projects: "المشروعات",
+    why: "لماذا أولي",
+    payment: "السداد",
+    contact: "تواصل",
+    call: "اتصل",
+  },
   hero: {
-    eyebrow: "ميكرز للعقارات · سوديك إيست",
+    eyebrow: "بيع أولي · مباشرة من المطور",
     titleLine1: "البحيرات",
-    titleLine2: "",
+    titleLine2: "سوديك إيست",
     place: "هليوبوليس الجديدة · شرق القاهرة",
     lede:
-      "مياه ومساحات خضراء وحياة يومية حول بحيرة مركزية صالحة للسباحة. وحدات تبدأ من 6.7 مليون جنيه، بدون مقدم وتقسيط على 10 سنوات.",
-    primary: "استكشف المجموعة",
-    secondary: "تحدث مع مستشار",
-    scroll: "انزل للاستكشاف",
+      "شقق ودوبلكس من الإطلاق الأول، بيع مباشر من المطور. أسعار رسمية، بدون مقدم وتقسيط على 10 سنوات — بدون علاوة إعادة بيع.",
+    primary: "استكشف الوحدات",
+    secondary: "تواصل واتساب",
+    scroll: "اكتشف سوديك إيست",
     stats: [
-      { value: "655", label: "فدان" },
+      { value: "655", label: "فدان ماستر بلان" },
       { value: "55%", label: "مساحات مفتوحة" },
       { value: "0%", label: "مقدم الحجز" },
       { value: "10 سنوات", label: "مدة التقسيط" },
     ],
   },
+  sections: {
+    intro: {
+      kicker: "بيع أولي فقط",
+      title: "عنوان من الإطلاق الأول، بتعامل احترافي.",
+      lede:
+        "ميكرز للعقارات تبيع وحدات أولية في سوديك إيست — وحدات يطرحها المطور، وليست إعادة بيع من مالك.",
+      body:
+        "هذا يغيّر ما تراه: قائمة الأسعار الرسمية، المتاح الفعلي، جدول سداد المطور ومواعيد التسليم الحقيقية. بدون سعر إعادة بيع مرتفع، وبدون مشاكل موروثة، وبدون تخمين لقيمة الوحدة.",
+      facts: [
+        { value: "2", label: "عنوان في سوديك إيست" },
+        { value: "100%", label: "وحدات أولية" },
+        { value: "7 أيام", label: "دعم المبيعات" },
+      ],
+    },
+    projects: {
+      kicker: "المعروض",
+      title: "عنوانان. معيار واحد.",
+      lede:
+        "وحدات من الإطلاق الأول مختارة من حيث التقسيم والإضاءة والقيمة على المدى الطويل — كلها داخل سوديك إيست، هليوبوليس الجديدة.",
+      items: [
+        {
+          name: "البحيرات",
+          location: "سوديك إيست · هليوبوليس الجديدة",
+          type: "شقق ودوبلكس",
+          priceFrom: "تبدأ من 6.7 مليون جنيه",
+          status: "متاح الآن",
+          image: "/img/lakes-pool.jpg",
+          note: "بدون مقدم · تقسيط 10 سنوات · تسليم ديسمبر 2026",
+        },
+        {
+          name: "إيست فيل",
+          location: "سوديك إيست · هليوبوليس الجديدة",
+          type: "شقق وتاون هاوس",
+          priceFrom: "قائمة الأسعار عند الطلب",
+          status: "طرح أولي",
+          image: "/img/lakes-sunset.jpg",
+          note: "أسعار الإطلاق الرسمية · خطط سداد من المطور",
+        },
+      ],
+    },
+    advantages: {
+      kicker: "لماذا أولي",
+      title: "اشترِ أولاً. لا تُعِد البيع.",
+      lede:
+        "الشراء الأولي هو الطريق الأنظف إلى مشروع المطور — والوحيد الذي يبدأ بالسعر الرسمي.",
+      items: [
+        {
+          title: "سعر المطور",
+          text: "سعر الإطلاق من المصدر، بدون علاوة إعادة بيع مضافة.",
+        },
+        {
+          title: "خطة سداد رسمية",
+          text: "مقدم وأقساط المطور، موثقة كتابةً في العقد.",
+        },
+        {
+          title: "تخصيص نظيف",
+          text: "وحدات من الطرح الأول بملكية واضحة والمطور هو البائع.",
+        },
+        {
+          title: "تسليم مضمون",
+          text: "مواعيد تسليم مرحلية وتحديثات إنشاء من المشروع مباشرة.",
+        },
+      ],
+    },
+    amenities: {
+      kicker: "الماستر بلان",
+      title: "655 فدانًا حول الماء.",
+      lede:
+        "بحيرة مركزية صالحة للسباحة، محور أخضر وخدمات يومية داخل سوديك إيست — كحي متكامل واحد.",
+      image: "/img/lakes-sunset.jpg",
+      items: [
+        "بحيرة مركزية صالحة للسباحة",
+        "55% مساحات مفتوحة",
+        "نادي سوديك الرياضي",
+        "مدرسة دولية",
+        "مسار للدراجات والجري",
+        "ممشى تجاري ومطاعم",
+      ],
+    },
+    payment: {
+      kicker: "السداد",
+      title: "خطة تبدأ من صفر.",
+      lede:
+        "وحدات مختارة من الطرح الأول متاحة بدون مقدم وتقسيط على 10 سنوات — جدول المطور، مؤكد في عقد الحجز.",
+      stats: [
+        { value: "0%", label: "مقدم الحجز" },
+        { value: "10 سنوات", label: "مدة التقسيط" },
+        { value: "120", label: "قسط شهري" },
+        { value: "ديسمبر 2026", label: "أول تسليم" },
+      ],
+      note:
+        "الأرقام الشهرية إرشادية وتحسب بدون فوائد. الجدول النهائي وموعد التسليم وسعر الوحدة يحددها المطور في عقد الحجز.",
+    },
+  },
   footer: {
-    title: "لنحدد عنوانك.",
+    title: "اطلب قائمة الأسعار الأولية.",
     lede:
-      "سيف الدين طارق يشرح لك المخططات والمتاح والأسعار وخطط السداد — عادة خلال ساعة من تواصلك.",
-    advisor: "سيف الدين طارق",
-    role: "مستشار عقاري أول · سوديك",
+      "تحدث مع أحمد حسن لمعرفة المتاح الفعلي والمخططات وجدول سداد المطور — عادة خلال ساعة.",
+    advisor: "أحمد حسن",
+    role: "مستشار مبيعات أولية · ميكرز للعقارات",
     whatsapp: "واتساب",
-    call: "0100 950 0083",
+    call: "0111 620 4890",
     disclaimer:
-      "الأسعار والمساحات والمتاح إرشادية وقابلة للتغيير دون إشعار. الصور تخييلية لمشروع البحيرات داخل سوديك إيست. مواعيد التسليم حسب المرحلة.",
+      "بيع أولي فقط. ميكرز للعقارات شريك بيع معتمد للمشروعات المعروضة. الأسعار والمساحات والمتاح وخطط السداد إرشادية وتخضع لتأكيد المطور والتغيير دون إشعار. الصور تخييلية.",
     rights: "ميكرز للعقارات. جميع الحقوق محفوظة.",
-    builtWith: "سوديك إيست · البحيرات · مرحلة 08M",
+    builtWith: "سوديك إيست · البحيرات · إيست فيل",
     sections: "الأقسام",
   },
   leadForm: {
     kicker: "اطلب مكالمة",
-    title: "أخبرنا بما تبحث عنه",
+    title: "أخبرنا بما تبحث عنه.",
     lede:
-      "اترك رقمك وسيقوم المستشار بالاتصال بك — عادة خلال ساعة، طوال أيام الأسبوع.",
+      "اترك رقمك وسيتصل بك مستشار المبيعات الأولية بالمتاح الفعلي والمخططات وجدول سداد المطور.",
     name: "الاسم بالكامل",
     nameHint: "",
     phone: "رقم الهاتف",
@@ -176,15 +420,15 @@ const ar: Content = {
     project: "المشروع المهتم به",
     bedrooms: "عدد غرف النوم",
     message: "رسالة (اختياري)",
-    messageHint: "الميزانية، الدور المفضل، الإطلالة…",
+    messageHint: "الدور المفضل، الإطلالة، الميزانية…",
     consent: "أوافق على التواصل معي بخصوص هذا الطلب.",
     submit: "اطلب مكالمة",
     submitting: "جارٍ الإرسال…",
     successTitle: "شكرًا لك — استلمنا طلبك.",
-    successLede: "سيقوم المستشار بالتواصل معك قريبًا. تفضل واتساب؟ راسلنا في أي وقت.",
+    successLede: "سيتواصل معك مستشار المبيعات الأولية قريبًا. تفضل واتساب؟ راسلنا في أي وقت.",
     error: "تعذر الإرسال — حاول مرة أخرى أو اتصل بنا مباشرة.",
     required: "الاسم والهاتف مطلوبان.",
-    projectOptions: ["ذا ليكس", "إيست ڤيل"],
+    projectOptions: ["البحيرات", "إيست فيل"],
     bedroomOptions: ["الكل", "1", "2", "3", "4+"],
   },
 };
@@ -220,18 +464,25 @@ export type Contact = {
   name: Record<Lang, string>;
   phoneLabel: string;
   phoneHref: string;
+  whatsappLabel: string;
   whatsapp: string;
   whatsappMessage: Record<Lang, string>;
 };
 
+/**
+ * Two numbers, deliberately separate:
+ * - WhatsApp is the first number and must never be dialled.
+ * - Calls are received on the second number.
+ */
 export const contact: Contact = {
-  name: { en: "Seif El Din Tarek", ar: "سيف الدين طارق" },
-  phoneLabel: "0100 950 0083",
-  phoneHref: "tel:+201009500083",
-  whatsapp: "https://wa.me/201009500083",
+  name: { en: "Ahmed Hassan", ar: "أحمد حسن" },
+  phoneLabel: "0111 620 4890",
+  phoneHref: "tel:+201116204890",
+  whatsappLabel: "0102 508 0764",
+  whatsapp: "https://wa.me/201025080764",
   whatsappMessage: {
-    en: "Hello Seif, I am interested in SODIC East — please send me the layouts and payment plan.",
-    ar: "أهلاً سيف، مهتم بمشروع سوديك إيست — من فضلك ابعتلي المخططات وخطة السداد.",
+    en: "Hello Ahmed, I am interested in the primary residences at SODIC East — please send me the price list and payment plan.",
+    ar: "أهلاً أحمد، مهتم بالوحدات الأولية في سوديك إيست — من فضلك ابعتلي قائمة الأسعار وخطة السداد.",
   },
 };
 

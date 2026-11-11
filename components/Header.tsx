@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Content, Lang } from "@/data/content";
+import type { Contact, Content, Lang } from "@/data/content";
 import { ui } from "@/lib/labels";
 import Brand from "./Brand";
 
@@ -9,12 +9,14 @@ export default function Header({
   c,
   lang,
   onLang,
+  contact,
   whatsapp,
   phoneHref,
 }: {
   c: Content;
   lang: Lang;
   onLang: (l: Lang) => void;
+  contact: Contact;
   whatsapp: string;
   phoneHref: string;
 }) {
@@ -29,19 +31,30 @@ export default function Header({
 
   return (
     <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
-      <a href="#top" aria-label={c.brand.name + " — " + c.brand.sub}>
+      <a className="header-brand" href="#top" aria-label={c.brand.name + " — " + c.brand.sub}>
         <Brand name={c.brand.name} tagline={c.brand.tagline} />
       </a>
 
+      <nav className="header-nav" aria-label={c.footer.sections}>
+        <a className="header-link" href="#projects">
+          {c.nav.projects}
+        </a>
+        <a className="header-link" href="#why">
+          {c.nav.why}
+        </a>
+        <a className="header-link" href="#payment">
+          {c.nav.payment}
+        </a>
+        <a className="header-link" href="#enquiry">
+          {c.nav.contact}
+        </a>
+      </nav>
+
       <div className="header-right">
-        <nav className="header-nav" aria-label={c.footer.sections}>
-          <a className="header-link phone" href={phoneHref} data-cta="phone" data-cta-surface="header">
-            {c.footer.call}
-          </a>
-          <a className="header-link" href="#enquiry">
-            {c.nav.contact}
-          </a>
-        </nav>
+        <a className="header-call" href={phoneHref} data-cta="phone" data-cta-surface="header">
+          <small>{c.nav.call}</small>
+          <strong className="phone">{contact.phoneLabel}</strong>
+        </a>
 
         <a className="header-login" href="/login" aria-label={ui[lang].login}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -74,14 +87,14 @@ export default function Header({
         </div>
 
         <a
-          className="btn btn--solid btn--sm"
+          className="btn btn--gold btn--sm header-cta"
           href={whatsapp}
           target="_blank"
           rel="noopener noreferrer"
           data-cta="whatsapp"
           data-cta-surface="header"
         >
-          <span>{ui[lang].book}</span>
+          <span>{ui[lang].whatsapp}</span>
         </a>
       </div>
     </header>

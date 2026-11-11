@@ -2,8 +2,8 @@ import { contact, content, type Lang } from "../data/content";
 import { getPool, withTransaction, type TxClient } from "../lib/db";
 
 /**
- * Seeds the bilingual landing-page chrome (meta, brand, nav, hero, footer,
- * lead form) and the contact block.
+ * Seeds the bilingual landing page: chrome, the primary-sales sections and
+ * the contact block.
  *
  * CRM lead records are operational data and are deliberately not populated
  * with sample/demo rows by this script.
@@ -16,12 +16,13 @@ async function seedLocale(client: TxClient, lang: Lang) {
   const locale = content[lang];
 
   await client.query(
-    `INSERT INTO site_content (lang, meta, brand, nav, hero, footer, lead_form)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `INSERT INTO site_content (lang, meta, brand, nav, hero, footer, lead_form, sections)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT (lang) DO UPDATE SET
        meta = EXCLUDED.meta, brand = EXCLUDED.brand, nav = EXCLUDED.nav,
        hero = EXCLUDED.hero, footer = EXCLUDED.footer,
-       lead_form = EXCLUDED.lead_form, updated_at = now()`,
+       lead_form = EXCLUDED.lead_form, sections = EXCLUDED.sections,
+       updated_at = now()`,
     [
       lang,
       json(locale.meta),
@@ -30,10 +31,11 @@ async function seedLocale(client: TxClient, lang: Lang) {
       json(locale.hero),
       json(locale.footer),
       json(locale.leadForm),
+      json(locale.sections),
     ]
   );
 
-  console.log(`[seed] ${lang}: landing chrome`);
+  console.log(`[seed] ${lang}: landing chrome and sections`);
 }
 
 async function main() {

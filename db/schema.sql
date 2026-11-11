@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS site_content (
   hero       jsonb NOT NULL,
   footer     jsonb NOT NULL,
   lead_form  jsonb,
+  sections   jsonb,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -119,6 +120,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
 -- Existing installs: widen the lead enums and add the follow-up columns
 -- without dropping data.
 ALTER TABLE site_content ADD COLUMN IF NOT EXISTS lead_form jsonb;
+ALTER TABLE site_content ADD COLUMN IF NOT EXISTS sections jsonb;
 
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS preferred_area     text;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS payment_preference text;

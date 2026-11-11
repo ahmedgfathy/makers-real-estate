@@ -1,26 +1,23 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { Content, Lang } from "@/data/content";
+import type { Contact, Content, Lang } from "@/data/content";
 import { capture } from "@/lib/analytics";
 
 /**
- * Public "request a call back" form (section #enquiry on the landing page).
- *
- * Posts to the same POST /api/leads endpoint as Facebook lead ads, so every
- * visitor enquiry lands in the dashboard's Leads pipeline with source
- * `website`. A hidden honeypot field keeps basic spam bots out without a
- * captcha dependency. Success is a friendly confirmation with the advisor's
- * WhatsApp / phone kept one tap away.
+ * Public enquiry form. Posts to the same POST /api/leads endpoint as the
+ * Meta lead ads, so every visitor enquiry lands in the CRM pipeline.
  */
 export default function LeadForm({
   c,
   lang,
+  contact,
   whatsapp,
   phoneHref,
 }: {
   c: Content;
   lang: Lang;
+  contact: Contact;
   whatsapp: string;
   phoneHref: string;
 }) {
@@ -40,7 +37,6 @@ export default function LeadForm({
     const honeypot = String(data.get("_hp") ?? "");
 
     if (honeypot) {
-      // Bot filled the hidden field: pretend success, store nothing.
       setDone(true);
       return;
     }
@@ -69,7 +65,7 @@ export default function LeadForm({
           bedrooms: bedroomsValue(String(data.get("bedrooms") ?? "")),
           message: String(data.get("message") ?? "").trim() || undefined,
           source: "website",
-          form_name: "Website — Request a call",
+          form_name: "Website — Primary enquiry",
           consent: true,
         }),
       });
@@ -90,12 +86,11 @@ export default function LeadForm({
     }
   }
 
-
   return (
     <section className="enquiry" id="enquiry" aria-labelledby="enquiry-title">
       <div className="enquiry-inner">
         <div className="enquiry-intro">
-          <p className="enquiry-kicker">{f.kicker}</p>
+          <p className="section-kicker">{f.kicker}</p>
           <h2 className="enquiry-title" id="enquiry-title">
             {f.title}
           </h2>
@@ -117,11 +112,12 @@ export default function LeadForm({
                 </svg>
               </span>
               <span className="enquiry-contact-copy">
-                <small>{lang === "ar" ? "راسل مستشارًا" : "Message an advisor"}</small>
-                <strong>{c.footer.whatsapp}</strong>
+                <small>{lang === "ar" ? "واتساب فقط" : "WhatsApp only"}</small>
+                <strong className="phone">{contact.whatsappLabel}</strong>
               </span>
               <span className="enquiry-contact-arrow" aria-hidden="true">↗</span>
             </a>
+
             <a
               className="enquiry-contact-link"
               href={phoneHref}
@@ -135,8 +131,8 @@ export default function LeadForm({
                 </svg>
               </span>
               <span className="enquiry-contact-copy">
-                <small>{lang === "ar" ? "اتصل بفريقنا" : "Call our team"}</small>
-                <strong>{c.footer.call}</strong>
+                <small>{lang === "ar" ? "للمكالمات" : "For calls"}</small>
+                <strong className="phone">{contact.phoneLabel}</strong>
               </span>
               <span className="enquiry-contact-arrow" aria-hidden="true">↗</span>
             </a>
@@ -150,7 +146,7 @@ export default function LeadForm({
               <p>{f.successLede}</p>
               <div className="enquiry-alt">
                 <a
-                  className="btn btn--solid btn--sm"
+                  className="btn btn--gold btn--sm"
                   href={whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -159,18 +155,13 @@ export default function LeadForm({
                 >
                   <span>{c.footer.whatsapp}</span>
                 </a>
-                <button
-                  type="button"
-                  className="btn btn--ghost btn--sm"
-                  onClick={() => setDone(false)}
-                >
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setDone(false)}>
                   <span>{f.submit}</span>
                 </button>
               </div>
             </div>
           ) : (
             <form className="enquiry-form" onSubmit={onSubmit} noValidate>
-              {/* Honeypot — humans never see or fill this. */}
               <input
                 type="text"
                 name="_hp"
@@ -181,22 +172,12 @@ export default function LeadForm({
               />
 
               <label className="enquiry-field">
-                <span>
-                  {f.name} <b aria-hidden="true">*</b>
-                </span>
-                <input
-                  type="text"
-                  name="full_name"
-                  autoComplete="name"
-                  placeholder={f.nameHint}
-                  required
-                />
+                <span>{f.name} <b aria-hidden="true">*</b></span>
+                <input type="text" name="full_name" autoComplete="name" placeholder={f.nameHint} required />
               </label>
 
               <label className="enquiry-field">
-                <span>
-                  {f.phone} <b aria-hidden="true">*</b>
-                </span>
+                <span>{f.phone} <b aria-hidden="true">*</b></span>
                 <input
                   type="tel"
                   name="phone"
@@ -218,9 +199,7 @@ export default function LeadForm({
                 <select name="project" defaultValue="">
                   <option value="" disabled />
                   {f.projectOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+                    <option key={option} value={option}>{option}</option>
                   ))}
                 </select>
               </label>
@@ -230,9 +209,7 @@ export default function LeadForm({
                 <select name="bedrooms" defaultValue="">
                   <option value="" disabled />
                   {f.bedroomOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+                    <option key={option} value={option}>{option}</option>
                   ))}
                 </select>
               </label>
@@ -248,19 +225,11 @@ export default function LeadForm({
               </label>
 
               {error ? (
-                <p className="enquiry-error enquiry-field--wide" role="alert">
-                  {error}
-                </p>
+                <p className="enquiry-error enquiry-field--wide" role="alert">{error}</p>
               ) : null}
 
               <div className="enquiry-actions enquiry-field--wide">
-                <button
-                  type="submit"
-                  className="btn btn--solid"
-                  disabled={pending}
-                  data-cta="lead_form"
-                  data-cta-surface="enquiry"
-                >
+                <button type="submit" className="btn btn--gold" disabled={pending} data-cta="lead_form" data-cta-surface="enquiry">
                   <span>{pending ? f.submitting : f.submit}</span>
                 </button>
                 <small className="enquiry-required">{f.required}</small>
@@ -273,7 +242,6 @@ export default function LeadForm({
   );
 }
 
-/** "2" → 2, "4+" → 4, "Any"/"" → null (the API treats null as unset). */
 function bedroomsValue(option: string): number | null {
   const digits = option.replace(/\D/g, "");
   if (!digits || /any|الكل/i.test(option)) return null;

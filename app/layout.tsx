@@ -39,10 +39,11 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [
       "SODIC East",
       "The Lakes",
+      "EastVale",
       "New Heliopolis",
+      "primary units",
       "Makers Real Estate",
       "apartments East Cairo",
-      "phase 08M",
     ],
     openGraph: {
       title: meta.title,
@@ -60,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#f3f7fc",
+  themeColor: "#081f18",
   width: "device-width",
   initialScale: 1,
 };

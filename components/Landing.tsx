@@ -10,6 +10,7 @@ import {
 import { capture } from "@/lib/analytics";
 import Header from "./Header";
 import Hero from "./Hero";
+import Showcase from "./Showcase";
 import LeadForm from "./LeadForm";
 import Footer from "./Footer";
 
@@ -21,6 +22,7 @@ export default function Landing({
   contact: Contact;
 }) {
   const [lang, setLang] = useState<Lang>("en");
+  const [hydrated, setHydrated] = useState(false);
 
   const c = content[lang];
   const whatsapp = whatsappLink(contact, lang);
@@ -32,17 +34,21 @@ export default function Landing({
     } catch {
       /* storage unavailable */
     }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    // Do not write back before the stored choice has been read: in React
+    // StrictMode the first effect pass would otherwise overwrite it with "en".
+    if (!hydrated) return;
     try {
       window.localStorage.setItem("makers.lang", lang);
     } catch {
       /* storage unavailable */
     }
-  }, [lang]);
+  }, [lang, hydrated]);
 
   const changeLang = useCallback((next: Lang) => {
     setLang(next);
@@ -50,12 +56,32 @@ export default function Landing({
   }, []);
 
   return (
-    <>
-      <Header c={c} lang={lang} onLang={changeLang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
+    <div className="site">
+      <Header
+        c={c}
+        lang={lang}
+        onLang={changeLang}
+        contact={contact}
+        whatsapp={whatsapp}
+        phoneHref={contact.phoneHref}
+      />
 
       <main>
-        <Hero c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
-        <LeadForm c={c} lang={lang} whatsapp={whatsapp} phoneHref={contact.phoneHref} />
+        <Hero
+          c={c}
+          lang={lang}
+          contact={contact}
+          whatsapp={whatsapp}
+          phoneHref={contact.phoneHref}
+        />
+        <Showcase c={c} lang={lang} />
+        <LeadForm
+          c={c}
+          lang={lang}
+          contact={contact}
+          whatsapp={whatsapp}
+          phoneHref={contact.phoneHref}
+        />
       </main>
 
       <Footer
@@ -65,6 +91,6 @@ export default function Landing({
         whatsapp={whatsapp}
         phoneHref={contact.phoneHref}
       />
-    </>
+    </div>
   );
 }
