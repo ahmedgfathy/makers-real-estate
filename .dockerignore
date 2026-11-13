@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+.git
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+_work
+_repo
+_backup-local
+.freebuff

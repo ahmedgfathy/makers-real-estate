@@ -10,7 +10,7 @@ export const ui = {
     call: "Call",
     cookies: "Cookie preferences",
     consentText:
-      "We measure how this site is used (PostHog) to improve the listings. Nothing is tracked unless you allow it.",
+      "We use PostHog and Google analytics to improve the site. Analytics are disabled unless you allow them.",
     consentAccept: "Allow",
     consentDecline: "Decline",
   },
@@ -22,7 +22,7 @@ export const ui = {
     call: "اتصل",
     cookies: "تفضيلات الكوكيز",
     consentText:
-      "نقيس كيفية استخدام الموقع (PostHog) لتحسين المعروض. لا يتم تتبع أي شيء بدون موافقتك.",
+      "نستخدم PostHog وأدوات Google للتحليلات وتحسين الموقع. تظل التحليلات متوقفة ما لم توافق.",
     consentAccept: "موافق",
     consentDecline: "رفض",
   },

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   whatsappLink,
   type Contact,
@@ -18,50 +19,36 @@ import Footer from "./Footer";
 export default function Landing({
   content,
   contact,
+  initialLang,
 }: {
   content: Record<Lang, Content>;
   contact: Contact;
+  initialLang: Lang;
 }) {
-  const [lang, setLang] = useState<Lang>("en");
-  const [hydrated, setHydrated] = useState(false);
+  const router = useRouter();
+  const lang = initialLang;
 
   const c = content[lang];
   const whatsapp = whatsappLink(contact, lang);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("makers.lang");
-      if (stored === "ar" || stored === "en") setLang(stored);
-    } catch {
-      /* storage unavailable */
-    }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    // Do not write back before the stored choice has been read: in React
-    // StrictMode the first effect pass would otherwise overwrite it with "en".
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem("makers.lang", lang);
-    } catch {
-      /* storage unavailable */
-    }
-  }, [lang, hydrated]);
+  }, [lang]);
 
   const changeLang = useCallback((next: Lang) => {
-    setLang(next);
+    if (next === lang) return;
     capture("language_switched", { language: next });
-  }, []);
+    router.push(`/${next}`);
+  }, [lang, router]);
 
   return (
-    <div className="site">
+    <div className="site" lang={lang} dir={lang === "ar" ? "rtl" : "ltr"}>
       <Header
         c={c}
         lang={lang}
         onLang={changeLang}
+        homeHref={`/${lang}`}
         contact={contact}
         whatsapp={whatsapp}
         phoneHref={contact.phoneHref}
@@ -90,6 +77,7 @@ export default function Landing({
         c={c}
         contact={contact}
         lang={lang}
+        homeHref={`/${lang}`}
         whatsapp={whatsapp}
         phoneHref={contact.phoneHref}
       />

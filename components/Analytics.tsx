@@ -14,24 +14,15 @@ import {
 import { ui } from "@/lib/labels";
 
 /**
- * Mounts PostHog for the whole app: one pageview per route, a delegated
+ * Mounts analytics for the whole app: one pageview per route, a delegated
  * listener for every CTA marked with `data-cta`, and the consent prompt that
  * decides whether anything is sent at all. Renders nothing once a choice is
  * stored — the footer link reopens it.
  */
 export default function Analytics() {
   const pathname = usePathname();
-  const [lang, setLang] = useState<"en" | "ar">("en");
+  const lang = pathname.startsWith("/ar") ? "ar" : "en";
   const [ask, setAsk] = useState(false);
-
-  // Follow the <html lang> the landing page keeps in sync with the EN/ع switch.
-  useEffect(() => {
-    const sync = () => setLang(document.documentElement.lang === "ar" ? "ar" : "en");
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-    return () => observer.disconnect();
-  }, []);
 
   // Ask once when an analytics provider is configured.
   useEffect(() => {
@@ -42,6 +33,8 @@ export default function Analytics() {
 
   useEffect(() => {
     capturePageview();
+    const projectMatch = pathname.match(/^\/(?:en|ar)\/projects\/([^/]+)/);
+    if (projectMatch) capture("view_project", { project_slug: projectMatch[1] });
   }, [pathname]);
 
   // Every WhatsApp / call link carries data-cta, so one listener covers them all.
@@ -54,17 +47,22 @@ export default function Analytics() {
       capture("contact_clicked", {
         channel: link.dataset.cta,
         surface: link.dataset.ctaSurface ?? "unknown",
+        language: lang,
       });
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, []);
+  }, [lang]);
 
   const choose = useCallback((consent: AnalyticsConsent) => {
     setConsent(consent);
     setAsk(false);
-    if (consent === "granted") capturePageview();
-  }, []);
+    if (consent === "granted") {
+      capturePageview();
+      const projectMatch = pathname.match(/^\/(?:en|ar)\/projects\/([^/]+)/);
+      if (projectMatch) capture("view_project", { project_slug: projectMatch[1] });
+    }
+  }, [pathname]);
 
   if (!ask) return null;
   const copy = ui[lang];

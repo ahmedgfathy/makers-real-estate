@@ -9,6 +9,7 @@ export default function Header({
   c,
   lang,
   onLang,
+  homeHref = "",
   contact,
   whatsapp,
   phoneHref,
@@ -16,11 +17,13 @@ export default function Header({
   c: Content;
   lang: Lang;
   onLang: (l: Lang) => void;
+  homeHref?: string;
   contact: Contact;
   whatsapp: string;
   phoneHref: string;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const anchor = (id: string) => `${homeHref}#${id}`;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -31,21 +34,21 @@ export default function Header({
 
   return (
     <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
-      <a className="header-brand" href="#top" aria-label={c.brand.name + " — " + c.brand.sub}>
+      <a className="header-brand" href={anchor("top")} aria-label={c.brand.name + " — " + c.brand.sub}>
         <Brand name={c.brand.name} tagline={c.brand.tagline} />
       </a>
 
       <nav className="header-nav" aria-label={c.footer.sections}>
-        <a className="header-link" href="#projects">
+        <a className="header-link" href={anchor("projects")}>
           {c.nav.projects}
         </a>
-        <a className="header-link" href="#why">
+        <a className="header-link" href={anchor("why")}>
           {c.nav.why}
         </a>
-        <a className="header-link" href="#payment">
+        <a className="header-link" href={anchor("payment")}>
           {c.nav.payment}
         </a>
-        <a className="header-link" href="#enquiry">
+        <a className="header-link" href={anchor("enquiry")}>
           {c.nav.contact}
         </a>
       </nav>

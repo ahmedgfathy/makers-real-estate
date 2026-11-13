@@ -180,8 +180,15 @@ const VIDEO_PATHS = [
 ];
 const ARABIC_CLINIC_LABELS = ["غرفة واحدة", "غرفتان", "3 غرف", "4 غرف"];
 
-export default function SleekProject({ lang }: { lang: Lang }) {
+export default function SleekProject({
+  lang,
+  standalone = false,
+}: {
+  lang: Lang;
+  standalone?: boolean;
+}) {
   const c = copy[lang];
+  const ProjectTitle = standalone ? "h1" : "h2";
   const unitGroups: UnitGroup[] = [
     { title: c.groundRetail, units: units.groundRetail },
     { title: c.groundFood, units: units.groundFood },
@@ -203,7 +210,7 @@ export default function SleekProject({ lang }: { lang: Lang }) {
         <div className="sleek-overview">
           <div className="sleek-overview-copy">
             <p className="section-kicker">{c.kicker}</p>
-            <h2 className="section-title" id="sleek-title">Sleek</h2>
+            <ProjectTitle className="section-title" id="sleek-title">Sleek</ProjectTitle>
             <p className="section-lede">{c.intro}</p>
             <a className="sleek-map-link" href={MAP_URL} target="_blank" rel="noopener noreferrer">
               <span aria-hidden="true">↗</span>

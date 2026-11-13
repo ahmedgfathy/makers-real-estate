@@ -16,7 +16,12 @@ The database URL is read from `DATABASE_URL`. Use a Neon pooled connection for t
 
 ## Website and CRM
 
-- The public site has English/Arabic landing pages for The Lakes, EastVale and Sleek, enquiry forms, WhatsApp and phone contact links, consent-gated PostHog and Google Tag Manager analytics, and Google AdSense verification metadata and script.
+- The public site has localized `/en` and `/ar` landing pages, plus bilingual SEO pages for verified Sleek project details at `/en/projects/sleek` and `/ar/projects/sleek`. The root URL redirects to `/en`.
+- `sitemap.xml` lists only these public localized pages with reciprocal language alternates. `robots.txt` allows public assets and disallows the dashboard, login, and API routes.
+- The site emits consent-gated GTM events for page views, project views, WhatsApp/phone clicks, successful lead submissions, and language changes. Google Consent Mode defaults analytics and advertising storage to denied; accepting the current prompt grants analytics only.
+- Google Tag Manager is configured in the Next.js app, not through GoDaddy. Set `NEXT_PUBLIC_GTM_ID` and `NEXT_PUBLIC_SITE_URL` in Vercel. The canonical URL defaults to `https://www.makersegypt.com`; override it if the production hostname differs. Add GA4 event tags/triggers in the GTM container; configure its Google tag not to send an automatic page view and avoid a second browser-history page-view mechanism.
+- Set `GOOGLE_SITE_VERIFICATION` only for a Google Search Console URL-prefix verification token. Domain properties require DNS verification. Submit `/sitemap.xml` in Search Console after deployment.
+- The site retains its AdSense publisher verification metadata and loader; this does not add ad placements.
 - The CRM provides an overview, lead search and filtering, lead details, manual lead entry, follow-up logging, and account management.
 - Follow-ups are the heart of the CRM: every lead carries a `next_follow_up_on` date, and each contact attempt is appended to `lead_follow_ups`. The sidebar bell, the queue card, the overview banner, and `/dashboard/follow-ups` count overdue and due-today work.
 - Lead intake is available at `POST /api/leads`; the Meta lead ads webhook is `/api/webhooks/meta`.
@@ -32,4 +37,4 @@ The database URL is read from `DATABASE_URL`. Use a Neon pooled connection for t
 
 ## Deployment
 
-Vercel builds run `npm run db:migrate && next build`. Set `DATABASE_URL` and the authentication, lead API, Meta webhook, site URL, and optional analytics variables in the Vercel project environment. The Vercel region is configured in `vercel.json`.
+Vercel builds run `npm run db:migrate && next build`. Set `DATABASE_URL`, the authentication and Meta webhook variables, `NEXT_PUBLIC_SITE_URL` (the production canonical origin), `NEXT_PUBLIC_GTM_ID`, and any optional verification/analytics variables in the Vercel project environment. The Vercel region is configured in `vercel.json`.

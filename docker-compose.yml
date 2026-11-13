@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://makers:${MAKERS_DB_PASSWORD:-makers}@db:5432/makers
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+      - app_next:/app/.next
+    init: true
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: makers
+      POSTGRES_USER: makers
+      POSTGRES_PASSWORD: ${MAKERS_DB_PASSWORD:-makers}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U makers -d makers"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - makers_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  app_node_modules:
+  app_next:
+  makers_postgres_data:

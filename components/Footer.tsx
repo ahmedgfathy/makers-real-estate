@@ -8,15 +8,19 @@ export default function Footer({
   c,
   contact,
   lang,
+  homeHref = "",
   whatsapp,
   phoneHref,
 }: {
   c: Content;
   contact: Contact;
   lang: Lang;
+  homeHref?: string;
   whatsapp: string;
   phoneHref: string;
 }) {
+  const anchor = (id: string) => `${homeHref}#${id}`;
+
   return (
     <footer className="site-footer" id="contact">
       <div className="footer-inner">
@@ -62,22 +66,22 @@ export default function Footer({
         <div className="footer-grid">
           <div className="footer-col">
             <span className="footer-col-title">{c.footer.sections}</span>
-            <a className="footer-link" href="#projects">{c.nav.projects}</a>
-            <a className="footer-link" href="#why">{c.nav.why}</a>
-            <a className="footer-link" href="#amenities">{c.sections.amenities.kicker}</a>
-            <a className="footer-link" href="#payment">{c.nav.payment}</a>
+            <a className="footer-link" href={anchor("projects")}>{c.nav.projects}</a>
+            <a className="footer-link" href={anchor("why")}>{c.nav.why}</a>
+            <a className="footer-link" href={anchor("amenities")}>{c.sections.amenities.kicker}</a>
+            <a className="footer-link" href={anchor("payment")}>{c.nav.payment}</a>
           </div>
 
           <div className="footer-col">
             <span className="footer-col-title">{c.nav.contact}</span>
-            <a className="footer-link" href="#enquiry">{c.leadForm.kicker}</a>
+            <a className="footer-link" href={anchor("enquiry")}>{c.leadForm.kicker}</a>
             <a className="footer-link" href={whatsapp} target="_blank" rel="noopener noreferrer" data-cta="whatsapp" data-cta-surface="footer-links">
               {c.footer.whatsapp}
             </a>
             <a className="footer-link phone" href={phoneHref} data-cta="phone" data-cta-surface="footer-links">
               {contact.phoneLabel}
             </a>
-            <a className="footer-link" href="#top">{ui[lang].top}</a>
+            <a className="footer-link" href={anchor("top")}>{ui[lang].top}</a>
           </div>
 
           <div className="footer-col footer-col--wide">

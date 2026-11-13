@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Cairo, Cormorant_Garamond, Inter } from "next/font/google";
+import { headers } from "next/headers";
 import Script from "next/script";
 import Analytics from "@/components/Analytics";
-import { getSite } from "@/lib/content-db";
+import { SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 const sans = Inter({
@@ -28,41 +29,17 @@ const arabic = Cairo({
   weight: ["300", "400", "600"],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { content } = await getSite();
-  const meta = content.en.meta;
+const siteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 
-  return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-    title: meta.title,
-    description: meta.description,
-    applicationName: "Makers Real Estate",
-    other: {
-      "google-adsense-account": "ca-pub-7647429077075381",
-    },
-    keywords: [
-      "SODIC East",
-      "The Lakes",
-      "EastVale",
-      "New Heliopolis",
-      "primary units",
-      "Makers Real Estate",
-      "apartments East Cairo",
-    ],
-    openGraph: {
-      title: meta.title,
-      description: meta.description,
-      type: "website",
-      images: ["/img/lakes-pool.jpg"],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: meta.title,
-      description: meta.description,
-      images: ["/img/lakes-pool.jpg"],
-    },
-  };
-}
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: "Makers Real Estate",
+  applicationName: "Makers Real Estate",
+  other: {
+    "google-adsense-account": "ca-pub-7647429077075381",
+    ...(siteVerification ? { "google-site-verification": siteVerification } : {}),
+  },
+};
 
 export const viewport: Viewport = {
   themeColor: "#081f18",
@@ -70,14 +47,26 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = (await headers()).get("x-makers-locale") === "ar" ? "ar" : "en";
+
   return (
     <html
-      lang="en"
-      dir="ltr"
+      lang={locale}
+      dir={locale === "ar" ? "rtl" : "ltr"}
       className={`${sans.variable} ${serif.variable} ${arabic.variable}`}
     >
       <body>
+        <Script id="google-consent-mode-default" strategy="beforeInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+window.gtag('consent', 'default', {
+  analytics_storage: 'denied',
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied'
+});`}
+        </Script>
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7647429077075381"
           strategy="beforeInteractive"

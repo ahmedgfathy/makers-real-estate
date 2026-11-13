@@ -23,7 +23,7 @@ export default async function LoginPage({
 
   return (
     <main className="login-page">
-      <a className="login-back" href="/">
+      <a className="login-back" href="/en">
         <span aria-hidden="true">←</span> Back to the site
       </a>
 

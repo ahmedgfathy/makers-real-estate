@@ -43,7 +43,15 @@ export default function Showcase({ c, lang }: { c: Content; lang: Lang }) {
           <div className="project-grid">
             {s.projects.items.map((project, index) => (
               <article className="project-card" key={project.name}>
-                <a className="project-media" href={project.href ?? "#enquiry"} aria-label={project.name}>
+                <a
+                  className="project-media"
+                  href={
+                    project.href === "#sleek" || project.name.toLowerCase() === "sleek"
+                      ? `/${lang}/projects/sleek`
+                      : project.href ?? "#enquiry"
+                  }
+                  aria-label={project.name}
+                >
                   <img src={project.image} alt={project.name} loading={index === 0 ? "eager" : "lazy"} decoding="async" />
                   <span className="project-status">{project.status}</span>
                   <span className="project-index">0{index + 1}</span>
