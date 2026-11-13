@@ -3,6 +3,7 @@ export type Lang = "en" | "ar";
 export type Stat = { value: string; label: string };
 
 export type Project = {
+  slug?: string;
   name: string;
   location: string;
   type: string;
@@ -16,7 +17,7 @@ export type Project = {
 export type Content = {
   meta: { title: string; description: string };
   brand: { name: string; tagline: string; sub: string };
-  nav: { projects: string; why: string; payment: string; contact: string; call: string };
+  nav: { home: string; projects: string; about: string; contact: string; call: string };
   hero: {
     eyebrow: string;
     titleLine1: string;
@@ -103,16 +104,16 @@ export type Content = {
 
 const en: Content = {
   meta: {
-    title: "Makers Real Estate — SODIC East & Sleek South 90th",
+    title: "Makers Real Estate — The Lakes, EastVale, Sleek & Sarai",
     description:
-      "Primary residences at The Lakes and EastVale, plus Sleek retail, offices and clinics on South 90th Street. Developer pricing and payment plans.",
+      "Explore The Lakes, EastVale, Sleek and Sarai Compound by Madinet Masr with Makers Real Estate. Project images, community information and enquiry support.",
   },
   brand: { name: "Makers", tagline: "Real Estate", sub: "SODIC East · South 90th" },
   nav: {
+    home: "Home",
     projects: "Projects",
-    why: "Why primary",
-    payment: "Payment",
-    contact: "Contact",
+    about: "About Us",
+    contact: "Contact Us",
     call: "Call",
   },
   hero: {
@@ -148,11 +149,12 @@ const en: Content = {
     },
     projects: {
       kicker: "The portfolio",
-      title: "Three destinations. One standard.",
+      title: "Four projects. One standard.",
       lede:
-        "Two SODIC East residential addresses and Sleek on South 90th — primary opportunities across homes, retail, offices and clinics.",
+        "Explore The Lakes and EastVale at SODIC East, Sleek on South 90th and Sarai Compound by Madinet Masr.",
       items: [
         {
+          slug: "the-lakes",
           name: "The Lakes",
           location: "SODIC East · New Heliopolis",
           type: "Apartments & duplexes",
@@ -162,6 +164,7 @@ const en: Content = {
           note: "0% down · 10-year plan · Delivery December 2026",
         },
         {
+          slug: "eastvale",
           name: "EastVale",
           location: "SODIC East · New Heliopolis",
           type: "Apartments & townhouses",
@@ -171,6 +174,7 @@ const en: Content = {
           note: "Official launch pricing · Developer payment plans",
         },
         {
+          slug: "sleek",
           name: "Sleek",
           location: "South 90th St · Mohamed Naguib Axis",
           type: "Retail, F&B, offices & clinics",
@@ -179,6 +183,17 @@ const en: Content = {
           image: "/sleek/exterior.jpg",
           note: "5% down · 6-year plan · Delivery Q1 2029",
           href: "#sleek",
+        },
+        {
+          slug: "sarai",
+          name: "Sarai",
+          location: "New Heliopolis · Madinet Masr",
+          type: "S-Villa 212",
+          priceFrom: "Price on request",
+          status: "New project",
+          image: "/sarai/cover.jpg",
+          note: "S-Villa 212 is part of Sarai. Request current pricing and payment details.",
+          href: "/projects/sarai",
         },
       ],
     },
@@ -247,7 +262,7 @@ const en: Content = {
     disclaimer:
       "Primary sales only. Makers Real Estate is an authorised sales partner for the developments shown. Prices, areas, availability and payment plans are indicative, subject to developer confirmation and change without notice. Images are artist impressions.",
     rights: "Makers Real Estate. All rights reserved.",
-    builtWith: "SODIC East · The Lakes · EastVale · Sleek",
+    builtWith: "The Lakes · EastVale · Sleek · Sarai",
     sections: "Sections",
   },
   leadForm: {
@@ -273,23 +288,23 @@ const en: Content = {
       "A primary-sales advisor will call you back shortly. Prefer WhatsApp? Message us any time.",
     error: "Could not send — please try again or call us directly.",
     required: "Name and phone required.",
-    projectOptions: ["The Lakes", "EastVale", "Sleek"],
+    projectOptions: ["The Lakes", "EastVale", "Sleek", "Sarai — S-Villa 212"],
     bedroomOptions: ["Any", "1", "2", "3", "4+"],
   },
 };
 
 const ar: Content = {
   meta: {
-    title: "ميكرز للعقارات — سوديك إيست وسليك التسعين الجنوبي",
+    title: "ميكرز للعقارات — البحيرات وإيست فيل وسليك وسراي",
     description:
-      "وحدات أولية في البحيرات وإيست فيل، ومشروع سليك التجاري والإداري والطبي في شارع التسعين الجنوبي. أسعار وخطط سداد من المطور.",
+      "اكتشف مشروعات البحيرات وإيست فيل وسليك ومشروع سراي من مدينة مصر مع ميكرز للعقارات.",
   },
   brand: { name: "ميكرز", tagline: "للعقارات", sub: "سوديك إيست · التسعين الجنوبي" },
   nav: {
+    home: "الرئيسية",
     projects: "المشروعات",
-    why: "لماذا أولي",
-    payment: "السداد",
-    contact: "تواصل",
+    about: "من نحن",
+    contact: "اتصل بنا",
     call: "اتصل",
   },
   hero: {
@@ -325,11 +340,12 @@ const ar: Content = {
     },
     projects: {
       kicker: "المعروض",
-      title: "ثلاث وجهات. معيار واحد.",
+      title: "أربعة مشروعات. معيار واحد.",
       lede:
-        "عنوانان سكنيان في سوديك إيست ومشروع سليك في شارع التسعين الجنوبي — فرص أولية للسكن والتجزئة والمكاتب والعيادات.",
+        "استكشف البحيرات وإيست فيل في سوديك إيست، وسليك في شارع التسعين الجنوبي، ومشروع سراي من مدينة مصر.",
       items: [
         {
+          slug: "the-lakes",
           name: "البحيرات",
           location: "سوديك إيست · هليوبوليس الجديدة",
           type: "شقق ودوبلكس",
@@ -339,6 +355,7 @@ const ar: Content = {
           note: "بدون مقدم · تقسيط 10 سنوات · تسليم ديسمبر 2026",
         },
         {
+          slug: "eastvale",
           name: "إيست فيل",
           location: "سوديك إيست · هليوبوليس الجديدة",
           type: "شقق وتاون هاوس",
@@ -348,6 +365,7 @@ const ar: Content = {
           note: "أسعار الإطلاق الرسمية · خطط سداد من المطور",
         },
         {
+          slug: "sleek",
           name: "Sleek",
           location: "شارع التسعين الجنوبي · محور محمد نجيب",
           type: "تجزئة ومطاعم ومكاتب وعيادات",
@@ -356,6 +374,17 @@ const ar: Content = {
           image: "/sleek/exterior.jpg",
           note: "5% مقدم · تقسيط 6 سنوات · التسليم الربع الأول 2029",
           href: "#sleek",
+        },
+        {
+          slug: "sarai",
+          name: "سراي",
+          location: "هليوبوليس الجديدة · مدينة مصر",
+          type: "S-Villa 212",
+          priceFrom: "السعر عند الطلب",
+          status: "مشروع جديد",
+          image: "/sarai/cover.jpg",
+          note: "يقع S-Villa 212 ضمن مشروع سراي. اطلب أحدث تفاصيل الأسعار والسداد.",
+          href: "/projects/sarai",
         },
       ],
     },
@@ -424,7 +453,7 @@ const ar: Content = {
     disclaimer:
       "بيع أولي فقط. ميكرز للعقارات شريك بيع معتمد للمشروعات المعروضة. الأسعار والمساحات والمتاح وخطط السداد إرشادية وتخضع لتأكيد المطور والتغيير دون إشعار. الصور تخييلية.",
     rights: "ميكرز للعقارات. جميع الحقوق محفوظة.",
-    builtWith: "سوديك إيست · البحيرات · إيست فيل · Sleek",
+    builtWith: "البحيرات · إيست فيل · Sleek · سراي",
     sections: "الأقسام",
   },
   leadForm: {
@@ -449,7 +478,7 @@ const ar: Content = {
     successLede: "سيتواصل معك مستشار المبيعات الأولية قريبًا. تفضل واتساب؟ راسلنا في أي وقت.",
     error: "تعذر الإرسال — حاول مرة أخرى أو اتصل بنا مباشرة.",
     required: "الاسم والهاتف مطلوبان.",
-    projectOptions: ["البحيرات", "إيست فيل", "Sleek"],
+    projectOptions: ["البحيرات", "إيست فيل", "Sleek", "سراي — S-Villa 212"],
     bedroomOptions: ["الكل", "1", "2", "3", "4+"],
   },
 };
@@ -457,7 +486,7 @@ const ar: Content = {
 const LRI = "\u2066";
 const PDI = "\u2069";
 const NUM_CHUNK = /[A-Za-z0-9][A-Za-z0-9,.\/\u2013\-+%]*(?:\s*[\u2013\-]\s*[A-Za-z0-9][A-Za-z0-9,.\/\u2013\-+%]*)*/g;
-const SKIP_KEYS = new Set(["id", "src", "image", "kind"]);
+const SKIP_KEYS = new Set(["id", "slug", "src", "image", "kind"]);
 
 const isolateText = (s: string) =>
   /^\//.test(s) || /^(https?:|tel:|mailto:)/.test(s) ? s : s.replace(NUM_CHUNK, (m) => LRI + m + PDI);

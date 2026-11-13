@@ -14,12 +14,14 @@ export default function LeadForm({
   contact,
   whatsapp,
   phoneHref,
+  defaultProject,
 }: {
   c: Content;
   lang: Lang;
   contact: Contact;
   whatsapp: string;
   phoneHref: string;
+  defaultProject?: string;
 }) {
   const f = c.leadForm;
   const [pending, setPending] = useState(false);
@@ -196,7 +198,7 @@ export default function LeadForm({
 
               <label className="enquiry-field">
                 <span>{f.project}</span>
-                <select name="project" defaultValue="">
+                <select name="project" defaultValue={defaultProject ?? ""}>
                   <option value="" disabled />
                   {f.projectOptions.map((option) => (
                     <option key={option} value={option}>{option}</option>

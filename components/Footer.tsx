@@ -8,18 +8,18 @@ export default function Footer({
   c,
   contact,
   lang,
-  homeHref = "",
+  localeRoot,
   whatsapp,
   phoneHref,
 }: {
   c: Content;
   contact: Contact;
   lang: Lang;
-  homeHref?: string;
+  localeRoot: string;
   whatsapp: string;
   phoneHref: string;
 }) {
-  const anchor = (id: string) => `${homeHref}#${id}`;
+  const labels = ui[lang];
 
   return (
     <footer className="site-footer" id="contact">
@@ -66,22 +66,22 @@ export default function Footer({
         <div className="footer-grid">
           <div className="footer-col">
             <span className="footer-col-title">{c.footer.sections}</span>
-            <a className="footer-link" href={anchor("projects")}>{c.nav.projects}</a>
-            <a className="footer-link" href={anchor("why")}>{c.nav.why}</a>
-            <a className="footer-link" href={anchor("amenities")}>{c.sections.amenities.kicker}</a>
-            <a className="footer-link" href={anchor("payment")}>{c.nav.payment}</a>
+            <a className="footer-link" href={localeRoot}>{labels.home}</a>
+            <a className="footer-link" href={`${localeRoot}/projects`}>{labels.projects}</a>
+            <a className="footer-link" href={`${localeRoot}/about`}>{labels.aboutUs}</a>
+            <a className="footer-link" href={`${localeRoot}/contact`}>{labels.contactUs}</a>
           </div>
 
           <div className="footer-col">
-            <span className="footer-col-title">{c.nav.contact}</span>
-            <a className="footer-link" href={anchor("enquiry")}>{c.leadForm.kicker}</a>
+            <span className="footer-col-title">{labels.contactUs}</span>
+            <a className="footer-link" href={`${localeRoot}/contact`}>{c.leadForm.kicker}</a>
             <a className="footer-link" href={whatsapp} target="_blank" rel="noopener noreferrer" data-cta="whatsapp" data-cta-surface="footer-links">
               {c.footer.whatsapp}
             </a>
             <a className="footer-link phone" href={phoneHref} data-cta="phone" data-cta-surface="footer-links">
               {contact.phoneLabel}
             </a>
-            <a className="footer-link" href={anchor("top")}>{ui[lang].top}</a>
+            <a className="footer-link" href={localeRoot}>{labels.top}</a>
           </div>
 
           <div className="footer-col footer-col--wide">
@@ -93,7 +93,7 @@ export default function Footer({
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} {c.footer.rights}</span>
           <button type="button" className="footer-link" onClick={() => requestConsent()}>
-            {ui[lang].cookies}
+            {labels.cookies}
           </button>
         </div>
       </div>

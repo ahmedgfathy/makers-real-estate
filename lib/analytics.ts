@@ -239,6 +239,7 @@ function googleEventFor(
 
 function projectSlug(value: unknown): string {
   if (typeof value !== "string" || !value) return "unspecified";
+  if (/sarai|سراي|s[- ]villa/i.test(value)) return "sarai";
   if (/sleek/i.test(value)) return "sleek";
   if (/eastvale|إيست فيل|ايست فيل/i.test(value)) return "eastvale";
   if (/the lakes|البحيرات/i.test(value)) return "the-lakes";

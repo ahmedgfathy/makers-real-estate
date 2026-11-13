@@ -68,6 +68,9 @@ async function loadFromDb(): Promise<Site> {
 
     const dbSections = chrome.sections ?? staticContent[lang].sections;
     const staticSections = staticContent[lang].sections;
+    const replacesLegacySarai = (project: Content["sections"]["projects"]["items"][number]) =>
+      staticSections.projects.items.some((item) => item.slug === "sarai") &&
+      project.name.replace(/[\u2066\u2069]/g, "") === "S-Villa 212";
     const newProjects = staticSections.projects.items.filter(
       (project) => !dbSections.projects.items.some((existing) => existing.name === project.name)
     );
@@ -83,15 +86,23 @@ async function loadFromDb(): Promise<Site> {
               lede: staticSections.projects.lede,
             }
           : {}),
-        items: [...dbSections.projects.items, ...newProjects],
+        items: [
+          ...dbSections.projects.items.filter((project) => !replacesLegacySarai(project)),
+          ...newProjects,
+        ],
       },
     };
     const dbLeadForm = chrome.lead_form ?? staticContent[lang].leadForm;
+    const staticProjectOptions = staticContent[lang].leadForm.projectOptions;
+    const hasSaraiOption = staticProjectOptions.some((option) => /sarai|سراي/i.test(option));
     const leadForm: Content["leadForm"] = {
       ...dbLeadForm,
       projectOptions: [
-        ...dbLeadForm.projectOptions,
-        ...staticContent[lang].leadForm.projectOptions.filter(
+        ...dbLeadForm.projectOptions.filter(
+          (option) =>
+            !(hasSaraiOption && /s-villa/i.test(option) && !staticProjectOptions.includes(option))
+        ),
+        ...staticProjectOptions.filter(
           (option) => !dbLeadForm.projectOptions.includes(option)
         ),
       ],
