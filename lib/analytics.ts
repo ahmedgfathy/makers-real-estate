@@ -7,9 +7,8 @@ import posthog from "posthog-js";
  *
  * Capture is opt-in: the SDK starts opted out and only sends once the visitor
  * accepts the analytics prompt (remembered under `makers.analytics-consent`,
- * next to `makers.lang`). Do Not Track is respected. Without
- * NEXT_PUBLIC_POSTHOG_KEY every helper here is a no-op, so local builds and
- * previews stay quiet.
+ * next to `makers.lang`). Do Not Track is respected by PostHog. PostHog stays
+ * inert without NEXT_PUBLIC_POSTHOG_KEY.
  */
 
 export type AnalyticsConsent = "granted" | "denied";
@@ -19,12 +18,19 @@ const CONSENT_EVENT = "makers:analytics-consent";
 const API_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const API_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
 const UI_HOST = API_HOST.replace(".i.posthog.com", ".posthog.com");
+const GOOGLE_TAG_MANAGER_ID = "GTM-MTG88HJT";
+
+type GoogleWindow = Window & {
+  dataLayer?: unknown[];
+  gtag?: (...args: unknown[]) => void;
+};
 
 let initialised = false;
+let googleTagManagerInitialised = false;
 
-/** True when a project key is configured at build time. */
+/** True when an analytics provider is configured. */
 export function analyticsEnabled(): boolean {
-  return Boolean(API_KEY);
+  return Boolean(API_KEY || GOOGLE_TAG_MANAGER_ID);
 }
 
 export function readConsent(): AnalyticsConsent | null {
@@ -42,7 +48,10 @@ export function readConsent(): AnalyticsConsent | null {
  * Returns whether capturing is currently allowed.
  */
 function ready(): boolean {
-  if (typeof window === "undefined" || !API_KEY) return false;
+  if (typeof window === "undefined" || readConsent() !== "granted") return false;
+
+  initialiseGoogleTagManager();
+  if (!API_KEY) return false;
 
   if (!initialised) {
     posthog.init(API_KEY, {
@@ -71,14 +80,48 @@ export function setConsent(consent: AnalyticsConsent): void {
   } catch {
     /* storage unavailable */
   }
-  if (!API_KEY) return;
+
   if (consent === "granted") {
     ready();
     return;
   }
+
+  updateGoogleTagManagerConsent(consent);
+  if (!API_KEY) return;
   if (initialised && posthog.get_explicit_consent_status() !== "denied") {
     posthog.opt_out_capturing();
   }
+}
+
+function initialiseGoogleTagManager(): void {
+  const googleWindow = window as GoogleWindow;
+  const dataLayer = googleWindow.dataLayer ?? [];
+  googleWindow.dataLayer = dataLayer;
+
+  const gtag = googleWindow.gtag ?? ((...args: unknown[]) => dataLayer.push(args));
+  googleWindow.gtag = gtag;
+
+  if (!googleTagManagerInitialised) {
+    gtag("consent", "default", { analytics_storage: "denied" });
+    updateGoogleTagManagerConsent("granted");
+    gtag("js", new Date());
+    dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtm.js?id=${GOOGLE_TAG_MANAGER_ID}`;
+    document.head.appendChild(script);
+    googleTagManagerInitialised = true;
+    return;
+  }
+
+  updateGoogleTagManagerConsent("granted");
+}
+
+function updateGoogleTagManagerConsent(consent: AnalyticsConsent): void {
+  const googleWindow = window as GoogleWindow;
+  googleWindow.gtag?.("consent", "update", {
+    analytics_storage: consent === "granted" ? "granted" : "denied",
+  });
 }
 
 /** Reopen the consent prompt (footer "Cookie preferences"). */

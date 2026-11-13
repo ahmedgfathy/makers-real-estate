@@ -33,7 +33,7 @@ export default function Analytics() {
     return () => observer.disconnect();
   }, []);
 
-  // Ask once, and only when this deployment has a PostHog project key.
+  // Ask once when an analytics provider is configured.
   useEffect(() => {
     setAsk(analyticsEnabled() && readConsent() === null);
   }, []);

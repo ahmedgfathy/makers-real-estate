@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Cairo, Cormorant_Garamond, Inter } from "next/font/google";
+import Script from "next/script";
 import Analytics from "@/components/Analytics";
 import { getSite } from "@/lib/content-db";
 import "./globals.css";
@@ -74,6 +75,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${sans.variable} ${serif.variable} ${arabic.variable}`}
     >
       <body>
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7647429077075381"
+          strategy="beforeInteractive"
+          crossOrigin="anonymous"
+        />
         {children}
         <Analytics />
       </body>
