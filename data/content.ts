@@ -10,6 +10,7 @@ export type Project = {
   status: string;
   image: string;
   note: string;
+  href?: string;
 };
 
 export type Content = {
@@ -102,11 +103,11 @@ export type Content = {
 
 const en: Content = {
   meta: {
-    title: "Makers Real Estate — Primary Residences at SODIC East",
+    title: "Makers Real Estate — SODIC East & Sleek South 90th",
     description:
-      "First-release primary residences at The Lakes and EastVale, SODIC East. Apartments and duplexes from EGP 6.7M, 0% down, ten-year plans — sold directly by the developer.",
+      "Primary residences at The Lakes and EastVale, plus Sleek retail, offices and clinics on South 90th Street. Developer pricing and payment plans.",
   },
-  brand: { name: "Makers", tagline: "Real Estate", sub: "SODIC East · New Heliopolis" },
+  brand: { name: "Makers", tagline: "Real Estate", sub: "SODIC East · South 90th" },
   nav: {
     projects: "Projects",
     why: "Why primary",
@@ -147,9 +148,9 @@ const en: Content = {
     },
     projects: {
       kicker: "The portfolio",
-      title: "Two addresses. One standard.",
+      title: "Three destinations. One standard.",
       lede:
-        "First-release residences selected for layout, light and long-term value — all within SODIC East, New Heliopolis.",
+        "Two SODIC East residential addresses and Sleek on South 90th — primary opportunities across homes, retail, offices and clinics.",
       items: [
         {
           name: "The Lakes",
@@ -168,6 +169,16 @@ const en: Content = {
           status: "Primary allocation",
           image: "/img/lakes-sunset.jpg",
           note: "Official launch pricing · Developer payment plans",
+        },
+        {
+          name: "Sleek",
+          location: "South 90th St · Mohamed Naguib Axis",
+          type: "Retail, F&B, offices & clinics",
+          priceFrom: "From EGP 194k / m²",
+          status: "New project",
+          image: "/sleek/exterior.jpg",
+          note: "5% down · 6-year plan · Delivery Q1 2029",
+          href: "#sleek",
         },
       ],
     },
@@ -236,7 +247,7 @@ const en: Content = {
     disclaimer:
       "Primary sales only. Makers Real Estate is an authorised sales partner for the developments shown. Prices, areas, availability and payment plans are indicative, subject to developer confirmation and change without notice. Images are artist impressions.",
     rights: "Makers Real Estate. All rights reserved.",
-    builtWith: "SODIC East · The Lakes · EastVale",
+    builtWith: "SODIC East · The Lakes · EastVale · Sleek",
     sections: "Sections",
   },
   leadForm: {
@@ -262,18 +273,18 @@ const en: Content = {
       "A primary-sales advisor will call you back shortly. Prefer WhatsApp? Message us any time.",
     error: "Could not send — please try again or call us directly.",
     required: "Name and phone required.",
-    projectOptions: ["The Lakes", "EastVale"],
+    projectOptions: ["The Lakes", "EastVale", "Sleek"],
     bedroomOptions: ["Any", "1", "2", "3", "4+"],
   },
 };
 
 const ar: Content = {
   meta: {
-    title: "ميكرز للعقارات — وحدات أولية في سوديك إيست",
+    title: "ميكرز للعقارات — سوديك إيست وسليك التسعين الجنوبي",
     description:
-      "وحدات أولية من المطور في البحيرات وإيست فيل داخل سوديك إيست. شقق ودوبلكس تبدأ من 6.7 مليون جنيه، بدون مقدم وتقسيط 10 سنوات — بيع مباشر من المطور.",
+      "وحدات أولية في البحيرات وإيست فيل، ومشروع سليك التجاري والإداري والطبي في شارع التسعين الجنوبي. أسعار وخطط سداد من المطور.",
   },
-  brand: { name: "ميكرز", tagline: "للعقارات", sub: "سوديك إيست · هليوبوليس الجديدة" },
+  brand: { name: "ميكرز", tagline: "للعقارات", sub: "سوديك إيست · التسعين الجنوبي" },
   nav: {
     projects: "المشروعات",
     why: "لماذا أولي",
@@ -314,9 +325,9 @@ const ar: Content = {
     },
     projects: {
       kicker: "المعروض",
-      title: "عنوانان. معيار واحد.",
+      title: "ثلاث وجهات. معيار واحد.",
       lede:
-        "وحدات من الإطلاق الأول مختارة من حيث التقسيم والإضاءة والقيمة على المدى الطويل — كلها داخل سوديك إيست، هليوبوليس الجديدة.",
+        "عنوانان سكنيان في سوديك إيست ومشروع سليك في شارع التسعين الجنوبي — فرص أولية للسكن والتجزئة والمكاتب والعيادات.",
       items: [
         {
           name: "البحيرات",
@@ -335,6 +346,16 @@ const ar: Content = {
           status: "طرح أولي",
           image: "/img/lakes-sunset.jpg",
           note: "أسعار الإطلاق الرسمية · خطط سداد من المطور",
+        },
+        {
+          name: "Sleek",
+          location: "شارع التسعين الجنوبي · محور محمد نجيب",
+          type: "تجزئة ومطاعم ومكاتب وعيادات",
+          priceFrom: "من 194 ألف جنيه/م²",
+          status: "مشروع جديد",
+          image: "/sleek/exterior.jpg",
+          note: "5% مقدم · تقسيط 6 سنوات · التسليم الربع الأول 2029",
+          href: "#sleek",
         },
       ],
     },
@@ -403,7 +424,7 @@ const ar: Content = {
     disclaimer:
       "بيع أولي فقط. ميكرز للعقارات شريك بيع معتمد للمشروعات المعروضة. الأسعار والمساحات والمتاح وخطط السداد إرشادية وتخضع لتأكيد المطور والتغيير دون إشعار. الصور تخييلية.",
     rights: "ميكرز للعقارات. جميع الحقوق محفوظة.",
-    builtWith: "سوديك إيست · البحيرات · إيست فيل",
+    builtWith: "سوديك إيست · البحيرات · إيست فيل · Sleek",
     sections: "الأقسام",
   },
   leadForm: {
@@ -428,7 +449,7 @@ const ar: Content = {
     successLede: "سيتواصل معك مستشار المبيعات الأولية قريبًا. تفضل واتساب؟ راسلنا في أي وقت.",
     error: "تعذر الإرسال — حاول مرة أخرى أو اتصل بنا مباشرة.",
     required: "الاسم والهاتف مطلوبان.",
-    projectOptions: ["البحيرات", "إيست فيل"],
+    projectOptions: ["البحيرات", "إيست فيل", "Sleek"],
     bedroomOptions: ["الكل", "1", "2", "3", "4+"],
   },
 };

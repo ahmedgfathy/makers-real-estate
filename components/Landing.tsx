@@ -11,6 +11,7 @@ import { capture } from "@/lib/analytics";
 import Header from "./Header";
 import Hero from "./Hero";
 import Showcase from "./Showcase";
+import SleekProject from "./SleekProject";
 import LeadForm from "./LeadForm";
 import Footer from "./Footer";
 
@@ -75,6 +76,7 @@ export default function Landing({
           phoneHref={contact.phoneHref}
         />
         <Showcase c={c} lang={lang} />
+        <SleekProject lang={lang} />
         <LeadForm
           c={c}
           lang={lang}

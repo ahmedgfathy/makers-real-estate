@@ -10,9 +10,9 @@ import {
 /**
  * Runtime content source.
  *
- * PostgreSQL (db/schema.sql) is the source of truth. `data/content.ts` stays
- * behind as (a) the seed input for `npm run db:seed` and (b) a last-resort
- * fallback so the site keeps rendering if the database is unreachable.
+ * PostgreSQL stores the site content. `data/content.ts` stays behind as the
+ * seed input and fallback; new static project cards are merged at read time so
+ * a deployment can add a listing without reseeding the database.
  */
 
 export type Site = { content: Record<Lang, Content>; contact: Contact };
@@ -66,16 +66,51 @@ async function loadFromDb(): Promise<Site> {
     const chrome = siteRows.find((r) => r.lang === lang);
     if (!chrome) throw new Error(`site_content row missing for locale "${lang}"`);
 
+    const dbSections = chrome.sections ?? staticContent[lang].sections;
+    const staticSections = staticContent[lang].sections;
+    const newProjects = staticSections.projects.items.filter(
+      (project) => !dbSections.projects.items.some((existing) => existing.name === project.name)
+    );
+    const hasNewProjects = newProjects.length > 0;
+    const sections: Content["sections"] = {
+      ...dbSections,
+      projects: {
+        ...dbSections.projects,
+        ...(hasNewProjects
+          ? {
+              kicker: staticSections.projects.kicker,
+              title: staticSections.projects.title,
+              lede: staticSections.projects.lede,
+            }
+          : {}),
+        items: [...dbSections.projects.items, ...newProjects],
+      },
+    };
+    const dbLeadForm = chrome.lead_form ?? staticContent[lang].leadForm;
+    const leadForm: Content["leadForm"] = {
+      ...dbLeadForm,
+      projectOptions: [
+        ...dbLeadForm.projectOptions,
+        ...staticContent[lang].leadForm.projectOptions.filter(
+          (option) => !dbLeadForm.projectOptions.includes(option)
+        ),
+      ],
+    };
+
     built[lang] = {
-      meta: chrome.meta,
-      brand: chrome.brand,
+      meta: hasNewProjects ? staticContent[lang].meta : chrome.meta,
+      brand: hasNewProjects
+        ? { ...chrome.brand, sub: staticContent[lang].brand.sub }
+        : chrome.brand,
       nav: chrome.nav,
       hero: chrome.hero,
-      footer: chrome.footer,
+      footer: hasNewProjects
+        ? { ...chrome.footer, builtWith: staticContent[lang].footer.builtWith }
+        : chrome.footer,
       // Databases migrated before the lead form / new sections existed keep
       // the static copy so the redesigned page still renders in full.
-      leadForm: chrome.lead_form ?? staticContent[lang].leadForm,
-      sections: chrome.sections ?? staticContent[lang].sections,
+      leadForm,
+      sections,
     };
   }
 

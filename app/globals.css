@@ -1,13 +1,13 @@
 /* ============================================================
    Makers Real Estate — public site
-   Deep forest, warm ivory and muted gold. The dashboard and
+   Deep forest, clean white and muted gold. The dashboard and
    sign-in screens keep their own CRM stylesheets.
    ============================================================ */
 
 .site {
-  --paper: #f7f3ea;
-  --paper-2: #efe7d8;
-  --card: #fffdf8;
+  --paper: #fff;
+  --paper-2: #fff;
+  --card: #fff;
   --forest: #0f3529;
   --forest-deep: #081f18;
   --forest-mid: #123f31;
@@ -260,7 +260,7 @@ html[lang="ar"] .site .btn {
 }
 
 .site-header.is-scrolled {
-  background: rgba(247, 243, 234, 0.97);
+  background: rgba(255, 255, 255, 0.97);
   border-color: var(--hair);
   color: var(--ink);
   box-shadow: 0 10px 34px rgba(12, 36, 28, 0.08);
@@ -731,7 +731,7 @@ html[lang="ar"] .intro-fact-label { font-size: 0.76rem; letter-spacing: 0; text-
 
 .project-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(1.4rem, 3vw, 2.6rem);
 }
 
@@ -874,6 +874,231 @@ html[lang="ar"] .project-meta small { font-size: 0.7rem; letter-spacing: 0; text
 .project-link:hover { color: var(--gold); }
 
 html[lang="ar"] .project-link { font-size: 0.78rem; letter-spacing: 0; text-transform: none; }
+
+/* ---------- Sleek commercial project ---------- */
+
+.sleek-project {
+  border-top: 1px solid var(--hair);
+  background: var(--paper);
+}
+
+.sleek-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+}
+
+.sleek-overview-copy .section-title { margin-bottom: 1.2rem; }
+
+.sleek-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.3rem;
+  color: var(--forest);
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--gold);
+}
+
+.sleek-map-link span { color: var(--gold); }
+
+.sleek-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--hair);
+}
+
+.sleek-facts div { min-width: 0; }
+.sleek-facts dt {
+  color: var(--faint);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sleek-facts dd {
+  margin: 0.2rem 0 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.sleek-fact-wide { grid-column: 1 / -1; }
+
+html[lang="ar"] .sleek-facts dt {
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.sleek-cover,
+.sleek-gallery-item { margin: 0; }
+
+.sleek-cover {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--paper-2);
+}
+
+.sleek-cover img,
+.sleek-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sleek-cover figcaption,
+.sleek-gallery-item figcaption {
+  padding: 0.75rem 0.1rem 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.sleek-cover figcaption {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2.4rem 1rem 0.8rem;
+  background: linear-gradient(transparent, rgba(5, 18, 14, 0.65));
+  color: #fff;
+}
+
+.sleek-gallery-item img { height: auto; }
+
+.sleek-block { margin-top: clamp(3rem, 6vw, 5rem); }
+
+.sleek-subtitle {
+  margin-bottom: 1.4rem !important;
+  color: var(--forest) !important;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.8vw, 2.4rem);
+  line-height: 1.2;
+}
+
+.sleek-rates,
+.sleek-payment {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--hair-strong);
+  border-bottom: 1px solid var(--hair-strong);
+}
+
+.sleek-rate,
+.sleek-payment-step {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 1.3rem;
+  border-inline-start: 1px solid var(--hair);
+}
+
+.sleek-rate:first-child,
+.sleek-payment-step:first-child { border-inline-start: 0; }
+
+.sleek-rate span,
+.sleek-payment-step span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.sleek-rate strong,
+.sleek-payment-step strong {
+  color: var(--forest);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.sleek-rate strong { white-space: nowrap; }
+.sleek-payment-step strong {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.sleek-unit-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.sleek-unit-group {
+  min-width: 0;
+  padding: 1.35rem;
+  border: 1px solid var(--hair);
+  background: var(--card);
+}
+
+.sleek-unit-group h4 {
+  margin-bottom: 1rem;
+  color: var(--forest);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sleek-unit-header,
+.sleek-unit-row {
+  display: grid;
+  grid-template-columns: minmax(3rem, 0.6fr) minmax(3.75rem, 0.75fr) minmax(0, 1.4fr);
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.sleek-unit-header {
+  padding-bottom: 0.45rem;
+  color: var(--faint);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sleek-unit-row {
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--hair);
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.sleek-unit-row bdi {
+  color: var(--ink);
+  text-align: start;
+  unicode-bidi: isolate;
+}
+
+.sleek-unit-row strong {
+  color: var(--forest);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: end;
+  white-space: nowrap;
+}
+
+html[lang="ar"] .sleek-unit-header {
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.sleek-gallery,
+.sleek-videos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.sleek-gallery-item img,
+.sleek-videos video {
+  aspect-ratio: 4 / 3;
+  background: var(--paper-2);
+}
+
+.sleek-videos video { width: 100%; }
+.sleek-cta { margin-top: 2rem; }
 
 /* ---------- why primary ---------- */
 
@@ -1498,6 +1723,7 @@ html[lang="ar"] .footer-bottom { font-size: 0.74rem; letter-spacing: 0; }
 @media (max-width: 980px) {
   .site { --header-h: 74px; }
   .header-call { display: none; }
+  .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .intro-inner { grid-template-columns: 1fr; }
   .intro-facts { flex-direction: row; border-top: 0; }
   .intro-fact { flex: 1; padding: 1.1rem 1rem 1.1rem 0; border-bottom: 0; border-inline-start: 1px solid var(--hair); padding-inline-start: 1rem; }
@@ -1511,6 +1737,15 @@ html[lang="ar"] .footer-bottom { font-size: 0.74rem; letter-spacing: 0; }
   .why-item:nth-child(n + 3) { border-top: 1px solid rgba(255, 255, 255, 0.14); }
   .amenities-inner { grid-template-columns: 1fr; }
   .amenities-media { aspect-ratio: 16 / 9; }
+  .sleek-overview { grid-template-columns: 1fr; }
+  .sleek-rates,
+  .sleek-payment { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sleek-rate:nth-child(3),
+  .sleek-payment-step:nth-child(3) { border-inline-start: 0; }
+  .sleek-rate:nth-child(n + 3),
+  .sleek-payment-step:nth-child(n + 3) { border-top: 1px solid var(--hair); }
+  .sleek-gallery,
+  .sleek-videos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .enquiry-inner { grid-template-columns: 1fr; max-width: 760px; }
   .footer-top { grid-template-columns: 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
@@ -1525,6 +1760,7 @@ html[lang="ar"] .footer-bottom { font-size: 0.74rem; letter-spacing: 0; }
   .hero-stat:nth-child(n + 3) { border-top: 1px solid rgba(255, 255, 255, 0.14); }
   .hero-scroll { display: none; }
   .project-grid { grid-template-columns: 1fr; }
+  .sleek-unit-groups { grid-template-columns: 1fr; }
   .payment-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .payment-stat:nth-child(3) { border-inline-start: 0; padding-inline-start: 0; }
   .payment-stat:nth-child(n + 3) { border-top: 1px solid var(--hair); }
@@ -1559,6 +1795,17 @@ html[lang="ar"] .footer-bottom { font-size: 0.74rem; letter-spacing: 0; }
   .payment-stats { grid-template-columns: 1fr; }
   .payment-stat { border-inline-start: 0; padding-inline-start: 0; }
   .payment-stat + .payment-stat { border-top: 1px solid var(--hair); }
+  .sleek-rates,
+  .sleek-payment { grid-template-columns: 1fr; }
+  .sleek-rate,
+  .sleek-payment-step {
+    border-inline-start: 0;
+    border-top: 1px solid var(--hair);
+  }
+  .sleek-rate:first-child,
+  .sleek-payment-step:first-child { border-top: 0; }
+  .sleek-gallery,
+  .sleek-videos { grid-template-columns: 1fr; }
   .enquiry-card { padding: 1rem; }
   .enquiry-actions { flex-direction: column; align-items: flex-start; }
   .enquiry-actions .btn { width: 100%; }
