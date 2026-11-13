@@ -37,6 +37,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: meta.title,
     description: meta.description,
     applicationName: "Makers Real Estate",
+    other: {
+      "google-adsense-account": "ca-pub-7647429077075381",
+    },
     keywords: [
       "SODIC East",
       "The Lakes",

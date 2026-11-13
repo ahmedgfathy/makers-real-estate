@@ -16,7 +16,7 @@ The database URL is read from `DATABASE_URL`. Use a Neon pooled connection for t
 
 ## Website and CRM
 
-- The public site has an English/Arabic landing page, enquiry form, WhatsApp and phone contact links, consent-gated PostHog and Google Tag Manager analytics, and the Google AdSense site-verification script.
+- The public site has an English/Arabic landing page, enquiry form, WhatsApp and phone contact links, consent-gated PostHog and Google Tag Manager analytics, and Google AdSense verification metadata and script.
 - The CRM provides an overview, lead search and filtering, lead details, manual lead entry, follow-up logging, and account management.
 - Follow-ups are the heart of the CRM: every lead carries a `next_follow_up_on` date, and each contact attempt is appended to `lead_follow_ups`. The sidebar bell, the queue card, the overview banner, and `/dashboard/follow-ups` count overdue and due-today work.
 - Lead intake is available at `POST /api/leads`; the Meta lead ads webhook is `/api/webhooks/meta`.
