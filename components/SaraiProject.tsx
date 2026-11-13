@@ -26,6 +26,31 @@ export default function SaraiProject({ lang }: { lang: Lang }) {
   const facilities = arabic
     ? ["تشطيب كامل", "منطقة تجارية", "منطقة إدارية", "مركز طبي", "نادٍ رياضي", "كلوب هاوس"]
     : ["Fully finished", "Commercial area", "Administrative area", "Medical centre", "Sport club", "Club house"];
+  const salesCopy = arabic
+    ? {
+        pricesTitle: "أسعار تبدأ حسب مساحة الوحدة",
+        startingPrice: "السعر التسويقي",
+        priceValue: "عند الطلب",
+        unitSizes: "المساحات المتاحة",
+        sizesValue: "تُحدّد حسب التوافر الحالي",
+        paymentTitle: "خطة السداد",
+        paymentValue: "تُؤكّد مع فريق المبيعات",
+        inventoryTitle: "الوحدات المتاحة",
+        inventoryNote: "تواصل معنا لمعرفة مساحات الوحدات والأسعار التسويقية الحالية وخيارات السداد المعتمدة.",
+        enquire: "استفسر عن سراي",
+      }
+    : {
+        pricesTitle: "Starting prices by unit size",
+        startingPrice: "Marketing price",
+        priceValue: "On request",
+        unitSizes: "Available unit sizes",
+        sizesValue: "Confirm current availability",
+        paymentTitle: "Payment plan",
+        paymentValue: "Confirm current terms with sales",
+        inventoryTitle: "Available units",
+        inventoryNote: "Contact us for current unit sizes, marketing prices, and approved payment options.",
+        enquire: "Ask about Sarai",
+      };
 
   return (
     <section className="section sarai-project" aria-labelledby="sarai-title">
@@ -63,6 +88,35 @@ export default function SaraiProject({ lang }: { lang: Lang }) {
           </ul>
         </section>
 
+        <section className="sleek-block" aria-labelledby="sarai-prices-title">
+          <h2 className="sleek-subtitle" id="sarai-prices-title">{salesCopy.pricesTitle}</h2>
+          <div className="sleek-rates">
+            <div className="sleek-rate">
+              <span>{salesCopy.startingPrice}</span>
+              <strong>{salesCopy.priceValue}</strong>
+            </div>
+            <div className="sleek-rate">
+              <span>{salesCopy.unitSizes}</span>
+              <strong>{salesCopy.sizesValue}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="sleek-block" aria-labelledby="sarai-payment-title">
+          <h2 className="sleek-subtitle" id="sarai-payment-title">{salesCopy.paymentTitle}</h2>
+          <div className="sleek-payment">
+            <div className="sleek-payment-step">
+              <strong>{salesCopy.paymentValue}</strong>
+              <span>{salesCopy.paymentTitle}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="sleek-block" aria-labelledby="sarai-inventory-title">
+          <h2 className="sleek-subtitle" id="sarai-inventory-title">{salesCopy.inventoryTitle}</h2>
+          <p className="section-lede sarai-inventory-note">{salesCopy.inventoryNote}</p>
+        </section>
+
         <section className="sleek-block" aria-labelledby="sarai-gallery-title">
           <h2 className="sleek-subtitle" id="sarai-gallery-title">{ui[lang].gallery}</h2>
           <div className="sleek-gallery">
@@ -95,6 +149,12 @@ export default function SaraiProject({ lang }: { lang: Lang }) {
             ))}
           </div>
         </section>
+
+        <div className="sleek-cta">
+          <a className="btn btn--forest" href="#enquiry" data-cta="project_enquiry" data-cta-surface="sarai">
+            {salesCopy.enquire}
+          </a>
+        </div>
       </div>
     </section>
   );
