@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
-import SleekLanding from "@/components/SleekLanding";
+import LeadForm from "@/components/LeadForm";
+import SiteFrame from "@/components/SiteFrame";
+import ProjectDetail from "@/components/portal/ProjectDetail";
+import { whatsappLink } from "@/data/content";
+import { PORTAL, PROJECT_DETAILS, projectsOf } from "@/data/portfolio";
 import { absoluteUrl, isLang, localizedAlternates } from "@/lib/seo";
 import { getSite } from "@/lib/content-db";
 
@@ -9,7 +13,9 @@ type PageProps = { params: Promise<{ locale: string }> };
 
 export const dynamic = "force-dynamic";
 
-const projectCopy = {
+const SLUG = "sleek";
+
+const pageCopy = {
   en: {
     title: "Sleek South 90th Street | Commercial Units in New Cairo",
     description:
@@ -26,16 +32,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = await params;
   if (!isLang(locale)) return {};
 
-  const copy = projectCopy[locale];
-  const url = absoluteUrl(`/${locale}/projects/sleek`);
-
+  const copy = pageCopy[locale];
+  const url = absoluteUrl(`/${locale}/projects/${SLUG}`);
   return {
     title: copy.title,
     description: copy.description,
-    alternates: {
-      canonical: url,
-      languages: localizedAlternates("/projects/sleek"),
-    },
+    alternates: { canonical: url, languages: localizedAlternates(`/projects/${SLUG}`) },
     openGraph: {
       title: copy.title,
       description: copy.description,
@@ -58,9 +60,12 @@ export default async function SleekProjectPage({ params }: PageProps) {
   const { locale } = await params;
   if (!isLang(locale)) notFound();
 
+  const project = projectsOf(locale).find((item) => item.slug === SLUG);
+  const detail = PROJECT_DETAILS[SLUG];
+  if (!project || !detail) notFound();
+
   const { content, contact } = await getSite();
-  const homeUrl = absoluteUrl(`/${locale}`);
-  const projectUrl = absoluteUrl(`/${locale}/projects/sleek`);
+  const c = content[locale];
 
   return (
     <>
@@ -77,24 +82,42 @@ export default async function SleekProjectPage({ params }: PageProps) {
             {
               "@type": "BreadcrumbList",
               itemListElement: [
-                {
-                  "@type": "ListItem",
-                  position: 1,
-                  name: locale === "ar" ? "الرئيسية" : "Home",
-                  item: homeUrl,
-                },
-                {
-                  "@type": "ListItem",
-                  position: 2,
-                  name: "Sleek",
-                  item: projectUrl,
-                },
+                { "@type": "ListItem", position: 1, name: locale === "ar" ? "الرئيسية" : "Home", item: absoluteUrl(`/${locale}`) },
+                { "@type": "ListItem", position: 2, name: "Sleek", item: absoluteUrl(`/${locale}/projects/${SLUG}`) },
               ],
+            },
+            {
+              "@type": "Place",
+              name: "Sleek",
+              description: "Commercial destination on South 90th Street, New Cairo",
+              url: absoluteUrl(`/${locale}/projects/${SLUG}`),
+              image: absoluteUrl("/sleek/exterior.jpg"),
+              provider: { "@type": "Organization", name: "AlRabat" },
+              inLanguage: locale === "ar" ? "ar-EG" : "en-EG",
             },
           ],
         }}
       />
-      <SleekLanding content={content} contact={contact} lang={locale} />
+      <SiteFrame content={content} contact={contact} lang={locale}>
+        <main className="site-page-main">
+          <ProjectDetail
+            lang={locale}
+            project={project}
+            detail={detail}
+            copy={PORTAL[locale]}
+            contact={contact}
+            whatsapp={whatsappLink(contact, locale)}
+          />
+          <LeadForm
+            c={c}
+            lang={locale}
+            contact={contact}
+            whatsapp={whatsappLink(contact, locale)}
+            phoneHref={contact.phoneHref}
+            defaultProject={c.leadForm.projectOptions.find((option) => /sleek/i.test(option))}
+          />
+        </main>
+      </SiteFrame>
     </>
   );
 }

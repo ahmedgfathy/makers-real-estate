@@ -108,19 +108,34 @@ export type DetailFact = {
   value: Record<Lang, string>;
 };
 
+export type DetailRate = { label: Record<Lang, string>; value: string };
+
+export type DetailUnit = { label: string; area: string; price: string };
+
+export type DetailUnitGroup = { title: Record<Lang, string>; units: DetailUnit[] };
+
+export type DetailVideo = { src: string; poster: string; label: Record<Lang, string> };
+
 export type ProjectDetail = {
   slug: string;
   /** Hero + gallery imagery. */
   cover: string;
+  coverCaption?: Record<Lang, string>;
   gallery: string[];
+  galleryAlt?: Record<Lang, string>;
+  videos?: DetailVideo[];
   intro: Record<Lang, string[]>;
   facts: DetailFact[];
   highlights: Record<Lang, string[]>;
+  /** Price per m², only where the developer publishes it (Sleek). */
+  rates?: DetailRate[];
   plan: {
     stats: { value: string; label: Record<Lang, string> }[];
-    example: Record<Lang, string>;
+    example?: Record<Lang, string>;
     note: Record<Lang, string>;
   };
+  /** Unit inventory, grouped by floor or use. */
+  units?: DetailUnitGroup[];
 };
 
 export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
@@ -245,6 +260,210 @@ export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
       note: {
         en: "Monthly figures are indicative and calculated at 0% interest. The final schedule, unit price and handover date are set by the developer in the reservation contract.",
         ar: "الأرقام الشهرية تقديرية ومحسوبة دون فوائد. الجدول النهائي وسعر الوحدة وموعد التسليم يحددها المطور في عقد الحجز.",
+      },
+    },
+  },
+  sleek: {
+    slug: "sleek",
+    cover: "/sleek/exterior.jpg",
+    coverCaption: { en: "Sleek, South 90th Street", ar: "سليك، شارع التسعين الجنوبي" },
+    gallery: [
+      "/sleek/exterior.jpg",
+      "/sleek/frontage.jpg",
+      "/sleek/retail-render.jpg",
+      "/sleek/location-map.jpg",
+      "/sleek/site-progress.jpg",
+      "/sleek/site-aerial.jpg",
+      "/sleek/site-view.jpg",
+    ],
+    galleryAlt: {
+      en: "Sleek exterior, frontage, retail promenade, location and construction progress",
+      ar: "سليك — الواجهة والممشى التجاري والموقع وتقدم الأعمال",
+    },
+    videos: [
+      { src: "/sleek/video-1.mp4", poster: "/sleek/exterior.jpg", label: { en: "Sleek project film 1", ar: "فيديو سليك 1" } },
+      { src: "/sleek/video-2.mp4", poster: "/sleek/frontage.jpg", label: { en: "Sleek project film 2", ar: "فيديو سليك 2" } },
+      { src: "/sleek/video-3.mp4", poster: "/sleek/retail-render.jpg", label: { en: "Sleek project film 3", ar: "فيديو سليك 3" } },
+    ],
+    intro: {
+      en: [
+        "Sleek is AlRabat's commercial address on South 90th Street at Mohamed Naguib Axis: ground and first-floor retail and food and beverage, plus offices and clinics above, designed as a single walkable frontage.",
+        "Units run from a 36.5 m² clinic to a 179 m² administrative floor plate. Retail and F&B are handed over core and shell, clinics fully finished, with delivery in Q1 2029.",
+      ],
+      ar: [
+        "سليك هو العنوان التجاري للرباط على شارع التسعين الجنوبي عند محور محمد نجيب: تجزئة ومطاعم في الدورين الأرضي والأول، ومكاتب وعيادات أعلى، بتصميم واجهة واحدة قابلة للمشي.",
+        "الوحدات تبدأ من عيادة 36.5 م² حتى مسطح إداري 179 م². التجزئة والمطاعم تُسلَّم على الطوب (Core & shell) والعيادات بتشطيب كامل، والتسليم في الربع الأول 2029.",
+      ],
+    },
+    facts: [
+      { label: { en: "Starting price", ar: "السعر الابتدائي" }, value: { en: "EGP 6.4M", ar: "6.4 مليون جنيه" } },
+      { label: { en: "Unit size", ar: "مساحة الوحدة" }, value: { en: "37–141 m²", ar: "37–141 م²" } },
+      { label: { en: "Activities", ar: "الأنشطة" }, value: { en: "Retail · F&B · Admin · Clinics", ar: "تجزئة · مطاعم · إداري · عيادات" } },
+      { label: { en: "Delivery", ar: "التسليم" }, value: { en: "Q1 2029", ar: "الربع الأول 2029" } },
+    ],
+    highlights: {
+      en: [
+        "South 90th Street frontage at Mohamed Naguib Axis",
+        "Ground and first-floor retail and F&B",
+        "Administrative floors, core and shell",
+        "Clinics delivered fully finished",
+        "Operated by AlRabat",
+        "40% cash discount available",
+      ],
+      ar: [
+        "واجهة على التسعين الجنوبي عند محور محمد نجيب",
+        "تجزئة ومطاعم في الدورين الأرضي والأول",
+        "أدوار إدارية على الطوب (Core & shell)",
+        "عيادات بتشطيب كامل",
+        "التشغيل بواسطة الرباط",
+        "خصم كاش يصل إلى 40%",
+      ],
+    },
+    rates: [
+      { label: { en: "Commercial · ground", ar: "تجاري · أرضي" }, value: "EGP 334,000 / m²" },
+      { label: { en: "Commercial · first", ar: "تجاري · أول" }, value: "EGP 277,000 / m²" },
+      { label: { en: "Administrative", ar: "إداري" }, value: "EGP 194,000 / m²" },
+      { label: { en: "Clinics", ar: "عيادات" }, value: "EGP 205,000 / m²" },
+    ],
+    plan: {
+      stats: [
+        { value: "5%", label: { en: "Down payment", ar: "مقدم" } },
+        { value: "5%", label: { en: "After 3 months", ar: "بعد 3 أشهر" } },
+        { value: "6 yrs", label: { en: "Payment period", ar: "مدة السداد" } },
+        { value: "40%", label: { en: "Cash discount", ar: "خصم الكاش" } },
+      ],
+      note: {
+        en: "Sleek is sold core and shell for retail and F&B, and fully finished for clinics. Prices, unit availability and the payment schedule are confirmed by AlRabat at reservation.",
+        ar: "يُباع سليك على الطوب للتجزئة والمطاعم وبتشطيب كامل للعيادات. الأسعار وتوافر الوحدات وجدول السداد يؤكدها الرباط عند الحجز.",
+      },
+    },
+    units: [
+      {
+        title: { en: "Ground floor · Retail", ar: "الدور الأرضي · تجزئة" },
+        units: [
+          { label: "—", area: "64 m²", price: "EGP 21,376,000" },
+          { label: "—", area: "58 m²", price: "EGP 27,260,000" },
+          { label: "—", area: "74 m²", price: "EGP 29,156,000" },
+        ],
+      },
+      {
+        title: { en: "Ground floor · F&B", ar: "الدور الأرضي · مطاعم" },
+        units: [
+          { label: "—", area: "58 + 27.5 m²", price: "EGP 30,225,000" },
+          { label: "—", area: "88.5 + 48 m²", price: "EGP 38,214,000" },
+          { label: "—", area: "86 + 22.5 m²", price: "EGP 50,060,000" },
+        ],
+      },
+      {
+        title: { en: "First floor · Retail", ar: "الدور الأول · تجزئة" },
+        units: [
+          { label: "—", area: "51.5 m²", price: "EGP 14,780,500" },
+          { label: "—", area: "51 m²", price: "EGP 15,555,500" },
+          { label: "—", area: "61 m²", price: "EGP 17,385,000" },
+        ],
+      },
+      {
+        title: { en: "First floor · F&B", ar: "الدور الأول · مطاعم" },
+        units: [{ label: "—", area: "118 + 40 m²", price: "EGP 45,782,000" }],
+      },
+      {
+        title: { en: "Administrative · core and shell", ar: "إداري · على الطوب" },
+        units: [
+          { label: "—", area: "39 m²", price: "EGP 8,853,000" },
+          { label: "—", area: "47.5 m²", price: "EGP 10,402,500" },
+          { label: "—", area: "53 + 8.5 m²", price: "EGP 12,668,500" },
+          { label: "—", area: "65 + 7 m²", price: "EGP 13,051,000" },
+          { label: "—", area: "77 m²", price: "EGP 15,777,300" },
+          { label: "—", area: "97 + 3 m²", price: "EGP 20,968,000" },
+          { label: "—", area: "110 + 38 m²", price: "EGP 24,779,000" },
+          { label: "—", area: "124 m²", price: "EGP 26,536,000" },
+          { label: "—", area: "140.5 m²", price: "EGP 28,662,000" },
+        ],
+      },
+      {
+        title: { en: "Clinics · fully finished", ar: "عيادات · تشطيب كامل" },
+        units: [
+          { label: "1 room", area: "36.5 m²", price: "EGP 7,551,850" },
+          { label: "2 rooms", area: "50 m²", price: "EGP 11,495,000" },
+          { label: "3 rooms", area: "73.5 m²", price: "EGP 15,103,700" },
+          { label: "4 rooms", area: "129 + 22 m²", price: "EGP 26,733,000" },
+        ],
+      },
+    ],
+  },
+  sarai: {
+    slug: "sarai",
+    cover: "/sarai/cover.jpg",
+    coverCaption: { en: "Sarai compound, Suez Road", ar: "سراي، طريق السويس" },
+    gallery: [
+      "/sarai/villa-exterior.jpg",
+      "/sarai/waterfront.jpg",
+      "/sarai/residences.jpg",
+      "/sarai/landscaped-homes.jpg",
+      "/sarai/building.jpg",
+      "/sarai/canal.jpg",
+      "/sarai/community.jpg",
+      "/sarai/evening.jpg",
+    ],
+    galleryAlt: {
+      en: "Sarai villas, waterfront, residences and community",
+      ar: "فلل سراي والواجهة المائية والمجتمع",
+    },
+    videos: [
+      { src: "/sarai/video-1.mp4", poster: "/sarai/cover.jpg", label: { en: "Sarai project film 1", ar: "فيديو سراي 1" } },
+      { src: "/sarai/video-2.mp4", poster: "/sarai/waterfront.jpg", label: { en: "Sarai project film 2", ar: "فيديو سراي 2" } },
+      { src: "/sarai/video-3.mp4", poster: "/sarai/villa-exterior.jpg", label: { en: "Sarai project film 3", ar: "فيديو سراي 3" } },
+    ],
+    intro: {
+      en: [
+        "Sarai is Madinet Masr's 1,200-acre double-gated community on Suez Road, beside Madinaty and the El-Amal axis. The developer has been building since 1909.",
+        "Makers is selling S-Villa 212 in Elm Tree Park: a 3-bedroom villa with maid's room, EGP 19,100,000 at 1.5% down over 12 years, with 8% maintenance and delivery in 2031.",
+      ],
+      ar: [
+        "سراي مجتمع مدينة مصر على 1,200 فدان ببوابات مزدوجة على طريق السويس، بجوار مدينتي ومحور الأمل. المطور يعمل منذ عام 1909.",
+        "تبيع ميكرز S-Villa 212 في إلم تري بارك: فيلا 3 غرف نوم مع غرفة خدم، بسعر 19,100,000 جنيه بمقدم 1.5% وتقسيط 12 سنة، وصيانة 8% وتسليم 2031.",
+      ],
+    },
+    facts: [
+      { label: { en: "Unit price", ar: "سعر الوحدة" }, value: { en: "EGP 19.1M", ar: "19.1 مليون جنيه" } },
+      { label: { en: "Unit type", ar: "نوع الوحدة" }, value: { en: "S-Villa 212 · 3 bed + maid", ar: "S-Villa 212 · 3 غرف + خدم" } },
+      { label: { en: "Maintenance", ar: "الصيانة" }, value: { en: "8%", ar: "8%" } },
+      { label: { en: "Delivery", ar: "التسليم" }, value: { en: "2031", ar: "2031" } },
+    ],
+    highlights: {
+      en: [
+        "1,200-acre double-gated community",
+        "Suez Road, beside Madinaty",
+        "Elm Tree Park — S-Villa 212",
+        "Commercial area and strip mall",
+        "International school and medical centre",
+        "Klub Kayan and club houses",
+        "Hotel and gas station on site",
+      ],
+      ar: [
+        "مجتمع على 1,200 فدان ببوابات مزدوجة",
+        "طريق السويس بجوار مدينتي",
+        "إلم تري بارك — S-Villa 212",
+        "منطقة تجارية وستريب مول",
+        "مدرسة دولية ومركز طبي",
+        "كلوب كيان وكلوب هاوسات",
+        "فندق ومحطة وقود داخل المشروع",
+      ],
+    },
+    plan: {
+      stats: [
+        { value: "1.5%", label: { en: "Down payment", ar: "المقدم" } },
+        { value: "12 yrs", label: { en: "Instalments", ar: "التقسيط" } },
+        { value: "144", label: { en: "Instalments count", ar: "عدد الأقساط" } },
+        { value: "2031", label: { en: "Delivery", ar: "التسليم" } },
+      ],
+      example: {
+        en: "EGP 19,100,000 at 1.5% down is EGP 286,500 up front, leaving about EGP 130,649 per month over 144 instalments.",
+        ar: "19,100,000 جنيه بمقدم 1.5% تعني 286,500 جنيه مقدمًا، ويتبقى نحو 130,649 جنيهًا شهريًا على 144 قسطًا.",
+      },
+      note: {
+        en: "Maintenance is 8% of the unit price (EGP 1,528,000) per the Elm Tree Park sheet. Prices, availability and the final schedule are confirmed by Madinet Masr at reservation.",
+        ar: "الصيانة 8% من سعر الوحدة (1,528,000 جنيه) حسب ورقة إلم تري بارك. الأسعار والتوافر والجدول النهائي يؤكدها مدينة مصر عند الحجز.",
       },
     },
   },
