@@ -187,6 +187,8 @@
 
 .header-call {
   display: inline-flex;
+  flex-direction: row; /* reset the stacked column from globals.css */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   padding: 9px 16px;
@@ -194,6 +196,7 @@
   background: var(--p-gold);
   color: #fff;
   line-height: 1.2;
+  white-space: nowrap;
   transition: background 0.25s var(--p-ease);
 }
 
@@ -208,6 +211,7 @@
 .header-call strong {
   font-size: 16px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .header-call svg {
@@ -321,6 +325,67 @@
 @media (max-width: 560px) {
   .header-login {
     display: none;
+  }
+}
+
+/* Keep the call pill (icon + number, one line), the language switch and the
+   burger on a single row down to the smallest phones. */
+@media (max-width: 420px) {
+  .header-right {
+    gap: 8px;
+  }
+
+  .header-call {
+    gap: 6px;
+    padding: 7px 10px;
+  }
+
+  .header-call strong {
+    font-size: 13px;
+  }
+
+  .site .header-right .lang-opt {
+    padding: 3px 6px;
+    font-size: 13px;
+  }
+
+  .header-menu-toggle {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-width: 340px) {
+  .site-header {
+    padding-inline: 10px;
+    gap: 8px;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .site .header-right .lang-switch {
+    padding: 1px;
+  }
+
+  .site .header-right .lang-opt {
+    padding: 2px 5px;
+    font-size: 12px;
+  }
+
+  .header-call {
+    gap: 5px;
+    padding: 6px 8px;
+  }
+
+  .header-call strong {
+    font-size: 12px;
+  }
+
+  .header-menu-toggle {
+    width: 32px;
+    height: 32px;
   }
 }
 
