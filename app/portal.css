@@ -1,7 +1,7 @@
 /* ============================================================
    Makers Real Estate — portal design system
-   Charcoal, bronze and off-white, Cairo throughout, 1320px
-   container and 60px section rhythm. Loaded after globals.css:
+   Charcoal, bronze and off-white, Roboto in English and Cairo in
+   Arabic, 1320px container and 60px section rhythm. Loaded after globals.css:
    it retunes the public site's palette and re-skins the shared
    chrome (header, buttons, headings, footer) so older pages sit
    inside the same visual system as the portal home page.
@@ -66,7 +66,7 @@
 .site .section-kicker {
   gap: 0;
   margin-bottom: 6px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -79,7 +79,7 @@
 
 .site .section-title {
   max-width: 30ch;
-  font-family: var(--font-arabic);
+  font-family: var(--theme-font);
   font-size: clamp(1.5rem, 2.4vw, 1.8rem);
   font-weight: 600;
   line-height: 1.35;
@@ -94,7 +94,7 @@
 
 .site .section-lede {
   max-width: 62ch;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
 }
 
@@ -109,14 +109,14 @@
   min-height: 40px;
   padding: 8px 22px;
   border-radius: 6px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
 }
 
 .site[lang="ar"] .btn {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .site .btn--gold {
@@ -133,7 +133,7 @@
 .site .btn--sm {
   min-height: 36px;
   padding: 6px 16px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 /* ---------- header ---------- */
@@ -166,7 +166,7 @@
 
 .header-link {
   padding-block: 6px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -206,7 +206,7 @@
 }
 
 .header-call strong {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -219,7 +219,7 @@
   align-items: center;
   gap: 6px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .header-login:hover {
@@ -239,7 +239,7 @@
   padding: 4px 8px;
   border-radius: 3px;
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
 }
@@ -263,7 +263,7 @@
 
 @media (max-width: 1024px) {
   .header-link {
-    font-size: 14px;
+    font-size: 15px;
   }
   .header-login span {
     display: none;
@@ -301,7 +301,7 @@
   .header-link {
     padding: 12px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .header-right {
@@ -314,7 +314,7 @@
   }
 
   .header-call strong {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
@@ -385,7 +385,7 @@
   background: #fff;
   color: var(--p-dark);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.3;
   cursor: pointer;
   transition: background 0.25s var(--p-ease), color 0.25s var(--p-ease);
@@ -430,7 +430,7 @@
   background: var(--theme-surface-input);
   color: var(--p-dark);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .site .psearch-input::placeholder {
@@ -464,7 +464,7 @@
   background: var(--p-dark-2);
   color: #fff;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   appearance: none;
   cursor: pointer;
 }
@@ -482,7 +482,7 @@
   background: var(--p-gold);
   color: #fff;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.25s var(--p-ease);
@@ -501,7 +501,7 @@
 
   .site .psearch-tab {
     padding: 8px 16px;
-    font-size: 13.5px;
+    font-size: 14.5px;
   }
 
   .phero {
@@ -543,7 +543,7 @@
 .pkicker {
   margin: 0 0 6px;
   color: var(--p-gold);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -562,7 +562,7 @@
 .plede {
   max-width: 62ch;
   margin: 8px 0 0;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.8;
   color: var(--p-muted);
 }
@@ -580,7 +580,7 @@
   border: 1px solid var(--p-gold);
   border-radius: 4px;
   color: var(--p-gold);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.3;
   transition: background 0.25s var(--p-ease), color 0.25s var(--p-ease);
@@ -635,20 +635,20 @@
 }
 
 .parea-count {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.86);
 }
 
 .parea-name {
   margin-top: 2px;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 600;
   line-height: 1.35;
 }
 
 .parea-blurb {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.82);
 }
 
@@ -712,7 +712,7 @@
   border-radius: 4px;
   background: var(--p-gold);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -726,7 +726,7 @@
 
 .pproject-name {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.35;
 }
@@ -736,7 +736,7 @@
 }
 
 .pproject-loc {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--p-gold);
 }
 
@@ -753,7 +753,7 @@
   gap: 12px;
   padding-bottom: 5px;
   border-bottom: 1px dashed var(--theme-line);
-  font-size: 13.5px;
+  font-size: 14.5px;
   color: var(--p-muted);
 }
 
@@ -765,7 +765,7 @@
 
 .pproject-note {
   margin: 2px 0 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
   color: var(--p-muted);
 }
@@ -786,7 +786,7 @@
   border: 1px solid var(--hair);
   border-radius: 4px;
   color: var(--p-dark);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
 }
 
@@ -850,7 +850,7 @@
 
 .pstat-label {
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 16px;
   color: rgba(255, 255, 255, 0.85);
 }
 
@@ -869,21 +869,21 @@
 .pwhy-index {
   display: block;
   margin-bottom: 8px;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   color: var(--p-gold-2);
 }
 
 .pwhy-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: #fff;
 }
 
 .pwhy-text {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.72);
 }
@@ -929,19 +929,19 @@
 
 .pdev-name {
   margin: 0;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 600;
 }
 
 .pdev-blurb {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.75;
   color: var(--p-muted);
 }
 
 .pdev-meta {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--p-gold);
 }
 
@@ -951,7 +951,7 @@
   gap: 8px;
   margin-top: auto;
   padding-top: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--p-dark);
 }
@@ -983,7 +983,7 @@
 .pfield {
   display: grid;
   gap: 6px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--p-muted);
 }
 
@@ -996,7 +996,7 @@
   background: #fff;
   color: var(--p-dark);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .pfield input:focus,
@@ -1011,7 +1011,7 @@
   justify-content: space-between;
   gap: 12px;
   margin: 12px 0 22px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--p-muted);
 }
 
@@ -1021,7 +1021,7 @@
 
 .pclear {
   color: var(--p-gold);
-  font-size: 14px;
+  font-size: 15px;
   text-decoration: underline;
 }
 
@@ -1035,7 +1035,7 @@
 
 .pempty h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 600;
 }
 
@@ -1043,7 +1043,7 @@
   max-width: 52ch;
   margin: 8px auto 0;
   color: var(--p-muted);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.75;
 }
 
@@ -1136,14 +1136,14 @@
 .pfooter-about {
   max-width: 34ch;
   margin: 14px 0 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.8;
   color: rgba(255, 255, 255, 0.7);
 }
 
 .pfooter-title {
   margin: 0 0 12px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
 }
@@ -1151,7 +1151,7 @@
 .pfooter-link {
   display: block;
   padding-block: 5px;
-  font-size: 14px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.74);
 }
 
@@ -1161,7 +1161,7 @@
 
 .pfooter-note {
   margin: 14px 0 0;
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.5);
 }
@@ -1174,13 +1174,13 @@
   margin-top: 36px;
   padding-top: 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.55);
 }
 
 .pfooter-cookie {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
+  font-size: 14px;
   text-decoration: underline;
 }
 

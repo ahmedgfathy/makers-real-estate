@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Cairo, Cormorant_Garamond, Inter } from "next/font/google";
 import { headers } from "next/headers";
 import Script from "next/script";
 import Analytics from "@/components/Analytics";
@@ -9,27 +8,12 @@ import "./theme.css";
 import "./globals.css";
 import "./portal.css";
 
-const sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  weight: ["300", "400", "500"],
-});
-
-const serif = Cormorant_Garamond({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-  weight: ["300", "400", "500"],
-  style: ["normal", "italic"],
-});
-
-const arabic = Cairo({
-  subsets: ["arabic", "latin"],
-  variable: "--font-arabic",
-  display: "swap",
-  weight: ["300", "400", "600"],
-});
+/**
+ * Typefaces are loaded from the Google Fonts CDN (not next/font): Roboto for
+ * English, Cairo for Arabic. app/theme.css chooses between them by `lang`.
+ */
+const FONT_HREF =
+  "https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap";
 
 const siteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 
@@ -53,11 +37,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const locale = (await headers()).get("x-makers-locale") === "ar" ? "ar" : "en";
 
   return (
-    <html
-      lang={locale}
-      dir={locale === "ar" ? "rtl" : "ltr"}
-      className={`${sans.variable} ${serif.variable} ${arabic.variable}`}
-    >
+    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href={FONT_HREF} />
+      </head>
       <body>
         <Script id="google-consent-mode-default" strategy="beforeInteractive">
           {`window.dataLayer = window.dataLayer || [];

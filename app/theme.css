@@ -4,7 +4,8 @@
    One place to change the whole public site's colours, type and
    geometry. Every value below was measured from the reference
    real-estate portal (imicegypt.com): bronze primary on charcoal,
-   off-white surfaces, Cairo type, 6–10px radii, dark slate inputs.
+   off-white surfaces, 6–10px radii, dark slate inputs. Roboto carries
+   English, Cairo carries Arabic (both served from the Google Fonts CDN).
 
    Change a token here and the header, hero, search card, cards,
    catalogue, enquiry band and footer all follow.
@@ -45,13 +46,27 @@
   --theme-instagram: #c13584;
 
   /* ---------- type ---------- */
-  --theme-font: var(--font-arabic), "Cairo", ui-sans-serif, system-ui, sans-serif;
-  --theme-fs-body: 16px;
-  --theme-fs-small: 14px;
-  --theme-fs-meta: 13px;
-  --theme-fs-card-title: 16px;
-  --theme-fs-section: clamp(1.5rem, 2.1vw, 1.75rem); /* 24→28px */
-  --theme-fs-hero: clamp(1.35rem, 2.15vw, 2rem); /* 22→32px */
+  /* Families come from the Google Fonts CDN (see app/layout.tsx). */
+  --theme-font-en: "Roboto", "Helvetica Neue", Arial, ui-sans-serif, system-ui,
+    sans-serif;
+  --theme-font-ar: "Cairo", "Segoe UI", Tahoma, ui-sans-serif, system-ui,
+    sans-serif;
+  --theme-font: var(--theme-font-en);
+
+  /* Legacy family names still read by globals.css, the inner project pages,
+     the dashboard and the sign-in screen. */
+  --font-sans: var(--theme-font-en);
+  --font-serif: var(--theme-font-en);
+  --font-arabic: var(--theme-font-ar);
+  --font-display: var(--theme-font);
+  --font-body: var(--theme-font);
+
+  --theme-fs-body: 17px;
+  --theme-fs-small: 15px;
+  --theme-fs-meta: 14px;
+  --theme-fs-card-title: 17px;
+  --theme-fs-section: clamp(1.6rem, 2.2vw, 1.85rem); /* 26→30px */
+  --theme-fs-hero: clamp(1.45rem, 2.3vw, 2.1rem); /* 23→34px */
   --theme-fw-regular: 400;
   --theme-fw-medium: 500;
   --theme-fw-bold: 600;
@@ -77,6 +92,24 @@
   --theme-gutter: 12px;
   --theme-section-y: 60px;
   --theme-header-h: 64px;
+}
+
+/* Arabic pages take Cairo, English keeps Roboto. Both are inherited by
+   .site and by the consent prompt, which sits outside it. */
+html[lang="ar"] {
+  --theme-font: var(--theme-font-ar);
+}
+
+/* 17px root instead of 16px: every rem-based size steps up by roughly 1px,
+   so the inner project pages grow with the portal's px scale. */
+html {
+  font-size: 106.25%;
+}
+
+/* Anything outside .site (consent prompt, admin screens) still gets the
+   right family and follows the locale. */
+body {
+  font-family: var(--theme-font);
 }
 
 /*

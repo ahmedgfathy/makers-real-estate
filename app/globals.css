@@ -569,7 +569,7 @@ html, body { margin: 0; padding: 0; }
 .header-link[aria-current="page"]::after { width: 100%; }
 
 .site[lang="ar"] .header-link {
-  font-size: 0.8rem;
+  font-size: var(--theme-fs-body);
   letter-spacing: 0;
   text-transform: none;
 }
