@@ -1737,3 +1737,345 @@
     min-height: 150px;
   }
 }
+
+/* ============================================================
+   Project detail pages (The Lakes, EastVale)
+
+   Shared by components/portal/ProjectDetail.tsx: hero, at-a-glance
+   facts, the about + includes pair, and the payment-plan band.
+   ============================================================ */
+
+.pdetail-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 420px;
+  padding: calc(var(--header-h) + 56px) 0 48px;
+  background-color: var(--p-dark);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.pdetail-hero-inner {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: 12px;
+}
+
+.pdetail-kicker {
+  margin: 0 0 8px;
+  color: var(--theme-accent);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.pdetail-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.pdetail-lede {
+  margin: 10px 0 0;
+  max-width: 60ch;
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pdetail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pdetail-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--theme-radius-pill);
+  font-size: 14px;
+}
+
+.pdetail-chip--solid {
+  border-color: var(--theme-brand);
+  background: var(--theme-brand);
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ---------- at a glance ---------- */
+
+.pdetail-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 14px;
+  border: 1px solid var(--p-line);
+  border-radius: var(--theme-radius-lg);
+  overflow: hidden;
+  background: var(--p-line);
+}
+
+.pdetail-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  background: #fff;
+}
+
+.pdetail-fact span {
+  color: var(--p-muted);
+  font-size: 13px;
+}
+
+.pdetail-fact strong {
+  color: var(--p-dark);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* ---------- about + includes ---------- */
+
+.pdetail-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.pdetail-copy p {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--p-muted);
+}
+
+.pdetail-copy .ptitle {
+  margin-bottom: 4px;
+}
+
+.pdetail-note {
+  padding-inline-start: 14px;
+  border-inline-start: 2px solid var(--p-gold);
+  font-size: 14.5px !important;
+  line-height: 1.7 !important;
+}
+
+.pdetail-side {
+  align-self: start;
+  padding: 22px 24px;
+  border: 1px solid var(--p-line);
+  border-radius: var(--theme-radius-lg);
+  background: var(--p-off);
+}
+
+.pdetail-side-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--p-dark);
+}
+
+.pdetail-list {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdetail-list li {
+  position: relative;
+  padding-inline-start: 18px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--p-muted);
+}
+
+.pdetail-list li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.55em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--p-gold);
+}
+
+/* ---------- payment plan ---------- */
+
+.pdetail-plan {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 26px;
+  border-radius: var(--theme-radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pdetail-plan-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 24px;
+  background: var(--p-dark);
+}
+
+.pdetail-plan-stat strong {
+  color: var(--theme-accent);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.pdetail-plan-stat span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.pdetail-example {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--theme-radius-md);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pdetail-example p {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #fff;
+}
+
+.pdetail-example-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: var(--theme-radius-pill);
+  background: var(--theme-brand);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pdetail-example-tag--muted {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pdetail-plan-note {
+  margin: 16px 0 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pdetail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.site .pdetail-actions .btn {
+  min-height: 46px;
+  padding: 10px 24px;
+  border-radius: var(--theme-radius-sm);
+}
+
+.site .pdetail-actions .btn--outline {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #fff;
+}
+
+.site .pdetail-actions .btn--outline:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- gallery ---------- */
+
+.pdetail-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pdetail-gallery img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--theme-radius-md);
+}
+
+@media (max-width: 900px) {
+  .pdetail-hero {
+    min-height: 320px;
+    padding: calc(var(--header-h) + 34px) 0 32px;
+  }
+
+  .pdetail-facts,
+  .pdetail-plan {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pdetail-body {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    margin-top: 28px;
+  }
+
+  .pdetail-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .pdetail-hero-inner,
+  .pdetail .pwrap {
+    padding-inline: 14px;
+  }
+
+  .pdetail-title {
+    font-size: 1.75rem;
+  }
+
+  .pdetail-lede {
+    font-size: 15px;
+  }
+
+  .pdetail-fact,
+  .pdetail-plan-stat {
+    padding: 14px 16px;
+  }
+
+  .pdetail-plan-stat strong {
+    font-size: 1.5rem;
+  }
+
+  .pdetail-copy p {
+    font-size: 15px;
+  }
+
+  .site .pdetail-actions .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .pdetail-gallery {
+    gap: 8px;
+  }
+}

@@ -96,6 +96,160 @@ export const DEVELOPERS: Developer[] = [
   },
 ];
 
+/**
+ * Detail-page copy for the projects that do not have a hand-built component
+ * (Sleek and Sarai have their own pages). Every figure here is already
+ * published on the cards in data/content.ts — nothing new is invented; the
+ * monthly examples are the simple arithmetic of price / months at 0% interest
+ * and are labelled indicative.
+ */
+export type DetailFact = {
+  label: Record<Lang, string>;
+  value: Record<Lang, string>;
+};
+
+export type ProjectDetail = {
+  slug: string;
+  /** Hero + gallery imagery. */
+  cover: string;
+  gallery: string[];
+  intro: Record<Lang, string[]>;
+  facts: DetailFact[];
+  highlights: Record<Lang, string[]>;
+  plan: {
+    stats: { value: string; label: Record<Lang, string> }[];
+    example: Record<Lang, string>;
+    note: Record<Lang, string>;
+  };
+};
+
+export const PROJECT_DETAILS: Record<string, ProjectDetail> = {
+  "the-lakes": {
+    slug: "the-lakes",
+    cover: "/img/lakes-pool.jpg",
+    gallery: [
+      "/img/lakes-pool.jpg",
+      "/img/lakes-beach.jpg",
+      "/img/lakes-garden.jpg",
+      "/img/lakes-sunset.jpg",
+      "/img/lakes-walk.jpg",
+      "/img/lakes-building.jpg",
+    ],
+    intro: {
+      en: [
+        "The Lakes is the residential core of SODIC East in New Heliopolis: a 655-acre master plan built around a swimmable central lagoon, with 55% of the land left open as landscape, water and walking routes.",
+        "Makers sells the first release directly for the developer — apartments, duplexes and penthouses from 60 to 209 m², at the official launch price rather than a resale ticket.",
+      ],
+      ar: [
+        "البحيرات هي النواة السكنية لمشروع سوديك إيست في هليوبوليس الجديدة: ماستر بلان على 655 فدانًا حول بحيرة مركزية قابلة للسباحة، مع ترك 55% من الأرض مساحات مفتوحة ومياه وممرات للمشي.",
+        "تبيع ميكرز الطرح الأول مباشرة لصالح المطور — شقق ودوبلكس وبنتهاوس بمساحات من 60 إلى 209 م²، بسعر الإطلاق الرسمي وليس بسعر إعادة بيع.",
+      ],
+    },
+    facts: [
+      { label: { en: "Starting price", ar: "السعر الابتدائي" }, value: { en: "EGP 6.7M", ar: "6.7 مليون جنيه" } },
+      { label: { en: "Unit size", ar: "مساحة الوحدة" }, value: { en: "60–209 m²", ar: "60–209 م²" } },
+      { label: { en: "Unit types", ar: "أنواع الوحدات" }, value: { en: "1–4 bed · duplex · penthouse", ar: "غرفة إلى 4 غرف · دوبلكس · بنتهاوس" } },
+      { label: { en: "First delivery", ar: "أول تسليم" }, value: { en: "Dec 2026", ar: "ديسمبر 2026" } },
+    ],
+    highlights: {
+      en: [
+        "Swimmable central lagoon",
+        "55% open landscape",
+        "SODIC Sports Club",
+        "International school",
+        "Cycling and running spine",
+        "Retail and dining promenade",
+        "Flexi Plus finish",
+      ],
+      ar: [
+        "بحيرة مركزية قابلة للسباحة",
+        "55% مساحات مفتوحة",
+        "نادي سوديك الرياضي",
+        "مدرسة دولية",
+        "مسار للدراجات والجري",
+        "ممشى تجاري ومطاعم",
+        "تشطيب فليكسي بلس",
+      ],
+    },
+    plan: {
+      stats: [
+        { value: "0%", label: { en: "Down payment", ar: "المقدم" } },
+        { value: "10 yrs", label: { en: "Instalments", ar: "التقسيط" } },
+        { value: "120", label: { en: "Monthly payments", ar: "قسط شهري" } },
+        { value: "Dec 2026", label: { en: "First delivery", ar: "أول تسليم" } },
+      ],
+      example: {
+        en: "A 60 m² residence from EGP 6,700,000 over 120 months is roughly EGP 55,833 per month at 0% down.",
+        ar: "وحدة 60 م² تبدأ من 6,700,000 جنيه على 120 شهرًا تعني نحو 55,833 جنيهًا شهريًا بمقدم 0%.",
+      },
+      note: {
+        en: "Monthly figures are indicative and calculated at 0% interest. The final schedule, unit price and delivery date are set by the developer in the reservation contract.",
+        ar: "الأرقام الشهرية تقديرية ومحسوبة دون فوائد. الجدول النهائي وسعر الوحدة وموعد التسليم يحددها المطور في عقد الحجز.",
+      },
+    },
+  },
+  eastvale: {
+    slug: "eastvale",
+    cover: "/img/lakes-sunset.jpg",
+    gallery: [
+      "/img/lakes-sunset.jpg",
+      "/img/lakes-garden.jpg",
+      "/img/lakes-walk.jpg",
+      "/img/lakes-beach.jpg",
+    ],
+    intro: {
+      en: [
+        "EastVale anchors Mada City in Mostakbal City: SODIC's 500-feddan wellness community, planned around open landscape and everyday facilities rather than a single landmark.",
+        "The mix runs from apartments to townhouses and villas between 80 and 311 m², sold by Makers at the developer's primary price with the developer's own payment schedule.",
+      ],
+      ar: [
+        "إيست فيل هو نواة مدينة مادا بمدينة المستقبل: مجتمع سوديك الصحي على 500 فدان، مخطط حول المساحات المفتوحة والخدمات اليومية بدلًا من معلم واحد.",
+        "المزيج يمتد من الشقق إلى التاون هاوس والفلل بمساحات من 80 إلى 311 م²، تبيعه ميكرز بسعر المطور الأولي وبجدول السداد الخاص به.",
+      ],
+    },
+    facts: [
+      { label: { en: "Starting price", ar: "السعر الابتدائي" }, value: { en: "EGP 8.5M", ar: "8.5 مليون جنيه" } },
+      { label: { en: "Unit size", ar: "مساحة الوحدة" }, value: { en: "80–311 m²", ar: "80–311 م²" } },
+      { label: { en: "Unit types", ar: "أنواع الوحدات" }, value: { en: "Apartments · townhouses · villas", ar: "شقق · تاون هاوس · فلل" } },
+      { label: { en: "Community", ar: "المجتمع" }, value: { en: "500 feddan", ar: "500 فدان" } },
+    ],
+    highlights: {
+      en: [
+        "500-feddan wellness master plan",
+        "Apartments, townhouses and villas",
+        "Inside Mada City, Mostakbal City",
+        "Primary sales, direct from SODIC",
+        "Phased handover by neighbourhood",
+        "Flexible instalment plans up to 9 years",
+      ],
+      ar: [
+        "ماستر بلان صحي على 500 فدان",
+        "شقق وتاون هاوس وفلل",
+        "داخل مدينة مادا بمدينة المستقبل",
+        "بيع أولي مباشرة من سوديك",
+        "تسليم على مراحل حسب الحي",
+        "خطط سداد مرنة حتى 9 سنوات",
+      ],
+    },
+    plan: {
+      stats: [
+        { value: "5%", label: { en: "Down payment", ar: "المقدم" } },
+        { value: "9 yrs", label: { en: "Instalments", ar: "التقسيط" } },
+        { value: "108", label: { en: "Monthly payments", ar: "قسط شهري" } },
+        { value: "Phased", label: { en: "Handover", ar: "التسليم" } },
+      ],
+      example: {
+        en: "An 80 m² unit from EGP 8,500,000 with 5% down (EGP 425,000) leaves about EGP 74,769 per month over 108 months.",
+        ar: "وحدة 80 م² تبدأ من 8,500,000 جنيه بمقدم 5% (425,000 جنيه) تترك نحو 74,769 جنيهًا شهريًا على 108 أشهر.",
+      },
+      note: {
+        en: "Monthly figures are indicative and calculated at 0% interest. The final schedule, unit price and handover date are set by the developer in the reservation contract.",
+        ar: "الأرقام الشهرية تقديرية ومحسوبة دون فوائد. الجدول النهائي وسعر الوحدة وموعد التسليم يحددها المطور في عقد الحجز.",
+      },
+    },
+  },
+};
+
 const PROJECT_MARKET: Record<string, string> = {
   "the-lakes": "new-heliopolis",
   eastvale: "mostakbal-city",

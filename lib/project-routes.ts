@@ -1,9 +1,11 @@
 import type { Lang, Project } from "@/data/content";
 
+/** Projects with their own detail page (a page per slug under app/[locale]/projects). */
+const DETAIL_PAGES = new Set(["sleek", "sarai", "the-lakes", "eastvale"]);
+
 export function projectPath(project: Project, lang: Lang): string {
   const slug = projectSlug(project);
-  if (slug === "sleek") return `/${lang}/projects/sleek`;
-  if (slug === "sarai") return `/${lang}/projects/sarai`;
+  if (DETAIL_PAGES.has(slug)) return `/${lang}/projects/${slug}`;
   return `/${lang}/projects#${slug}`;
 }
 

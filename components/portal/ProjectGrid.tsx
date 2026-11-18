@@ -52,7 +52,7 @@ export default function ProjectGrid({
       {projects.map((project) => {
         const href = projectPath(project, lang);
         return (
-          <article className="pproject" key={project.slug ?? project.name}>
+          <article className="pproject" id={project.slug} key={project.slug ?? project.name}>
             <a className="pproject-media" href={href} aria-label={project.name}>
               <img src={project.image} alt={project.name} loading="lazy" decoding="async" />
               {project.status ? <span className="pproject-badge">{project.status}</span> : null}
