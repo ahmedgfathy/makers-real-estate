@@ -14,41 +14,75 @@ const photos = [
 
 export default function SaraiProject({ lang }: { lang: Lang }) {
   const arabic = lang === "ar";
+  // Facts, facilities and the offer below come from Madinet Masr's current
+  // company fact sheet and the Elm Tree Park payment-plan sheet.
   const facts = arabic
     ? [
-        { label: "المساحة", value: "550 Acres" },
-        { label: "الموقع", value: "New Heliopolis" },
+        { label: "المساحة", value: "1,200 فدان" },
+        { label: "الموقع", value: "طريق السويس · بجوار مدينتي" },
+        { label: "المطور", value: "مدينة مصر · منذ 1909" },
       ]
     : [
-        { label: "Project area", value: "550 Acres" },
-        { label: "Location", value: "New Heliopolis" },
+        { label: "Project area", value: "1,200 acres" },
+        { label: "Location", value: "Suez Road · next to Madinaty" },
+        { label: "Developer", value: "Madinet Masr · since 1909" },
       ];
   const facilities = arabic
-    ? ["تشطيب كامل", "منطقة تجارية", "منطقة إدارية", "مركز طبي", "نادٍ رياضي", "كلوب هاوس"]
-    : ["Fully finished", "Commercial area", "Administrative area", "Medical centre", "Sport club", "Club house"];
+    ? [
+        "منطقة تجارية",
+        "ستريب مول",
+        "منطقة إدارية",
+        "مدرسة دولية",
+        "مركز طبي",
+        "محطة وقود",
+        "فندق",
+        "مجتمع محاط ببوابات مزدوجة",
+        "كلوب كيان",
+        "كلوب هاوسات خاصة",
+      ]
+    : [
+        "Commercial area",
+        "Strip mall",
+        "Administrative area",
+        "International school",
+        "Medical centre",
+        "Gas station",
+        "Hotel",
+        "Double gated community",
+        "Klub Kayan",
+        "Exclusive club houses",
+      ];
   const salesCopy = arabic
     ? {
-        pricesTitle: "أسعار تبدأ حسب مساحة الوحدة",
-        startingPrice: "السعر التسويقي",
-        priceValue: "عند الطلب",
-        unitSizes: "المساحات المتاحة",
-        sizesValue: "تُحدّد حسب التوافر الحالي",
+        pricesTitle: "S-Villa 212 · إلم تري بارك",
+        startingPrice: "سعر الوحدة",
+        priceValue: "19.1 مليون جنيه",
+        unitSizes: "نوع الوحدة",
+        sizesValue: "S-Villa 212 · 3 غرف + خدم",
+        maintenance: "الصيانة",
+        maintenanceValue: "8%",
+        delivery: "التسليم",
+        deliveryValue: "2031",
         paymentTitle: "خطة السداد",
-        paymentValue: "تُؤكّد مع فريق المبيعات",
+        paymentValue: "مقدم 1.5% · تقسيط 12 سنة",
         inventoryTitle: "الوحدات المتاحة",
-        inventoryNote: "تواصل معنا لمعرفة مساحات الوحدات والأسعار التسويقية الحالية وخيارات السداد المعتمدة.",
+        inventoryNote: "السعر والخطة أعلاه لعرض إلم تري بارك الحالي. الأسعار والمساحات والتوافر تتغير بسرعة — تواصل معنا لتأكيد الوحدة المتاحة.",
         enquire: "استفسر عن سراي",
       }
     : {
-        pricesTitle: "Starting prices by unit size",
-        startingPrice: "Marketing price",
-        priceValue: "On request",
-        unitSizes: "Available unit sizes",
-        sizesValue: "Confirm current availability",
+        pricesTitle: "S-Villa 212 · Elm Tree Park",
+        startingPrice: "Unit price",
+        priceValue: "EGP 19.1M",
+        unitSizes: "Unit type",
+        sizesValue: "S-Villa 212 · 3 bed + maid",
+        maintenance: "Maintenance",
+        maintenanceValue: "8%",
+        delivery: "Delivery",
+        deliveryValue: "2031",
         paymentTitle: "Payment plan",
-        paymentValue: "Confirm current terms with sales",
+        paymentValue: "1.5% down · 12 years",
         inventoryTitle: "Available units",
-        inventoryNote: "Contact us for current unit sizes, marketing prices, and approved payment options.",
+        inventoryNote: "The price and plan above are the current Elm Tree Park offer. Prices, sizes and availability move quickly — contact us to confirm the unit on release.",
         enquire: "Ask about Sarai",
       };
 
@@ -61,8 +95,8 @@ export default function SaraiProject({ lang }: { lang: Lang }) {
             <h1 className="section-title" id="sarai-title">Sarai</h1>
             <p className="section-lede">
               {arabic
-                ? "يقع S-Villa 212 ضمن مشروع سراي. تعرّف على تفاصيل المشروع واطلب سعر الوحدة وخيارات السداد حسب المساحة من فريق المبيعات."
-                : "S-Villa 212 is part of Sarai. Explore the compound and ask our sales team for unit pricing by size and current payment options."}
+                ? "S-Villa 212 في إلم تري بارك داخل سراي — مجتمع مدينة مصر على 1,200 فدان بطريق السويس بجوار مدينتي. تفاصيل الوحدة وخطة السداد الحالية بالأسفل."
+                : "S-Villa 212 sits in Elm Tree Park inside Sarai — Madinet Masr's 1,200-acre community on Suez Road beside Madinaty. Current unit and payment details below."}
             </p>
           </div>
           <img className="sarai-cover" src="/sarai/cover.jpg" alt="" fetchPriority="high" />
@@ -98,6 +132,14 @@ export default function SaraiProject({ lang }: { lang: Lang }) {
             <div className="sleek-rate">
               <span>{salesCopy.unitSizes}</span>
               <strong>{salesCopy.sizesValue}</strong>
+            </div>
+            <div className="sleek-rate">
+              <span>{salesCopy.maintenance}</span>
+              <strong>{salesCopy.maintenanceValue}</strong>
+            </div>
+            <div className="sleek-rate">
+              <span>{salesCopy.delivery}</span>
+              <strong>{salesCopy.deliveryValue}</strong>
             </div>
           </div>
         </section>

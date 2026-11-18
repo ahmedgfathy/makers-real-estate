@@ -5,7 +5,9 @@ import { headers } from "next/headers";
 import Script from "next/script";
 import Analytics from "@/components/Analytics";
 import { SITE_URL } from "@/lib/seo";
+import "./theme.css";
 import "./globals.css";
+import "./portal.css";
 
 const sans = Inter({
   subsets: ["latin"],

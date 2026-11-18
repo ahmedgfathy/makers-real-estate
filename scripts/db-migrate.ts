@@ -12,6 +12,7 @@ const REMOVE_PORTFOLIO_CONTENT = "remove_portfolio_content_v1";
 const REMOVE_DEMO_LEADS = "remove_demo_leads_v1";
 const PURGE_TEST_LEADS = "purge_test_leads_v1";
 const REFRESH_LANDING = "refresh_landing_primary_v1";
+const REFRESH_PROJECT_COPY = "refresh_project_copy_v3";
 const DEMO_LEAD_PHONES = [
   "0100 214 8831",
   "0112 905 7744",
@@ -155,6 +156,16 @@ async function main() {
   });
   if (refreshed) {
     console.log("[migrate] published the primary-sales landing page and new contact numbers");
+  }
+
+  // Project details taken from the developer fact sheet and the Elm Tree Park
+  // payment-plan sheet in the local source data, applied once per database.
+  const refreshedProjects = await runOnce(REFRESH_PROJECT_COPY, async (client) => {
+    await refreshLanding(client);
+    return true;
+  });
+  if (refreshedProjects) {
+    console.log("[migrate] refreshed project copy with researched locations, prices and payment terms");
   }
 
   const ping = await pingDb();

@@ -4,6 +4,8 @@ import { useCallback, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { type Contact, type Content, type Lang, whatsappLink } from "@/data/content";
 import { capture } from "@/lib/analytics";
+import { ui } from "@/lib/labels";
+import FloatingActions from "./portal/FloatingActions";
 import Footer from "./Footer";
 import Header from "./Header";
 
@@ -22,6 +24,8 @@ export default function SiteFrame({
   const router = useRouter();
   const localeRoot = `/${lang}`;
   const c = content[lang];
+  const labels = ui[lang];
+  const whatsapp = whatsappLink(contact, lang);
 
   const changeLang = useCallback((next: Lang) => {
     if (next === lang) return;
@@ -37,18 +41,22 @@ export default function SiteFrame({
         lang={lang}
         onLang={changeLang}
         localeRoot={localeRoot}
-        solid={pathname !== localeRoot}
         contact={contact}
         phoneHref={contact.phoneHref}
-        whatsapp={whatsappLink(contact, lang)}
       />
       {children}
+      <FloatingActions
+        phoneHref={contact.phoneHref}
+        whatsapp={whatsapp}
+        callLabel={labels.call}
+        whatsappLabel={labels.whatsapp}
+      />
       <Footer
         c={c}
         contact={contact}
         lang={lang}
         localeRoot={localeRoot}
-        whatsapp={whatsappLink(contact, lang)}
+        whatsapp={whatsapp}
         phoneHref={contact.phoneHref}
       />
     </div>

@@ -1,8 +1,11 @@
 "use client";
 
 import type { Contact, Content, Lang } from "@/data/content";
+import { projectsOf } from "@/data/portfolio";
 import { requestConsent } from "@/lib/analytics";
+import { projectPath } from "@/lib/project-routes";
 import { ui } from "@/lib/labels";
+import Brand from "./Brand";
 
 export default function Footer({
   c,
@@ -20,79 +23,77 @@ export default function Footer({
   phoneHref: string;
 }) {
   const labels = ui[lang];
+  const projects = projectsOf(lang);
 
   return (
-    <footer className="site-footer" id="contact">
-      <div className="footer-inner">
-        <div className="footer-top">
-          <div className="footer-brand">
-            <span className="footer-wordmark">
-              {c.brand.name}
-              <small>{c.brand.tagline}</small>
+    <footer className="site-footer">
+      <div className="pfooter-inner">
+        <div className="pfooter-grid">
+          <div className="pfooter-brand">
+            <Brand name={c.brand.name} tagline={c.brand.tagline} />
+            <p className="pfooter-about">{c.footer.lede}</p>
+            <p className="pfooter-note">{c.footer.disclaimer}</p>
+          </div>
+
+          <nav className="pfooter-col" aria-label={labels.projects}>
+            <h2 className="pfooter-title">{labels.projects}</h2>
+            {projects.map((project) => (
+              <a className="pfooter-link" href={projectPath(project, lang)} key={project.slug ?? project.name}>
+                {project.name}
+              </a>
+            ))}
+            <a className="pfooter-link" href={`${localeRoot}/projects`}>
+              {labels.seeAllProjects}
+            </a>
+          </nav>
+
+          <nav className="pfooter-col" aria-label={c.footer.sections}>
+            <h2 className="pfooter-title">{c.footer.sections}</h2>
+            <a className="pfooter-link" href={localeRoot}>
+              {labels.home}
+            </a>
+            <a className="pfooter-link" href={`${localeRoot}/about`}>
+              {labels.aboutUs}
+            </a>
+            <a className="pfooter-link" href={`${localeRoot}/contact`}>
+              {labels.contactUs}
+            </a>
+            <a className="pfooter-link" href="/login">
+              {labels.login}
+            </a>
+          </nav>
+
+          <div className="pfooter-col">
+            <h2 className="pfooter-title">{labels.contactUs}</h2>
+            <span className="pfooter-title" style={{ margin: 0, fontWeight: 400, fontSize: "13px", color: "rgba(255,255,255,0.55)" }}>
+              {c.footer.role}
             </span>
-            <p>{c.brand.sub}</p>
-          </div>
-
-          <div className="footer-lede-wrap">
-            <h2 className="footer-title">{c.footer.title}</h2>
-            <p className="footer-lede">{c.footer.lede}</p>
-          </div>
-
-          <div className="advisor">
-            <span className="advisor-label">{c.footer.role}</span>
-            <span className="advisor-name">{contact.name[lang]}</span>
-
-            <a className="advisor-number" href={whatsapp} target="_blank" rel="noopener noreferrer" data-cta="whatsapp" data-cta-surface="footer">
-              <small>{lang === "ar" ? "واتساب فقط" : "WhatsApp only"}</small>
-              <strong className="phone">{contact.whatsappLabel}</strong>
-            </a>
-
-            <a className="advisor-number" href={phoneHref} data-cta="phone" data-cta-surface="footer">
-              <small>{lang === "ar" ? "للمكالمات" : "For calls"}</small>
-              <strong className="phone">{contact.phoneLabel}</strong>
-            </a>
-
-            <div className="advisor-actions">
-              <a className="btn btn--gold btn--sm" href={whatsapp} target="_blank" rel="noopener noreferrer" data-cta="whatsapp" data-cta-surface="footer">
-                <span>{c.footer.whatsapp}</span>
-              </a>
-              <a className="btn btn--outline btn--sm" href={phoneHref} data-cta="phone" data-cta-surface="footer">
-                <span>{c.footer.call}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="footer-grid">
-          <div className="footer-col">
-            <span className="footer-col-title">{c.footer.sections}</span>
-            <a className="footer-link" href={localeRoot}>{labels.home}</a>
-            <a className="footer-link" href={`${localeRoot}/projects`}>{labels.projects}</a>
-            <a className="footer-link" href={`${localeRoot}/about`}>{labels.aboutUs}</a>
-            <a className="footer-link" href={`${localeRoot}/contact`}>{labels.contactUs}</a>
-          </div>
-
-          <div className="footer-col">
-            <span className="footer-col-title">{labels.contactUs}</span>
-            <a className="footer-link" href={`${localeRoot}/contact`}>{c.leadForm.kicker}</a>
-            <a className="footer-link" href={whatsapp} target="_blank" rel="noopener noreferrer" data-cta="whatsapp" data-cta-surface="footer-links">
-              {c.footer.whatsapp}
-            </a>
-            <a className="footer-link phone" href={phoneHref} data-cta="phone" data-cta-surface="footer-links">
+            <p style={{ margin: "6px 0 10px", color: "#fff", fontSize: "15px" }}>{contact.name[lang]}</p>
+            <a className="pfooter-link phone" href={phoneHref} dir="ltr" data-cta="phone" data-cta-surface="footer">
               {contact.phoneLabel}
             </a>
-            <a className="footer-link" href={localeRoot}>{labels.top}</a>
-          </div>
-
-          <div className="footer-col footer-col--wide">
-            <span className="footer-col-title">{c.footer.builtWith}</span>
-            <p className="footer-disclaimer">{c.footer.disclaimer}</p>
+            <a
+              className="pfooter-link phone"
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              dir="ltr"
+              data-cta="whatsapp"
+              data-cta-surface="footer"
+            >
+              {contact.whatsappLabel}
+            </a>
+            <a className="pfooter-link" href={`${localeRoot}/contact`}>
+              {c.leadForm.submit}
+            </a>
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} {c.footer.rights}</span>
-          <button type="button" className="footer-link" onClick={() => requestConsent()}>
+        <div className="pfooter-bottom">
+          <span>
+            © {new Date().getFullYear()} {c.footer.rights}
+          </span>
+          <button type="button" className="pfooter-cookie" onClick={() => requestConsent()}>
             {labels.cookies}
           </button>
         </div>

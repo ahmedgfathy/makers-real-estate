@@ -1,0 +1,87 @@
+/* ============================================================
+   Makers Real Estate — theme schema
+   ------------------------------------------------------------
+   One place to change the whole public site's colours, type and
+   geometry. Every value below was measured from the reference
+   real-estate portal (imicegypt.com): bronze primary on charcoal,
+   off-white surfaces, Cairo type, 6–10px radii, dark slate inputs.
+
+   Change a token here and the header, hero, search card, cards,
+   catalogue, enquiry band and footer all follow.
+   ============================================================ */
+
+:root {
+  /* ---------- brand ---------- */
+  --theme-brand: #8e7744; /* primary: buttons, active tab, badges, icons */
+  --theme-brand-strong: #7a6339; /* hover / pressed primary */
+  --theme-brand-soft: #efe6d4; /* tinted surfaces, selection */
+  --theme-accent: #d0af66; /* stat numerals, highlights on dark */
+
+  /* ---------- ink ---------- */
+  --theme-ink: #212529; /* headings and body copy */
+  --theme-ink-muted: #555555; /* secondary copy, meta rows */
+  --theme-ink-subtle: #8d9094; /* placeholders, captions */
+  --theme-ink-inverse: #ffffff;
+
+  /* ---------- surfaces ---------- */
+  --theme-surface: #ffffff;
+  --theme-surface-alt: #f9f7f4; /* alternating section band */
+  --theme-surface-muted: #f5f5f5;
+  --theme-surface-input: #f3f3f4; /* text field fill */
+  --theme-surface-dark: #212529; /* header, stats band, footer */
+  --theme-surface-dark-2: #2b3035;
+  --theme-surface-dark-elevated: #0f172a; /* selects, dropdowns */
+
+  /* ---------- lines ---------- */
+  --theme-line: #e7e7e7;
+  --theme-line-strong: rgba(0, 0, 0, 0.176);
+  --theme-line-inverse: rgba(255, 255, 255, 0.14);
+
+  /* ---------- actions ---------- */
+  --theme-whatsapp: #25d366;
+  --theme-whatsapp-strong: #1eb457;
+  --theme-call: #3d60ff;
+  --theme-facebook: #3b5998;
+  --theme-instagram: #c13584;
+
+  /* ---------- type ---------- */
+  --theme-font: var(--font-arabic), "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --theme-fs-body: 16px;
+  --theme-fs-small: 14px;
+  --theme-fs-meta: 13px;
+  --theme-fs-card-title: 16px;
+  --theme-fs-section: clamp(1.5rem, 2.1vw, 1.75rem); /* 24→28px */
+  --theme-fs-hero: clamp(1.35rem, 2.15vw, 2rem); /* 22→32px */
+  --theme-fw-regular: 400;
+  --theme-fw-medium: 500;
+  --theme-fw-bold: 600;
+  --theme-fw-heavy: 700;
+  --theme-lh-body: 1.75;
+
+  /* ---------- geometry ---------- */
+  --theme-radius-xs: 4px;
+  --theme-radius-sm: 6px;
+  --theme-radius-md: 8px;
+  --theme-radius-lg: 10px;
+  --theme-radius-tab: 5px 5px 0 0;
+  --theme-radius-pill: 999px;
+
+  /* ---------- elevation ---------- */
+  --theme-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.08);
+  --theme-shadow-search: 0 18px 50px rgba(0, 0, 0, 0.14);
+  --theme-shadow-float: 0 10px 22px rgba(0, 0, 0, 0.22);
+  --theme-ring: 0 0 0 2px rgba(142, 119, 68, 0.35);
+
+  /* ---------- layout ---------- */
+  --theme-container: 1320px;
+  --theme-gutter: 12px;
+  --theme-section-y: 60px;
+  --theme-header-h: 64px;
+}
+
+/*
+ * The public site maps these tokens onto the legacy custom properties that
+ * globals.css and the inner project pages still read (--forest, --gold,
+ * --ink, --paper, --hair, --radius ...). That mapping lives at the top of
+ * app/portal.css, which loads last and therefore wins over globals.css.
+ */

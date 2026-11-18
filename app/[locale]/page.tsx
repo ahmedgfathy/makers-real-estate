@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
-import Landing from "@/components/Landing";
-import { absoluteUrl, isLang, localizedAlternates, SITE_URL } from "@/lib/seo";
+import LeadForm from "@/components/LeadForm";
+import SiteFrame from "@/components/SiteFrame";
+import AreaSection from "@/components/portal/AreaSection";
+import DeveloperSection from "@/components/portal/DeveloperSection";
+import HeroSearch from "@/components/portal/HeroSearch";
+import JourneySection from "@/components/portal/JourneySection";
+import ProjectGrid from "@/components/portal/ProjectGrid";
+import { whatsappLink } from "@/data/content";
+import { MARKETS, PORTAL, projectsOf } from "@/data/portfolio";
 import { getSite } from "@/lib/content-db";
+import { absoluteUrl, isLang, localizedAlternates, SITE_URL } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +55,9 @@ export default async function LocalizedHome({ params }: PageProps) {
   if (!isLang(locale)) notFound();
 
   const { content, contact } = await getSite();
+  const c = content[locale];
+  const copy = PORTAL[locale];
+  const projects = projectsOf(locale);
 
   return (
     <>
@@ -69,7 +80,45 @@ export default async function LocalizedHome({ params }: PageProps) {
           ],
         }}
       />
-      <Landing content={content} contact={contact} initialLang={locale} />
+      <SiteFrame content={content} contact={contact} lang={locale}>
+        <main>
+          <HeroSearch lang={locale} copy={copy} areas={MARKETS} image="/img/lakes-sunset.jpg" />
+
+          <AreaSection lang={locale} copy={copy} />
+
+          <section className="psec" id="projects" aria-labelledby="projects-title">
+            <div className="pwrap">
+              <div className="phead">
+                <div>
+                  <p className="pkicker">{copy.projectsKicker}</p>
+                  <h2 className="ptitle" id="projects-title">
+                    {copy.projectsTitle}
+                  </h2>
+                  <p className="plede">{copy.projectsLede}</p>
+                </div>
+                <a className="pmore" href={`/${locale}/projects`}>
+                  {copy.viewMore}
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+
+              <ProjectGrid lang={locale} copy={copy} projects={projects} contact={contact} />
+            </div>
+          </section>
+
+          <JourneySection lang={locale} c={c} copy={copy} />
+
+          <DeveloperSection lang={locale} copy={copy} />
+
+          <LeadForm
+            c={c}
+            lang={locale}
+            contact={contact}
+            whatsapp={whatsappLink(contact, locale)}
+            phoneHref={contact.phoneHref}
+          />
+        </main>
+      </SiteFrame>
     </>
   );
 }
