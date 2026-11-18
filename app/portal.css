@@ -357,8 +357,8 @@
 
 @media (max-width: 340px) {
   .site-header {
-    padding-inline: 10px;
-    gap: 8px;
+    padding-inline: 8px;
+    gap: 6px;
   }
 
   .header-right {
@@ -370,13 +370,13 @@
   }
 
   .site .header-right .lang-opt {
-    padding: 2px 5px;
-    font-size: 12px;
+    padding: 2px 4px;
+    font-size: 11px;
   }
 
   .header-call {
     gap: 5px;
-    padding: 6px 8px;
+    padding: 6px 7px;
   }
 
   .header-call strong {
@@ -1422,8 +1422,318 @@
   }
 }
 
+/* ============================================================
+   Mobile pass
+   The portal was tuned at desktop width and only "stacked" on a
+   phone: 60px section bands, wrapped tab labels, four full-width
+   search rows, one area tile per row and a single-column footer
+   made the page ~9,000px tall. This block is the phone layout.
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .psec {
+    padding: 44px 0;
+  }
+
+  .phead {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .phead > div {
+    min-width: 0;
+  }
+
+  .site .pmore {
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--theme-brand);
+    border-radius: var(--theme-radius-xs);
+    color: var(--theme-brand);
+  }
+}
+
 @media (max-width: 640px) {
+  /* ---------- hero ---------- */
+  .phero {
+    padding: calc(var(--header-h) + 26px) 14px 32px;
+  }
+
+  /* The hero photograph is busier once it is cropped to a phone, so the
+     headline and lede get a flat scrim on top of the inline gradient. */
+  .phero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(0, 0, 0, 0.24);
+  }
+
+  .site .phero-title {
+    font-size: 1.32rem;
+    line-height: 1.4;
+  }
+
+  .phero-lede {
+    margin-top: 10px;
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .psearch {
+    margin-top: 20px;
+  }
+
+  /* Tabs share the row and each label stays on one line. */
+  .psearch-tabs {
+    gap: 4px;
+  }
+
+  .site .psearch-tab {
+    flex: 1 1 0;
+    padding: 10px 6px;
+    font-size: 13.5px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* City and unit type share a row; search field and button span both. */
+  .site .psearch-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px;
+    border-radius: 6px;
+  }
+
+  .psearch-selectwrap {
+    min-width: 0;
+  }
+
+  .psearch-card > .psearch-field,
+  .psearch-card > .psearch-btn {
+    grid-column: 1 / -1;
+  }
+
+  .site .psearch-input,
+  .site .psearch-select,
+  .site .psearch-btn {
+    height: 46px;
+    font-size: 16px; /* 16px keeps iOS from zooming the field on focus */
+  }
+
+  .site .psearch-select {
+    padding-inline: 12px 28px;
+  }
+
+  /* ---------- section rhythm and headings ---------- */
+  .psec {
+    padding: 34px 0;
+  }
+
+  .pwrap,
+  .pfooter-inner {
+    padding-inline: 14px;
+  }
+
+  .site .ptitle {
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
+
+  .site .plede {
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .pkicker {
+    font-size: 13.5px;
+  }
+
+  /* ---------- area tiles: two up ---------- */
+  .site .pareas {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .site .parea {
+    min-height: 168px;
+    padding: 14px;
+  }
+
+  .parea-name {
+    font-size: 15px;
+  }
+
+  .parea-blurb {
+    font-size: 12.5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ---------- project cards ---------- */
+  .pprojects {
+    gap: 16px;
+  }
+
+  .pproject-body {
+    padding: 16px;
+  }
+
+  .site .pproject-name {
+    font-size: 1.1rem;
+  }
+
+  .pproject-row {
+    font-size: 14px;
+  }
+
+  .pproject-rows {
+    gap: 4px;
+  }
+
+  .pproject-actions {
+    flex-wrap: wrap;
+  }
+
+  .pproject-action {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 42px;
+  }
+
+  /* ---------- stats, why band, developers ---------- */
+  .pstats {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .pstat-value {
+    font-size: 1.7rem;
+  }
+
+  .pstat-label {
+    font-size: 14px;
+  }
+
+  .pwhy {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .pwhy-title {
+    font-size: 15.5px;
+  }
+
+  .pwhy-text {
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+
+  .pdev {
+    padding: 18px;
+  }
+
+  .pdev-name {
+    font-size: 1.05rem;
+  }
+
+  .pdev-blurb {
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+
+  /* ---------- enquiry: readable labels, tighter grid ---------- */
+  .enquiry-form {
+    gap: 12px;
+  }
+
+  .site .enquiry-field > span {
+    font-size: 12px;
+  }
+
+  /* ---------- footer: brand across, links two up ---------- */
+  .pfooter-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 16px;
+  }
+
+  .pfooter-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* footer links need a thumb-sized row, not a 22px line */
+  .pfooter-col a {
+    display: block;
+    padding-block: 9px;
+  }
+
+  .pfooter-cookie {
+    display: inline-block;
+    padding-block: 8px;
+  }
+
+  .pfooter-bottom {
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  /* ---------- catalogue filters: search and apply span, selects pair up ---------- */
+  .site .pfilters {
+    /* minmax(0, 1fr), not 1fr: a <select> cannot shrink below its widest
+       option and that was pushing the two columns past the screen edge. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .site .pfilters .pfield {
+    min-width: 0;
+  }
+
+  .site .pfilters .pfield input,
+  .site .pfilters .pfield select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .site .pfilters > .pfield:first-child,
+  .site .pfilters > .btn {
+    grid-column: 1 / -1;
+  }
+
+  /* ---------- enquiry band ---------- */
+  .site .enquiry {
+    padding: 36px 0;
+  }
+
+  /* ---------- floating call / WhatsApp ---------- */
+  .pfloat {
+    inset-inline-end: 14px;
+    bottom: 14px;
+    gap: 8px;
+  }
+
+  .pfloat a {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+/* Below 360px two area tiles get too narrow to read. */
+@media (max-width: 360px) {
   .site .pareas {
     grid-template-columns: 1fr;
+  }
+
+  .parea {
+    min-height: 150px;
   }
 }
