@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { Lang } from "@/data/content";
-import type { PortalCopy, Market } from "@/data/portfolio";
+import type { PortalCopy } from "@/data/portfolio";
+import type { Location } from "@/lib/catalog";
 
 /**
  * Portal hero: full-bleed image, centred headline and the search card.
@@ -16,7 +17,7 @@ export default function HeroSearch({
 }: {
   lang: Lang;
   copy: PortalCopy;
-  areas: Market[];
+  areas: Location[];
   image: string;
 }) {
   const [type, setType] = useState<"residential" | "commercial">("residential");
@@ -65,11 +66,11 @@ export default function HeroSearch({
             </label>
 
             <span className="psearch-selectwrap">
-              <select className="psearch-select" name="city" defaultValue="" aria-label={copy.cityLabel}>
+              <select className="psearch-select" name="area" defaultValue="" aria-label={copy.cityLabel}>
                 <option value="">{copy.cityLabel}</option>
                 {areas.map((area) => (
-                  <option key={area.slug} value={area.slug}>
-                    {area.name[lang]}
+                  <option key={area.id} value={area.id}>
+                    {lang === "ar" ? area.nameAr || area.nameEn : area.nameEn}
                   </option>
                 ))}
               </select>
@@ -78,13 +79,13 @@ export default function HeroSearch({
             <span className="psearch-selectwrap">
               <select
                 className="psearch-select"
-                name="type"
-                value={type}
-                onChange={(event) => setType(event.target.value as "residential" | "commercial")}
+                name="category"
+                value={type === "residential" ? "residential" : "commercial-units"}
+                onChange={(event) => setType(event.target.value === "commercial-units" ? "commercial" : "residential")}
                 aria-label={copy.typeLabel}
               >
                 <option value="residential">{copy.residential}</option>
-                <option value="commercial">{copy.commercial}</option>
+                <option value="commercial-units">{copy.commercial}</option>
               </select>
             </span>
 

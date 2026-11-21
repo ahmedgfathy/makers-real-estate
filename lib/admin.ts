@@ -74,6 +74,26 @@ export type Lead = {
   property_type: string | null;
   bedrooms: number | null;
   preferred_area: string | null;
+  governorate_id: string | null;
+  city_id: string | null;
+  area_id: string | null;
+  location_id: string | null;
+  project_id: string | null;
+  property_category_id: string | null;
+  unit_id: string | null;
+  budget: number | null;
+  requirements: Record<string, unknown>;
+  locale: "en" | "ar" | null;
+  source_path: string | null;
+  referrer: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  meta_form_id: string | null;
+  meta_ad_id: string | null;
+  meta_adgroup_id: string | null;
+  meta_page_id: string | null;
+  meta_created_at: Date | null;
   budget_min: number | null;
   budget_max: number | null;
   payment_preference: LeadPayment | null;
@@ -107,6 +127,10 @@ export type LeadFilters = {
   status?: string;
   temperature?: string;
   assignedTo?: string;
+  locationId?: string;
+  projectId?: string;
+  categoryId?: string;
+  unitId?: string;
   /** "overdue" | "today" | "due" (today or earlier) | "none" (never scheduled) */
   followUp?: string;
   limit?: number;
@@ -128,6 +152,26 @@ export type NewLeadInput = {
   property_type?: string | null;
   bedrooms?: number | null;
   preferred_area?: string | null;
+  governorateId?: string | null;
+  cityId?: string | null;
+  areaId?: string | null;
+  locationId?: string | null;
+  projectId?: string | null;
+  propertyCategoryId?: string | null;
+  unitId?: string | null;
+  budget?: number | null;
+  requirements?: Record<string, unknown> | null;
+  locale?: string | null;
+  sourcePath?: string | null;
+  referrer?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  metaFormId?: string | null;
+  metaAdId?: string | null;
+  metaAdgroupId?: string | null;
+  metaPageId?: string | null;
+  metaCreatedAt?: string | null;
   budget_min?: number | null;
   budget_max?: number | null;
   payment_preference?: string | null;
@@ -144,6 +188,11 @@ const LEAD_SELECT = `
   id::int AS id,
   full_name, phone, email, source, form_name, campaign, external_id,
   project, property_type, bedrooms, preferred_area,
+  governorate_id, city_id, area_id, location_id, project_id,
+  property_category_id, unit_id,
+  budget::float8 AS budget, requirements,
+  locale, source_path, referrer, utm_source, utm_medium, utm_campaign,
+  meta_form_id, meta_ad_id, meta_adgroup_id, meta_page_id, meta_created_at,
   budget_min::float8 AS budget_min,
   budget_max::float8 AS budget_max,
   payment_preference, intent, temperature, message, status, assigned_to, consent,
@@ -184,6 +233,17 @@ export async function listLeads(filters: LeadFilters = {}): Promise<Lead[]> {
   if (filters.assignedTo?.trim()) {
     params.push(filters.assignedTo.trim());
     where.push(`assigned_to = $${params.length}`);
+  }
+  const contextFilters: [string | undefined, string][] = [
+    [filters.locationId, "location_id"],
+    [filters.projectId, "project_id"],
+    [filters.categoryId, "property_category_id"],
+    [filters.unitId, "unit_id"],
+  ];
+  for (const [value, column] of contextFilters) {
+    if (!value?.trim()) continue;
+    params.push(value.trim());
+    where.push(`${column} = $${params.length}`);
   }
   switch (filters.followUp) {
     case "overdue":
@@ -242,40 +302,70 @@ export async function findLeadByContact(key: string): Promise<Lead | null> {
 }
 
 export async function createLead(input: NewLeadInput): Promise<number> {
+  const columns = [
+    "full_name", "phone", "email", "source", "form_name", "campaign", "external_id",
+    "project", "property_type", "bedrooms", "preferred_area", "budget_min", "budget_max",
+    "payment_preference", "intent", "temperature", "message", "status", "assigned_to",
+    "consent", "next_follow_up_on",
+  ];
+  const values: unknown[] = [
+    input.full_name,
+    input.phone,
+    empty(input.email),
+    oneOf(LEAD_SOURCES, input.source, "manual"),
+    empty(input.form_name),
+    empty(input.campaign),
+    empty(input.external_id),
+    empty(input.project),
+    empty(input.property_type),
+    input.bedrooms ?? null,
+    empty(input.preferred_area),
+    input.budget_min ?? null,
+    input.budget_max ?? null,
+    oneOf(LEAD_PAYMENTS, input.payment_preference, null),
+    oneOf(LEAD_INTENTS, input.intent, null),
+    oneOf(LEAD_TEMPERATURES, input.temperature, null),
+    empty(input.message),
+    oneOf(LEAD_STATUSES, input.status, "new"),
+    empty(input.assigned_to),
+    input.consent ?? false,
+    input.next_follow_up_on ?? null,
+  ];
+
+  const context: [string, unknown][] = [
+    ["governorate_id", empty(input.governorateId)],
+    ["city_id", empty(input.cityId)],
+    ["area_id", empty(input.areaId)],
+    ["location_id", empty(input.locationId)],
+    ["project_id", empty(input.projectId)],
+    ["property_category_id", empty(input.propertyCategoryId)],
+    ["unit_id", empty(input.unitId)],
+    ["budget", input.budget ?? null],
+    ["requirements", input.requirements ?? {}],
+    ["locale", input.locale === "en" || input.locale === "ar" ? input.locale : null],
+    ["source_path", empty(input.sourcePath)],
+    ["referrer", empty(input.referrer)],
+    ["utm_source", empty(input.utmSource)],
+    ["utm_medium", empty(input.utmMedium)],
+    ["utm_campaign", empty(input.utmCampaign)],
+    ["meta_form_id", empty(input.metaFormId)],
+    ["meta_ad_id", empty(input.metaAdId)],
+    ["meta_adgroup_id", empty(input.metaAdgroupId)],
+    ["meta_page_id", empty(input.metaPageId)],
+    ["meta_created_at", input.metaCreatedAt || null],
+  ];
+  for (const [column, value] of context) {
+    columns.push(column);
+    values.push(value);
+  }
+
+  const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
   const rows = await query<{ id: number }>(
-    `INSERT INTO leads (
-       full_name, phone, email, source, form_name, campaign, external_id,
-       project, property_type, bedrooms, preferred_area, budget_min, budget_max,
-       payment_preference, intent, temperature, message, status, assigned_to,
-       consent, next_follow_up_on
-     ) VALUES (
-       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
-     )
+    `INSERT INTO leads (${columns.join(", ")})
+     VALUES (${placeholders})
      ON CONFLICT (external_id) WHERE external_id IS NOT NULL DO NOTHING
      RETURNING id::int AS id`,
-    [
-      input.full_name,
-      input.phone,
-      empty(input.email),
-      oneOf(LEAD_SOURCES, input.source, "manual"),
-      empty(input.form_name),
-      empty(input.campaign),
-      empty(input.external_id),
-      empty(input.project),
-      empty(input.property_type),
-      input.bedrooms ?? null,
-      empty(input.preferred_area),
-      input.budget_min ?? null,
-      input.budget_max ?? null,
-      oneOf(LEAD_PAYMENTS, input.payment_preference, null),
-      oneOf(LEAD_INTENTS, input.intent, null),
-      oneOf(LEAD_TEMPERATURES, input.temperature, null),
-      empty(input.message),
-      oneOf(LEAD_STATUSES, input.status, "new"),
-      empty(input.assigned_to),
-      input.consent ?? false,
-      input.next_follow_up_on ?? null,
-    ]
+    values
   );
 
   if (rows[0]) return rows[0].id;
@@ -395,6 +485,93 @@ export async function getLeadSourceBreakdown(): Promise<{ source: string; count:
       GROUP BY source
       ORDER BY count DESC, source`
   );
+}
+
+export type LeadClassification = {
+  location: string | null;
+  project: string | null;
+  category: string | null;
+  unit: string | null;
+  budget: number | null;
+  locale: string | null;
+  sourcePath: string | null;
+};
+
+/** Resolves the structured IDs stored on a lead back to catalogue names. */
+export async function getLeadClassification(
+  lead: Pick<Lead, "id" | "location_id" | "area_id" | "city_id" | "project_id" | "property_category_id" | "unit_id" | "budget" | "locale" | "source_path">
+): Promise<LeadClassification> {
+  const rows = await query<LeadClassification>(
+    `SELECT
+       COALESCE(area.name_en, loc.name_en, legacy.name_en) AS location,
+       proj.name_en AS project,
+       cat.name_en AS category,
+       unit.title_en AS unit,
+       le.budget::float8 AS budget,
+       le.locale,
+       le.source_path
+     FROM leads le
+     LEFT JOIN locations loc ON loc.id = le.location_id
+     LEFT JOIN locations area ON area.id = le.area_id
+     LEFT JOIN locations legacy ON legacy.id = le.city_id
+     LEFT JOIN projects proj ON proj.id = le.project_id
+     LEFT JOIN property_categories cat ON cat.id = le.property_category_id
+     LEFT JOIN units unit ON unit.id = le.unit_id
+     WHERE le.id = $1
+     LIMIT 1`,
+    [lead.id ?? null]
+  );
+  return rows[0] ?? {
+    location: null,
+    project: null,
+    category: null,
+    unit: null,
+    budget: lead.budget,
+    locale: lead.locale,
+    sourcePath: lead.source_path,
+  };
+}
+
+export type ClassificationRow = { id: string; name: string; count: number };
+
+/** CRM report: where structured enquiries are concentrated. */
+export async function getLeadClassificationReport(): Promise<{
+  locations: ClassificationRow[];
+  projects: ClassificationRow[];
+  categories: ClassificationRow[];
+  structured: number;
+  total: number;
+}> {
+  const [locations, projects, categories, summary] = await Promise.all([
+    query<ClassificationRow>(
+      `SELECT l.id::text AS id, l.name_en AS name, count(*)::int AS count
+         FROM leads le JOIN locations l ON l.id = COALESCE(le.area_id, le.location_id)
+        GROUP BY l.id, l.name_en ORDER BY count DESC, l.name_en LIMIT 8`
+    ),
+    query<ClassificationRow>(
+      `SELECT p.id::text AS id, p.name_en AS name, count(*)::int AS count
+         FROM leads le JOIN projects p ON p.id = le.project_id
+        GROUP BY p.id, p.name_en ORDER BY count DESC, p.name_en LIMIT 8`
+    ),
+    query<ClassificationRow>(
+      `SELECT c.id::text AS id, c.name_en AS name, count(*)::int AS count
+         FROM leads le JOIN property_categories c ON c.id = le.property_category_id
+        GROUP BY c.id, c.name_en ORDER BY count DESC, c.name_en LIMIT 8`
+    ),
+    query<{ structured: number; total: number }>(
+      `SELECT count(*) FILTER (WHERE location_id IS NOT NULL OR area_id IS NOT NULL
+          OR project_id IS NOT NULL OR property_category_id IS NOT NULL OR unit_id IS NOT NULL)::int AS structured,
+              count(*)::int AS total
+         FROM leads`
+    ),
+  ]);
+  return {
+    locations,
+    projects,
+    categories,
+    structured: summary[0]?.structured ?? 0,
+    total: summary[0]?.total ?? 0,
+  };
 }
 
 export async function getConsultantBreakdown(): Promise<{ consultant: string; count: number; due: number }[]> {

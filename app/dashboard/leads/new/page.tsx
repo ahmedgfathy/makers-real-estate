@@ -5,6 +5,13 @@ import {
   LEAD_STATUSES,
   LEAD_TEMPERATURES,
 } from "@/lib/admin";
+import {
+  ancestorLocations,
+  getCatalogOptions,
+  listUnits,
+  projectName,
+  unitTitle,
+} from "@/lib/catalog";
 import { titleCase } from "@/lib/format";
 import { createLeadAction } from "../actions";
 
@@ -19,6 +26,16 @@ export default async function NewLeadPage({
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
+  const [options, units] = await Promise.all([
+    getCatalogOptions(),
+    listUnits({ pageSize: 1000 }),
+  ]);
+  const locationLabel = (id: string) => {
+    const location = options.locations.find((item) => item.id === id);
+    return location
+      ? [...ancestorLocations(options.locations, location), location].map((item) => item.nameEn).join(" / ")
+      : id;
+  };
 
   return (
     <div className="dash-page" style={{ maxWidth: "980px" }}>
@@ -59,7 +76,66 @@ export default async function NewLeadPage({
         </section>
 
         <section className="dash-form-section">
-          <h2>Requirement</h2>
+          <h2>Catalogue classification</h2>
+          <p className="dash-muted" style={{ marginBottom: "1rem" }}>
+            Choose real catalogue records wherever possible. These IDs power CRM filters, reports and
+            public-site context. Free-text fields below remain available for details that have no record yet.
+          </p>
+          <div className="dash-form-grid">
+            <label className="dash-field">
+              <span>Location / area</span>
+              <select className="dash-select" name="locationId" defaultValue="">
+                <option value="">Not classified</option>
+                {options.locations.map((location) => (
+                  <option key={location.id} value={location.id}>{locationLabel(location.id)}</option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field">
+              <span>Project</span>
+              <select className="dash-select" name="projectId" defaultValue="">
+                <option value="">Not classified</option>
+                {options.projects.map((project) => (
+                  <option key={project.id} value={project.id}>{projectName(project, "en")}</option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field">
+              <span>Property category</span>
+              <select className="dash-select" name="categoryId" defaultValue="">
+                <option value="">Not classified</option>
+                {options.categories.map((category) => (
+                  <option key={category.id} value={category.id}>{category.nameEn}</option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field">
+              <span>Specific unit</span>
+              <select className="dash-select" name="unitId" defaultValue="">
+                <option value="">Not classified</option>
+                {units.items.map((unit) => (
+                  <option key={unit.id} value={unit.id}>
+                    {unitTitle(unit, "en")} · {unit.projectNameEn}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="dash-field">
+              <span>Canonical budget (EGP)</span>
+              <input className="dash-input" type="number" name="budget" min="0" step="100000" />
+            </label>
+            <label className="dash-field">
+              <span>Lead language</span>
+              <select className="dash-select" name="locale" defaultValue="en">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section className="dash-form-section">
+          <h2>Requirement details</h2>
           <div className="dash-form-grid">
             <label className="dash-field">
               <span>Project</span>

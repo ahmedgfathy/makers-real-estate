@@ -5,6 +5,7 @@ import {
   LEAD_TEMPERATURES,
   listLeads,
 } from "@/lib/admin";
+import { ancestorLocations, getCatalogOptions, projectName } from "@/lib/catalog";
 import { budget, phoneDigits, timeAgo, titleCase } from "@/lib/format";
 import { importLeadsAction } from "./actions";
 import { FollowUpBadge, SourceBadge, StatusBadge, TemperatureBadge } from "@/components/dashboard/Badges";
@@ -16,6 +17,10 @@ type Search = {
   source?: string;
   status?: string;
   temperature?: string;
+  locationId?: string;
+  projectId?: string;
+  categoryId?: string;
+  unitId?: string;
   followUp?: string;
   notice?: string;
   tone?: string;
@@ -34,17 +39,28 @@ export default async function LeadsPage({
   searchParams: Promise<Search>;
 }) {
   const filters = await searchParams;
-  const [stats, leads] = await Promise.all([
+  const [stats, leads, options] = await Promise.all([
     getLeadStats(),
     listLeads({
       q: filters.q,
       source: filters.source,
       status: filters.status,
       temperature: filters.temperature,
+      locationId: filters.locationId,
+      projectId: filters.projectId,
+      categoryId: filters.categoryId,
+      unitId: filters.unitId,
       followUp: filters.followUp,
       limit: 500,
     }),
+    getCatalogOptions(),
   ]);
+  const locationLabel = (id: string) => {
+    const location = options.locations.find((item) => item.id === id);
+    return location
+      ? [...ancestorLocations(options.locations, location), location].map((item) => item.nameEn).join(" / ")
+      : id;
+  };
 
   return (
     <div className="dash-page">
@@ -155,6 +171,36 @@ export default async function LeadsPage({
           </label>
 
           <label className="dash-field">
+            <span>Location</span>
+            <select className="dash-select" name="locationId" defaultValue={filters.locationId ?? ""}>
+              <option value="">All locations</option>
+              {options.locations.map((location) => (
+                <option key={location.id} value={location.id}>{locationLabel(location.id)}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="dash-field">
+            <span>Project</span>
+            <select className="dash-select" name="projectId" defaultValue={filters.projectId ?? ""}>
+              <option value="">All projects</option>
+              {options.projects.map((project) => (
+                <option key={project.id} value={project.id}>{projectName(project, "en")}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="dash-field">
+            <span>Category</span>
+            <select className="dash-select" name="categoryId" defaultValue={filters.categoryId ?? ""}>
+              <option value="">All categories</option>
+              {options.categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.nameEn}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="dash-field">
             <span>Follow-up</span>
             <select className="dash-select" name="followUp" defaultValue={filters.followUp ?? ""}>
               <option value="">Any</option>
@@ -191,7 +237,13 @@ export default async function LeadsPage({
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead) => (
+                {leads.map((lead) => {
+                  const classified = [
+                    lead.location_id ? locationLabel(lead.location_id) : "",
+                    lead.project_id ? options.projects.find((item) => item.id === lead.project_id)?.nameEn ?? "" : "",
+                    lead.property_category_id ? options.categories.find((item) => item.id === lead.property_category_id)?.nameEn ?? "" : "",
+                  ].filter(Boolean).join(" · ");
+                  return (
                   <tr key={lead.id}>
                     <td>
                       <a className="cell-strong" href={`/dashboard/leads/${lead.id}`}>
@@ -207,7 +259,7 @@ export default async function LeadsPage({
                       <span className="cell-sub">{timeAgo(lead.created_at)}</span>
                     </td>
                     <td>
-                      {lead.project ?? "—"}
+                      {classified || lead.project || "—"}
                       <span className="cell-sub">
                         {lead.property_type ?? "No unit type"}
                         {lead.bedrooms ? ` · ${lead.bedrooms} bed` : ""}
@@ -234,7 +286,8 @@ export default async function LeadsPage({
                       </a>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -17,3 +17,20 @@ export function projectSlug(project: Project): string {
   if (/sarai|سراي|s-villa/i.test(project.name)) return "sarai";
   return project.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+
+/** Canonical paths for the relational catalogue. */
+export function locationPath(lang: Lang, slug: string): string {
+  return `/${lang}/locations/${slug}`;
+}
+
+export function projectDetailPath(lang: Lang, slug: string): string {
+  return `/${lang}/projects/${slug}`;
+}
+
+export function projectCategoryPath(lang: Lang, projectSlug: string, categorySlug: string): string {
+  return `/${lang}/projects/${projectSlug}/${categorySlug}`;
+}
+
+export function unitPath(lang: Lang, slug: string): string {
+  return `/${lang}/units/${slug}`;
+}

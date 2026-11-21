@@ -49,6 +49,17 @@ const NAV: NavItem[] = [
       </Icon>
     ),
   },
+  {
+    href: "/dashboard/catalog",
+    label: "Catalogue",
+    icon: (
+      <Icon>
+        <rect x="3" y="4" width="18" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
+        <rect x="3" y="14" width="8" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
+        <rect x="13" y="14" width="8" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
+      </Icon>
+    ),
+  },
 ];
 
 export default function DashboardNav({

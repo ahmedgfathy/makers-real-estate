@@ -40,7 +40,17 @@ export default function Header({
     {
       href: `${prefix}/projects`,
       label: labels.projects,
-      match: (path: string) => path.startsWith(`${prefix}/projects`),
+      match: (path: string) => path === `${prefix}/projects`,
+    },
+    {
+      href: `${prefix}/locations`,
+      label: lang === "ar" ? "المواقع" : "Locations",
+      match: (path: string) => path.startsWith(`${prefix}/locations`),
+    },
+    {
+      href: `${prefix}/search`,
+      label: lang === "ar" ? "بحث" : "Search",
+      match: (path: string) => path.startsWith(`${prefix}/search`),
     },
     { href: `${prefix}/#developers`, label: lang === "ar" ? "المطورون" : "Developers", match: () => false },
     { href: `${prefix}/about`, label: labels.aboutUs, match: (path: string) => path === `${prefix}/about` },

@@ -143,6 +143,11 @@ export async function POST(req: Request) {
     const input = normalizeLead({
       ...details,
       leadgen_id: leadgenId,
+      form_id: entry.form_id ?? null,
+      ad_id: entry.ad_id ?? null,
+      adgroup_id: entry.adgroup_id ?? null,
+      page_id: entry.page_id ?? null,
+      created_time: entry.created_time ?? null,
       form_name: details.form_name ?? entry.form_id ?? null,
     });
     if ("error" in input) {

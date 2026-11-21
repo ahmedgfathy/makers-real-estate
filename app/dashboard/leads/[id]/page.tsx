@@ -8,6 +8,7 @@ import {
   FOLLOW_UP_CHANNELS,
   FOLLOW_UP_OUTCOMES,
   getLead,
+  getLeadClassification,
   LEAD_STATUSES,
   listFollowUps,
 } from "@/lib/admin";
@@ -35,6 +36,7 @@ export default async function LeadDetailPage({
 
   const [lead, followUps] = await Promise.all([getLead(leadId), listFollowUps(leadId)]);
   if (!lead) notFound();
+  const classification = await getLeadClassification(lead);
 
   const digits = phoneDigits(lead.phone);
   const callable = digits.length >= 8;
@@ -154,6 +156,44 @@ export default async function LeadDetailPage({
                 <div>
                   <dt>Consent</dt>
                   <dd>{lead.consent ? "Given" : "Not recorded"}</dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+
+          <section className="dash-card">
+            <div className="dash-card-head">
+              <h2 className="dash-card-title">Structured classification</h2>
+            </div>
+            <div className="dash-card-body">
+              <dl className="detail-list">
+                <div>
+                  <dt>Location</dt>
+                  <dd>{classification.location ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>Project</dt>
+                  <dd>{classification.project ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>Property category</dt>
+                  <dd>{classification.category ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>Specific unit</dt>
+                  <dd>{classification.unit ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>Canonical budget</dt>
+                  <dd>{classification.budget ? budget(classification.budget, classification.budget) : "—"}</dd>
+                </div>
+                <div>
+                  <dt>Language</dt>
+                  <dd>{classification.locale ? classification.locale.toUpperCase() : "—"}</dd>
+                </div>
+                <div>
+                  <dt>Source page</dt>
+                  <dd dir="ltr">{classification.sourcePath ?? "—"}</dd>
                 </div>
               </dl>
             </div>

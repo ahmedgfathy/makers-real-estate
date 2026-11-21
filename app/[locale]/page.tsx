@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import HomeLocationSection from "@/components/catalog/HomeLocationSection";
+import { ProjectCards } from "@/components/catalog/CatalogPieces";
 import JsonLd from "@/components/JsonLd";
 import LeadForm from "@/components/LeadForm";
 import SiteFrame from "@/components/SiteFrame";
-import AreaSection from "@/components/portal/AreaSection";
 import DeveloperSection from "@/components/portal/DeveloperSection";
 import HeroSearch from "@/components/portal/HeroSearch";
 import JourneySection from "@/components/portal/JourneySection";
-import ProjectGrid from "@/components/portal/ProjectGrid";
 import { whatsappLink } from "@/data/content";
-import { MARKETS, PORTAL, projectsOf } from "@/data/portfolio";
+import { PORTAL } from "@/data/portfolio";
+import { listDirectoryLocations, listProjects } from "@/lib/catalog";
 import { getSite } from "@/lib/content-db";
 import { absoluteUrl, isLang, localizedAlternates, SITE_URL } from "@/lib/seo";
 
@@ -54,10 +55,13 @@ export default async function LocalizedHome({ params }: PageProps) {
   const { locale } = await params;
   if (!isLang(locale)) notFound();
 
-  const { content, contact } = await getSite();
+  const [{ content, contact }, locations, projects] = await Promise.all([
+    getSite(),
+    listDirectoryLocations(),
+    listProjects({ pageSize: 6 }),
+  ]);
   const c = content[locale];
   const copy = PORTAL[locale];
-  const projects = projectsOf(locale);
 
   return (
     <>
@@ -82,9 +86,9 @@ export default async function LocalizedHome({ params }: PageProps) {
       />
       <SiteFrame content={content} contact={contact} lang={locale}>
         <main>
-          <HeroSearch lang={locale} copy={copy} areas={MARKETS} image="/img/lakes-sunset.jpg" />
+          <HeroSearch lang={locale} copy={copy} areas={locations} image="/img/lakes-sunset.jpg" />
 
-          <AreaSection lang={locale} copy={copy} />
+          <HomeLocationSection lang={locale} locations={locations} />
 
           <section className="psec" id="projects" aria-labelledby="projects-title">
             <div className="pwrap">
@@ -102,7 +106,7 @@ export default async function LocalizedHome({ params }: PageProps) {
                 </a>
               </div>
 
-              <ProjectGrid lang={locale} copy={copy} projects={projects} contact={contact} />
+              <ProjectCards lang={locale} projects={projects.items} />
             </div>
           </section>
 

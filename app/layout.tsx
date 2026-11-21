@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
-import Script from "next/script";
 import Analytics from "@/components/Analytics";
+import GoogleScripts from "@/components/GoogleScripts";
 import { SITE_URL } from "@/lib/seo";
 import "./theme.css";
 import "./globals.css";
@@ -44,21 +44,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <link rel="stylesheet" href={FONT_HREF} />
       </head>
       <body>
-        <Script id="google-consent-mode-default" strategy="beforeInteractive">
-          {`window.dataLayer = window.dataLayer || [];
-window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
-window.gtag('consent', 'default', {
-  analytics_storage: 'denied',
-  ad_storage: 'denied',
-  ad_user_data: 'denied',
-  ad_personalization: 'denied'
-});`}
-        </Script>
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7647429077075381"
-          strategy="beforeInteractive"
-          crossOrigin="anonymous"
-        />
+        <GoogleScripts />
         {children}
         <Analytics />
       </body>

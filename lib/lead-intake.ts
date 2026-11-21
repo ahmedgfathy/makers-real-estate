@@ -79,6 +79,8 @@ export function normalizeLead(body: LeadBody): NewLeadInput | { error: string } 
 
   const isFacebook = Boolean(body.leadgen_id || body.field_data);
   const externalId = first(field("leadgen_id"), body.leadgen_id, body.external_id);
+  const plain = (...names: string[]) => first(...names.map((name) => body[name]));
+  const context = (...names: string[]) => first(field(...names), plain(...names));
 
   return {
     full_name: fullName,
@@ -95,6 +97,26 @@ export function normalizeLead(body: LeadBody): NewLeadInput | { error: string } 
       field("preferred_area", "area", "location", "preferred_location"),
       body.preferred_area
     ),
+    governorateId: context("governorate_id", "governorate"),
+    cityId: context("city_id", "city"),
+    areaId: context("area_id", "area_id_slug"),
+    locationId: context("location_id", "location_slug"),
+    projectId: context("project_id", "project_slug"),
+    propertyCategoryId: context("property_category_id", "category_id", "category_slug"),
+    unitId: context("unit_id", "unit_slug"),
+    budget: toNumber(context("budget")),
+    locale: context("locale", "lang") === "ar" ? "ar" : context("locale", "lang") === "en" ? "en" : null,
+    sourcePath: plain("source_path", "path"),
+    referrer: plain("referrer", "referer"),
+    utmSource: plain("utm_source"),
+    utmMedium: plain("utm_medium"),
+    utmCampaign: plain("utm_campaign"),
+    metaFormId: first(field("form_id"), body.form_id),
+    metaAdId: plain("ad_id"),
+    metaAdgroupId: plain("adgroup_id"),
+    metaPageId: plain("page_id"),
+    metaCreatedAt: plain("created_time"),
+    requirements: fields.size ? Object.fromEntries(fields) : null,
     budget_min: toNumber(first(field("budget_min"), body.budget_min, body.budget)),
     budget_max: toNumber(first(field("budget_max"), body.budget_max)),
     payment_preference: first(

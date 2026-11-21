@@ -46,6 +46,10 @@ export async function POST(req: Request) {
       detail: {
         name: input.full_name,
         project: input.project,
+        project_id: input.projectId,
+        location_id: input.locationId,
+        category_id: input.propertyCategoryId,
+        unit_id: input.unitId,
         form: input.form_name,
         via: "api",
       },

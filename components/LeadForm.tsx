@@ -8,6 +8,15 @@ import { capture } from "@/lib/analytics";
  * Public enquiry form. Posts to the same POST /api/leads endpoint as the
  * Meta lead ads, so every visitor enquiry lands in the CRM pipeline.
  */
+export type LeadContext = {
+  projectId?: string;
+  locationId?: string;
+  propertyCategoryId?: string;
+  unitId?: string;
+  budget?: number;
+  sourcePath?: string;
+};
+
 export default function LeadForm({
   c,
   lang,
@@ -15,6 +24,7 @@ export default function LeadForm({
   whatsapp,
   phoneHref,
   defaultProject,
+  context,
 }: {
   c: Content;
   lang: Lang;
@@ -22,6 +32,7 @@ export default function LeadForm({
   whatsapp: string;
   phoneHref: string;
   defaultProject?: string;
+  context?: LeadContext;
 }) {
   const f = c.leadForm;
   const [pending, setPending] = useState(false);
@@ -64,6 +75,13 @@ export default function LeadForm({
           phone,
           email: String(data.get("email") ?? "").trim() || undefined,
           project: String(data.get("project") ?? "").trim() || undefined,
+          project_id: String(data.get("project_id") ?? "") || undefined,
+          location_id: String(data.get("location_id") ?? "") || undefined,
+          property_category_id: String(data.get("property_category_id") ?? "") || undefined,
+          unit_id: String(data.get("unit_id") ?? "") || undefined,
+          budget: String(data.get("budget") ?? "") || undefined,
+          source_path: String(data.get("source_path") ?? "") || undefined,
+          locale: lang,
           bedrooms: bedroomsValue(String(data.get("bedrooms") ?? "")),
           message: String(data.get("message") ?? "").trim() || undefined,
           source: "website",
@@ -172,6 +190,12 @@ export default function LeadForm({
                 aria-hidden="true"
                 className="enquiry-hp"
               />
+              <input type="hidden" name="project_id" defaultValue={context?.projectId ?? ""} />
+              <input type="hidden" name="location_id" defaultValue={context?.locationId ?? ""} />
+              <input type="hidden" name="property_category_id" defaultValue={context?.propertyCategoryId ?? ""} />
+              <input type="hidden" name="unit_id" defaultValue={context?.unitId ?? ""} />
+              <input type="hidden" name="budget" defaultValue={context?.budget ?? ""} />
+              <input type="hidden" name="source_path" defaultValue={context?.sourcePath ?? ""} />
 
               <label className="enquiry-field">
                 <span>{f.name} <b aria-hidden="true">*</b></span>

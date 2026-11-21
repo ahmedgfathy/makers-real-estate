@@ -2,6 +2,7 @@ import {
   getConsultantBreakdown,
   getDueFollowUps,
   getFollowUpAlerts,
+  getLeadClassificationReport,
   getLeadSourceBreakdown,
   getLeadStats,
   listLeads,
@@ -12,13 +13,14 @@ import { FollowUpBadge, SourceBadge, StatusBadge } from "@/components/dashboard/
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [leadStats, recentLeads, sources, alerts, due, consultants] = await Promise.all([
+  const [leadStats, recentLeads, sources, alerts, due, consultants, classification] = await Promise.all([
     getLeadStats(),
     listLeads({ limit: 8 }),
     getLeadSourceBreakdown(),
     getFollowUpAlerts(),
     getDueFollowUps(6),
     getConsultantBreakdown(),
+    getLeadClassificationReport(),
   ]);
 
   const sourceMax = Math.max(1, ...sources.map((source) => source.count));
@@ -217,6 +219,42 @@ export default async function DashboardPage() {
           </div>
         </section>
       </div>
+
+      <section className="dash-card" style={{ marginTop: "0.9rem" }} aria-labelledby="classification-report">
+        <div className="dash-card-head">
+          <h2 className="dash-card-title" id="classification-report">Demand by classification</h2>
+          <a className="dash-link" href="/dashboard/leads">Open filtered pipeline →</a>
+        </div>
+        <div className="dash-card-body">
+          <p className="dash-muted" style={{ marginBottom: "1rem" }}>
+            {classification.structured} of {classification.total} leads carry a structured location, project,
+            category or unit ID. Select a row to open the matching CRM filter.
+          </p>
+          <div className="classification-grid">
+            {[
+              { title: "Locations", rows: classification.locations, key: "locationId" },
+              { title: "Projects", rows: classification.projects, key: "projectId" },
+              { title: "Categories", rows: classification.categories, key: "categoryId" },
+            ].map((group) => (
+              <div key={group.title}>
+                <h3>{group.title}</h3>
+                {group.rows.length ? (
+                  <div className="source-list">
+                    {group.rows.map((row) => (
+                      <div className="source-row" key={row.id}>
+                        <div className="source-row-head">
+                          <a href={`/dashboard/leads?${group.key}=${encodeURIComponent(row.id)}`}>{row.name}</a>
+                          <strong>{row.count}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="detail-note">No classified leads yet.</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

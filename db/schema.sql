@@ -169,6 +169,249 @@ CREATE INDEX IF NOT EXISTS idx_follow_ups_lead ON lead_follow_ups (lead_id, logg
 CREATE INDEX IF NOT EXISTS idx_follow_ups_on ON lead_follow_ups (follow_up_on)
   WHERE follow_up_on IS NOT NULL;
 
+-- ---------------------------------------------------------------------------
+-- Real-estate catalogue
+--
+-- Area -> Project -> Property category -> Unit. Locations are self-referencing
+-- so countries, governorates, cities, districts and sub-areas all use one
+-- table. Every catalogue row has a stable text id and a unique public slug.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS locations (
+  id                text PRIMARY KEY,
+  slug              text NOT NULL UNIQUE,
+  parent_id         text REFERENCES locations (id) ON DELETE SET NULL,
+  type              text NOT NULL CHECK (type IN ('country', 'governorate', 'city', 'district', 'area')),
+  name_en           text NOT NULL,
+  name_ar           text NOT NULL,
+  description_en    text,
+  description_ar    text,
+  image_url         text,
+  seo_title_en      text,
+  seo_title_ar      text,
+  seo_description_en text,
+  seo_description_ar text,
+  sort_order        integer NOT NULL DEFAULT 0,
+  is_active         boolean NOT NULL DEFAULT true,
+  is_directory      boolean NOT NULL DEFAULT true,
+  archived_at       timestamptz,
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_locations_parent ON locations (parent_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_locations_directory ON locations (is_active, is_directory, type, sort_order);
+
+CREATE TABLE IF NOT EXISTS developers (
+  id             text PRIMARY KEY,
+  slug           text NOT NULL UNIQUE,
+  name_en        text NOT NULL,
+  name_ar        text,
+  description_en text,
+  description_ar text,
+  website        text,
+  logo_url       text,
+  is_active      boolean NOT NULL DEFAULT true,
+  archived_at    timestamptz,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+  id                    text PRIMARY KEY,
+  slug                  text NOT NULL UNIQUE,
+  developer_id          text REFERENCES developers (id) ON DELETE SET NULL,
+  location_id           text REFERENCES locations (id) ON DELETE SET NULL,
+  name_en               text NOT NULL,
+  name_ar               text NOT NULL,
+  description_en        text,
+  description_ar        text,
+  status                text NOT NULL DEFAULT 'off_plan'
+                        CHECK (status IN ('ready', 'under_construction', 'off_plan')),
+  cover_image           text,
+  masterplan_image      text,
+  video_url             text,
+  seo_title_en          text,
+  seo_title_ar          text,
+  seo_description_en    text,
+  seo_description_ar    text,
+  delivery_date         date,
+  starting_price        bigint,
+  down_payment_percent  numeric(6, 2),
+  installment_months    integer,
+  sort_order            integer NOT NULL DEFAULT 0,
+  is_featured           boolean NOT NULL DEFAULT false,
+  is_active             boolean NOT NULL DEFAULT true,
+  archived_at           timestamptz,
+  created_at            timestamptz NOT NULL DEFAULT now(),
+  updated_at            timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_projects_location ON projects (location_id, is_active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_projects_developer ON projects (developer_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status, is_active);
+CREATE INDEX IF NOT EXISTS idx_projects_price ON projects (starting_price) WHERE starting_price IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS project_images (
+  id          text PRIMARY KEY,
+  project_id  text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  url         text NOT NULL,
+  alt_en      text,
+  alt_ar      text,
+  kind        text NOT NULL DEFAULT 'gallery' CHECK (kind IN ('gallery', 'masterplan', 'video_poster')),
+  sort_order  integer NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_project_images_project ON project_images (project_id, kind, sort_order);
+
+CREATE TABLE IF NOT EXISTS project_facilities (
+  id         text PRIMARY KEY,
+  project_id text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  name_en    text NOT NULL,
+  name_ar    text,
+  icon       text,
+  sort_order integer NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_project_facilities_project ON project_facilities (project_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS project_landmarks (
+  id         text PRIMARY KEY,
+  project_id text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  name_en    text NOT NULL,
+  name_ar    text,
+  distance   text,
+  kind       text NOT NULL DEFAULT 'nearby' CHECK (kind IN ('nearby', 'landmark', 'transport', 'education', 'leisure')),
+  sort_order integer NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_project_landmarks_project ON project_landmarks (project_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS project_facts (
+  id         text PRIMARY KEY,
+  project_id text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  label_en   text NOT NULL,
+  label_ar   text,
+  value_en   text NOT NULL,
+  value_ar   text,
+  sort_order integer NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_project_facts_project ON project_facts (project_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS payment_plans (
+  id                    text PRIMARY KEY,
+  project_id            text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  name_en               text NOT NULL,
+  name_ar               text,
+  down_payment_percent  numeric(6, 2),
+  installment_months    integer,
+  delivery_date         date,
+  notes_en              text,
+  notes_ar              text,
+  sort_order            integer NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_payment_plans_project ON payment_plans (project_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS property_categories (
+  id               text PRIMARY KEY,
+  slug             text NOT NULL UNIQUE,
+  name_en          text NOT NULL,
+  name_ar          text NOT NULL,
+  description_en   text,
+  description_ar   text,
+  icon             text,
+  attribute_schema jsonb NOT NULL DEFAULT '{}'::jsonb,
+  sort_order       integer NOT NULL DEFAULT 0,
+  is_active        boolean NOT NULL DEFAULT true,
+  archived_at      timestamptz,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS project_property_categories (
+  project_id  text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  category_id text NOT NULL REFERENCES property_categories (id) ON DELETE CASCADE,
+  sort_order  integer NOT NULL DEFAULT 0,
+  is_active   boolean NOT NULL DEFAULT true,
+  PRIMARY KEY (project_id, category_id)
+);
+CREATE INDEX IF NOT EXISTS idx_ppc_category ON project_property_categories (category_id, is_active);
+
+CREATE TABLE IF NOT EXISTS units (
+  id                     text PRIMARY KEY,
+  slug                   text NOT NULL UNIQUE,
+  project_id             text NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  category_id            text NOT NULL,
+  payment_plan_id        text REFERENCES payment_plans (id) ON DELETE SET NULL,
+  FOREIGN KEY (project_id, category_id)
+    REFERENCES project_property_categories (project_id, category_id) ON DELETE CASCADE,
+  reference              text,
+  title_en               text,
+  title_ar               text,
+  description_en         text,
+  description_ar         text,
+  built_up_area          numeric(10, 2),
+  land_area              numeric(10, 2),
+  bedrooms               integer,
+  bathrooms              integer,
+  floor                  text,
+  garden_area            numeric(10, 2),
+  terrace_area           numeric(10, 2),
+  view_en                text,
+  view_ar                text,
+  finishing_en           text,
+  finishing_ar           text,
+  delivery_date          date,
+  total_price            bigint,
+  down_payment_amount    bigint,
+  down_payment_percent   numeric(6, 2),
+  installment_months     integer,
+  installment_amount     bigint,
+  installment_frequency  text CHECK (installment_frequency IN ('monthly', 'quarterly', 'yearly', 'none')),
+  status                 text NOT NULL DEFAULT 'available'
+                         CHECK (status IN ('available', 'reserved', 'sold', 'archived')),
+  is_active              boolean NOT NULL DEFAULT true,
+  created_at             timestamptz NOT NULL DEFAULT now(),
+  updated_at             timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_units_project_category ON units (project_id, category_id, status);
+CREATE INDEX IF NOT EXISTS idx_units_status_price ON units (status, total_price);
+CREATE INDEX IF NOT EXISTS idx_units_specs ON units (bedrooms, built_up_area);
+CREATE INDEX IF NOT EXISTS idx_units_delivery ON units (delivery_date) WHERE delivery_date IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS unit_images (
+  id         text PRIMARY KEY,
+  unit_id    text NOT NULL REFERENCES units (id) ON DELETE CASCADE,
+  url        text NOT NULL,
+  alt_en     text,
+  alt_ar     text,
+  kind       text NOT NULL DEFAULT 'photo' CHECK (kind IN ('photo', 'floor_plan')),
+  sort_order integer NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_unit_images_unit ON unit_images (unit_id, kind, sort_order);
+
+-- Leads keep the old free-text fields for compatibility, but new enquiries
+-- carry canonical ids so the CRM can filter and report by classification.
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS governorate_id text REFERENCES locations (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS city_id text REFERENCES locations (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS area_id text REFERENCES locations (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS location_id text REFERENCES locations (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS project_id text REFERENCES projects (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS property_category_id text REFERENCES property_categories (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS unit_id text REFERENCES units (id) ON DELETE SET NULL;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS budget bigint;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS requirements jsonb NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS locale text CHECK (locale IN ('en', 'ar'));
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS source_path text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS referrer text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_source text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_medium text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS utm_campaign text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS meta_form_id text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS meta_ad_id text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS meta_adgroup_id text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS meta_page_id text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS meta_created_at timestamptz;
+CREATE INDEX IF NOT EXISTS idx_leads_project ON leads (project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_area ON leads (area_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_category ON leads (property_category_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_unit ON leads (unit_id) WHERE unit_id IS NOT NULL;
+
 INSERT INTO locales (code, dir, label) VALUES
   ('en', 'ltr', 'English'),
   ('ar', 'rtl', 'العربية')

@@ -6,7 +6,14 @@ import {
   type Lang,
 } from "../data/content";
 import { getPool, pingDb, withTransaction, type TxClient } from "../lib/db";
+import { seedCatalog } from "../lib/catalog-seed";
 
+// Neon migrations should use the direct connection when one is configured;
+// the pooled URL remains the default for local Docker and simple installs.
+const migrationUrl = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
+if (migrationUrl) process.env.DATABASE_URL = migrationUrl;
+
+const SEED_CATALOG = "seed_catalog_v1";
 const REMOVE_PORTFOLIO_TABLES = "remove_portfolio_tables_v1";
 const REMOVE_PORTFOLIO_CONTENT = "remove_portfolio_content_v1";
 const REMOVE_DEMO_LEADS = "remove_demo_leads_v1";
@@ -112,11 +119,33 @@ async function refreshLanding(client: TxClient): Promise<void> {
   );
 }
 
+/**
+ * The retired front end used the same `projects`/`developers` table names.
+ * Preserve those rows under `legacy_*` names instead of dropping them, but only
+ * when the existing table is not already the new canonical catalogue table.
+ */
+async function archiveLegacyTable(
+  client: TxClient,
+  name: string,
+  requiredColumns: string[]
+): Promise<boolean> {
+  const columns = await client.query<{ column_name: string }>(
+    `SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = $1`,
+    [name]
+  );
+  if (!columns.rows.length) return false;
+  const present = new Set(columns.rows.map((row) => row.column_name));
+  const isCanonical = requiredColumns.every((column) => present.has(column));
+  if (isCanonical) return false;
+  await client.query(`ALTER TABLE "${name}" RENAME TO "legacy_${name}"`);
+  return true;
+}
+
 async function main() {
   const file = schemaPath();
   console.log(`[migrate] applying ${file}`);
   const pool = getPool();
-  await pool.query(readFileSync(file, "utf8"));
 
   await pool.query(
     `CREATE TABLE IF NOT EXISTS app_migrations (
@@ -125,22 +154,44 @@ async function main() {
      )`
   );
 
-  // One-time destructive migrations from the retired portfolio front end.
+  // Retire old inventory tables before schema.sql creates the new catalogue.
   const removedTables = await runOnce(REMOVE_PORTFOLIO_TABLES, async (client) => {
-    await client.query("DROP TABLE IF EXISTS properties, projects, developers CASCADE");
-    return true;
+    const targets: [string, string[]][] = [
+      ["properties", ["id"]],
+      ["projects", ["id", "slug", "name_en", "location_id"]],
+      ["developers", ["id", "slug", "name_en"]],
+    ];
+    let archived = false;
+    for (const [name, required] of targets) {
+      if (await archiveLegacyTable(client, name, required)) archived = true;
+    }
+    return archived;
   });
   if (removedTables) {
-    console.log("[migrate] removed developer, project, and property inventory tables and data");
+    console.log("[migrate] archived retired portfolio inventory tables");
   }
 
   const removedContent = await runOnce(REMOVE_PORTFOLIO_CONTENT, async (client) => {
     await client.query("DROP TABLE IF EXISTS panel_sections, panels, tiles CASCADE");
-    await client.query("ALTER TABLE site_content DROP COLUMN IF EXISTS grid, DROP COLUMN IF EXISTS panel");
+    // On a brand-new database schema.sql has not run yet, so there is nothing
+    // to clean up. Existing installs still get the retired columns removed.
+    const table = await client.query<{ name: string | null }>(
+      "SELECT to_regclass('public.site_content')::text AS name"
+    );
+    if (table.rows[0]?.name) {
+      await client.query("ALTER TABLE site_content DROP COLUMN IF EXISTS grid, DROP COLUMN IF EXISTS panel");
+    }
     return true;
   });
   if (removedContent) {
     console.log("[migrate] removed collection tiles and detail panels");
+  }
+
+  await pool.query(readFileSync(file, "utf8"));
+
+  const seededCatalog = await runOnce(SEED_CATALOG, seedCatalog);
+  if (seededCatalog) {
+    console.log("[migrate] seeded locations, projects, categories and published units");
   }
 
   const removedDemoLeads = await runOnce(REMOVE_DEMO_LEADS, deleteTestLeads);

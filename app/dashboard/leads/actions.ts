@@ -15,6 +15,12 @@ import {
   updateLeadStatus,
 } from "@/lib/admin";
 import { importLeadsFromCsv } from "@/lib/lead-import";
+import {
+  getCatalogOptions,
+  getLocationById,
+  getProjectById,
+  getUnitById,
+} from "@/lib/catalog";
 
 /** Uploaded spreadsheets are parsed in-request; keep the payload bounded. */
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
@@ -128,6 +134,18 @@ export async function createLeadAction(formData: FormData) {
     redirect("/dashboard/leads/new?error=Name%20and%20phone%20are%20required");
   }
 
+  const projectId = text(formData, "projectId");
+  const locationId = text(formData, "locationId");
+  const categoryId = text(formData, "categoryId");
+  const unitId = text(formData, "unitId");
+  const [options, project, location, unit] = await Promise.all([
+    getCatalogOptions(),
+    projectId ? getProjectById(projectId) : Promise.resolve(null),
+    locationId ? getLocationById(locationId) : Promise.resolve(null),
+    unitId ? getUnitById(unitId) : Promise.resolve(null),
+  ]);
+  const category = options.categories.find((item) => item.id === categoryId) ?? null;
+
   const id = await createLead({
     full_name: fullName,
     phone,
@@ -136,10 +154,29 @@ export async function createLeadAction(formData: FormData) {
     form_name: text(formData, "form_name"),
     campaign: text(formData, "campaign"),
     external_id: text(formData, "external_id"),
-    project: text(formData, "project"),
-    property_type: text(formData, "property_type"),
-    bedrooms: integer(formData, "bedrooms"),
-    preferred_area: text(formData, "preferred_area"),
+    project: project?.nameEn ?? text(formData, "project"),
+    property_type: category?.nameEn ?? text(formData, "property_type"),
+    bedrooms: unit?.bedrooms ?? integer(formData, "bedrooms"),
+    preferred_area: location?.nameEn ?? text(formData, "preferred_area"),
+    governorateId: null,
+    cityId: null,
+    areaId: location?.type === "area" ? location.id : null,
+    locationId: location?.id ?? null,
+    projectId: project?.id ?? null,
+    propertyCategoryId: category?.id ?? null,
+    unitId: unit?.id ?? null,
+    budget: unit?.totalPrice ?? money(formData, "budget"),
+    requirements: {
+      channel: "crm_manual",
+      structured: {
+        locationId: location?.id ?? null,
+        projectId: project?.id ?? null,
+        categoryId: category?.id ?? null,
+        unitId: unit?.id ?? null,
+      },
+    },
+    locale: pick(["en", "ar"], text(formData, "locale"), "en"),
+    sourcePath: "/dashboard/leads/new",
     budget_min: money(formData, "budget_min"),
     budget_max: money(formData, "budget_max"),
     payment_preference: text(formData, "payment_preference"),
